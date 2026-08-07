@@ -1,0 +1,189 @@
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'vappie-data-v2';
+  const DAYS = ['Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+  const PARTS = ['Middag','Avond'];
+  const clone = x => JSON.parse(JSON.stringify(x));
+  const uid = p => `${p}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+  const money = n => new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n||0));
+  const norm = s => String(s||'').toLocaleLowerCase('nl-NL').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const esc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const attr = esc;
+
+  function durationHours(from,to){
+    if(!from||!to) return 0;
+    const [fh,fm]=from.split(':').map(Number), [th,tm]=to.split(':').map(Number);
+    let a=fh*60+fm,b=th*60+tm; if(b<=a)b+=1440; return (b-a)/60;
+  }
+  function amount(shift,a,rate){ return durationHours(shift.from,shift.to)*Number(shift.people||0)*Number(a?.rateOverride ?? rate ?? 0); }
+  function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
+  let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:''}, adminQuery='';
+  const app=document.getElementById('app');
+  const save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+  const yd=()=>db.years[db.activeYear];
+  const assoc=id=>yd().associations.find(a=>a.id===id);
+  const sortedYears=()=>Object.keys(db.years).sort((a,b)=>Number(b)-Number(a));
+
+  function render(){
+    app.innerHTML=`
+      <header class="topbar">
+        <button class="mobile-menu" data-action="mobile-menu">☰</button>
+        <button class="brand" data-page="home"><span class="brand-mark">V</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></button>
+        <nav class="nav" id="nav">
+          ${navBtn('home','⌂','Zoeken')}${navBtn('planning','▣','Planning')}${navBtn('financial','€','Financieel')}${navBtn('occupancy','◉','Bezetting')}${navBtn('admin','☷','Administratie')}
+        </nav>
+        <div class="top-actions">
+          <div class="year-select">▦ <select id="yearSelect">${sortedYears().map(y=>`<option ${y===db.activeYear?'selected':''}>${esc(y)}</option>`).join('')}</select></div>
+          <button class="icon-btn" data-action="new-year" title="Nieuw jaar">＋</button>
+          <button class="icon-btn" data-action="data" title="Data en back-up">◫</button>
+        </div>
+      </header>
+      <main class="${page==='home'?'home-main':'main'}">${renderPage()}</main>
+      <div id="modalRoot"></div>`;
+    bindGlobal();
+    if(page==='home') bindHome();
+    if(page==='planning') bindPlanning();
+    if(page==='admin') bindAdmin();
+  }
+  function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b>${label}</button>`}
+  function renderPage(){ return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
+
+  function homeHtml(){
+    const q=norm(searchQuery), matches=q.length>=2?yd().associations.filter(a=>norm(a.name).includes(q)||norm(a.barchef).includes(q)||norm(a.planningName).includes(q)).slice(0,12):[];
+    return `<section class="search-hero">
+      <div class="hero-kicker">ZOMERPARKFEEST · ${esc(db.activeYear)}</div><h1>Wie zoek je?</h1><p>Zoek op vereniging of naam van de barchef.</p>
+      <div class="hero-search"><span class="search-icon">⌕</span><input id="mainSearch" autocomplete="off" value="${attr(searchQuery)}" placeholder="Bijv. Scouting, Civitas of Ron Janssen..."></div>
+      ${searchQuery.length===1?'<div class="search-hint">Typ minimaal 2 tekens.</div>':''}
+      ${q.length>=2&&matches.length===0?'<div class="empty-card"><b>⌕</b><strong>Niets gevonden</strong><span>Zoek op een deel van de naam.</span></div>':''}
+      <div class="search-results">${matches.map(resultHtml).join('')}</div>
+    </section>`;
+  }
+  function resultHtml(a){
+    const shifts=yd().shifts.filter(s=>s.associationId===a.id).sort(shiftSort), total=shifts.reduce((n,s)=>n+amount(s,a,yd().rate),0);
+    return `<article class="result-card"><div class="result-head"><div><span class="eyebrow">VERENIGING</span><h2>${esc(a.name)}</h2>${a.planningName!==a.name?`<small>Planningnaam: ${esc(a.planningName)}</small>`:''}</div><div class="earnings"><span>Verdiensten</span><strong>${money(total)}</strong></div></div>
+      <div class="contact-strip"><span>● ${esc(a.barchef||'Geen barchef')}</span><a ${a.phone?`href="tel:${attr(a.phone)}"`:''}>☎ ${esc(a.phone||'Geen telefoon')}</a><a ${a.email?`href="mailto:${attr(a.email)}"`:''}>✉ ${esc(a.email||'Geen e-mail')}</a></div>
+      <div class="shift-list"><div class="shift-header"><span>Dag</span><span>Bar</span><span>Tijd</span><span>Personen</span><span>Bedrag</span></div>
+      ${shifts.length?shifts.map(s=>`<div class="shift-row"><span><strong>${esc(s.day)}</strong><small>${esc(s.daypart)}</small></span><span>⌖ ${esc(s.bar)}</span><span>◷ ${esc(s.from)}–${esc(s.to)}</span><span>${s.people}</span><span>${money(amount(s,a,yd().rate))}</span></div>`).join(''):'<div class="no-shifts">Geen diensten gepland voor dit jaar.</div>'}</div></article>`;
+  }
+
+  function pageHeader(kicker,title,subtitle,action=''){return `<div class="page-header"><div><span class="eyebrow">${kicker}</span><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`}
+  function planningHtml(){
+    const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort();
+    const list=yd().shifts.filter(s=>(!filters.day||s.day===filters.day)&&(!filters.daypart||s.daypart===filters.daypart)&&(!filters.bar||s.bar===filters.bar)).sort(shiftSort);
+    return `${pageHeader('PLANNING','Wie staat waar?','Filter, wijzig of voeg diensten toe.','<button class="primary" data-action="add-shift">＋ Dienst toevoegen</button>')}
+      <div class="filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
+      <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Dag</th><th>Dagdeel</th><th>Bar</th><th>Vereniging</th><th>Tijd</th><th class="num">Personen</th><th></th></tr></thead><tbody>
+      ${list.map(s=>{const a=assoc(s.associationId);return `<tr><td><strong>${esc(s.day)}</strong></td><td><span class="pill">${esc(s.daypart)}</span></td><td>${esc(s.bar)}</td><td><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><small>${esc(a?.barchef||'')}</small></td><td>${esc(s.from)} – ${esc(s.to)}</td><td class="num">${s.people}</td><td class="actions"><button data-edit-shift="${attr(s.id)}">✎</button><button data-delete-shift="${attr(s.id)}">⌫</button></td></tr>`}).join('')}</tbody></table></div></div>`;
+  }
+  function selectFilter(key,label,opts){return `<label class="filter-select"><span>${label}</span><select data-filter="${key}"><option value="">Alles</option>${opts.map(o=>`<option ${filters[key]===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`}
+  function shiftSort(a,b){return DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||PARTS.indexOf(a.daypart)-PARTS.indexOf(b.daypart)||String(a.bar).localeCompare(String(b.bar),'nl')}
+
+  function financialHtml(){
+    const am=Object.fromEntries(yd().associations.map(a=>[a.id,a]));
+    const rows=yd().associations.map(a=>{const ss=yd().shifts.filter(s=>s.associationId===a.id);return {a,services:ss.length,hours:ss.reduce((n,s)=>n+durationHours(s.from,s.to)*s.people,0),amount:ss.reduce((n,s)=>n+amount(s,a,yd().rate),0)}}).filter(r=>r.services).sort((a,b)=>b.amount-a.amount);
+    const total=rows.reduce((n,r)=>n+r.amount,0), hours=rows.reduce((n,r)=>n+r.hours,0), persons=yd().shifts.reduce((n,s)=>n+s.people,0);
+    const byDay=DAYS.map(day=>({day,amount:yd().shifts.filter(s=>s.day===day).reduce((n,s)=>n+amount(s,am[s.associationId],yd().rate),0)})).filter(x=>x.amount>0); const max=Math.max(1,...byDay.map(x=>x.amount));
+    return `${pageHeader('FINANCIEEL','Verdiensten in beeld',`Berekend met standaardtarief ${money(yd().rate)} per persoon per uur; uitzonderingen zijn per vereniging mogelijk.`)}
+      <div class="kpis">${kpi('Totale vergoeding',money(total))}${kpi('Persoonsuren',Math.round(hours).toLocaleString('nl-NL'))}${kpi('Ingeplande personen',persons.toLocaleString('nl-NL'))}${kpi('Verenigingen met diensten',rows.length)}</div>
+      <div class="two-col"><div class="table-card"><div class="card-title">Per vereniging</div><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th class="num">Diensten</th><th class="num">Persoonsuren</th><th class="num">Bedrag</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.a.name)}</strong>${r.a.rateOverride===0?'<small>€ 0,00 tarief</small>':''}</td><td class="num">${r.services}</td><td class="num">${r.hours.toFixed(1)}</td><td class="num"><strong>${money(r.amount)}</strong></td></tr>`).join('')}</tbody></table></div></div>
+      <div class="side-card"><div class="card-title">Kosten per dag</div>${byDay.map(x=>`<div class="bar-stat"><div><strong>${x.day}</strong><span>${money(x.amount)}</span></div><div class="bar-track"><i style="width:${(x.amount/max)*100}%"></i></div></div>`).join('')}</div></div>`;
+  }
+  function kpi(label,value,sub=''){return `<div class="kpi"><span>${label}</span><strong>${value}</strong>${sub?`<small>${sub}</small>`:''}</div>`}
+
+  function occupancyHtml(){
+    const byDay=DAYS.map(day=>{const ss=yd().shifts.filter(s=>s.day===day);return {day,services:ss.length,people:ss.reduce((n,s)=>n+s.people,0)}}).filter(x=>x.services);
+    const bars=[...new Set(yd().shifts.map(s=>s.bar))].map(bar=>{const ss=yd().shifts.filter(s=>s.bar===bar), people=ss.reduce((n,s)=>n+s.people,0);return {bar,services:ss.length,people,avg:ss.length?people/ss.length:0,cap:yd().barCaps?.[bar]||0}}).sort((a,b)=>b.people-a.people);
+    const top=[...byDay].sort((a,b)=>b.people-a.people)[0];
+    return `${pageHeader('BEZETTING','Bezettingsoverzicht','Snel zien hoeveel mensen per dag en per bar zijn ingepland.')}
+      <div class="kpis">${kpi('Totaal diensten',yd().shifts.length)}${kpi('Totaal ingepland',yd().shifts.reduce((n,s)=>n+s.people,0).toLocaleString('nl-NL'))}${kpi('Drukste dag',top?.day||'—',top?`${top.people} personen`:'')}${kpi('Aantal bars',bars.length)}</div>
+      <div class="two-col"><div class="table-card"><div class="card-title">Per bar</div><div class="table-scroll"><table><thead><tr><th>Bar</th><th class="num">Diensten</th><th class="num">Personen</th><th class="num">Gem./dienst</th><th class="num">Richtcapaciteit</th></tr></thead><tbody>${bars.map(r=>`<tr><td><strong>${esc(r.bar)}</strong></td><td class="num">${r.services}</td><td class="num">${r.people}</td><td class="num">${r.avg.toFixed(1)}</td><td class="num">${r.cap||'—'}</td></tr>`).join('')}</tbody></table></div></div><div class="side-card"><div class="card-title">Per dag</div>${byDay.map(x=>`<div class="day-stat"><span>${x.day}<small>${x.services} diensten</small></span><strong>${x.people}</strong></div>`).join('')}</div></div>`;
+  }
+
+  function adminHtml(){
+    const q=norm(adminQuery), list=yd().associations.filter(a=>!q||norm(a.name).includes(q)||norm(a.barchef).includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    return `${pageHeader('ADMINISTRATIE','Verenigingen & barchefs','Wijzig contact- en administratiegegevens of voeg een vereniging toe.','<button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button>')}
+      <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging of barchef..."></div><span class="count">${list.length} verenigingen</span></div>
+      <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th>Barchef</th><th>Telefoon</th><th>E-mail</th><th>Certificaten</th><th>Shirts</th><th></th></tr></thead><tbody>${list.map(a=>`<tr><td><strong>${esc(a.name)}</strong><small>Planning: ${esc(a.planningName)}</small></td><td>${esc(a.barchef)}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.email||'—')}</td><td>${status(a.certificates)}</td><td>${status(a.shirts)}</td><td class="actions"><button data-edit-assoc="${attr(a.id)}">✎</button><button data-delete-assoc="${attr(a.id)}">⌫</button></td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  function status(v){return `<span class="status ${String(v).toLowerCase()==='ja'?'good':'neutral'}">${esc(v||'Onbekend')}</span>`}
+
+  function bindGlobal(){
+    document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page; render()});
+    document.getElementById('yearSelect').onchange=e=>{db.activeYear=e.target.value;save();render()};
+    document.querySelector('[data-action="mobile-menu"]').onclick=()=>document.getElementById('nav').classList.toggle('open');
+    document.querySelector('[data-action="new-year"]').onclick=newYear;
+    document.querySelector('[data-action="data"]').onclick=dataModal;
+  }
+  function bindHome(){
+    const input=document.getElementById('mainSearch'); input.oninput=e=>{searchQuery=e.target.value; const pos=e.target.selectionStart; render(); const n=document.getElementById('mainSearch'); n.focus(); n.setSelectionRange(pos,pos)}; input.focus();
+  }
+  function bindPlanning(){
+    document.querySelectorAll('[data-filter]').forEach(s=>s.onchange=e=>{filters[e.target.dataset.filter]=e.target.value;render()});
+    document.querySelector('[data-action="clear-filters"]').onclick=()=>{filters={day:'',daypart:'',bar:''};render()};
+    document.querySelector('[data-action="add-shift"]').onclick=()=>shiftModal();
+    document.querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>shiftModal(yd().shifts.find(s=>s.id===b.dataset.editShift)));
+    document.querySelectorAll('[data-delete-shift]').forEach(b=>b.onclick=()=>{if(confirm('Deze dienst verwijderen?')){yd().shifts=yd().shifts.filter(s=>s.id!==b.dataset.deleteShift);save();render()}});
+  }
+  function bindAdmin(){
+    const input=document.getElementById('adminSearch'); input.oninput=e=>{adminQuery=e.target.value; const pos=e.target.selectionStart; render(); const n=document.getElementById('adminSearch'); n.focus(); n.setSelectionRange(pos,pos)};
+    document.querySelector('[data-action="add-assoc"]').onclick=()=>assocModal();
+    document.querySelectorAll('[data-edit-assoc]').forEach(b=>b.onclick=()=>assocModal(yd().associations.find(a=>a.id===b.dataset.editAssoc)));
+    document.querySelectorAll('[data-delete-assoc]').forEach(b=>b.onclick=()=>{const a=yd().associations.find(x=>x.id===b.dataset.deleteAssoc),n=yd().shifts.filter(s=>s.associationId===a.id).length;if(n)return alert(`Deze vereniging heeft nog ${n} diensten. Verwijder of wijzig die eerst in Planning.`);if(confirm(`${a.name} verwijderen?`)){yd().associations=yd().associations.filter(x=>x.id!==a.id);save();render()}});
+  }
+
+  function showModal(title,body,onSave,wide=true){
+    const root=document.getElementById('modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal ${wide?'wide':''}"><div class="modal-head"><h2>${esc(title)}</h2><button id="modalClose">×</button></div><div class="modal-body">${body}<div class="modal-actions"><button class="secondary" id="modalCancel">Annuleren</button>${onSave?'<button class="primary" id="modalSave">✓ Opslaan</button>':''}</div></div></div></div>`;
+    const close=()=>root.innerHTML=''; document.getElementById('modalClose').onclick=close;document.getElementById('modalCancel').onclick=close; if(onSave)document.getElementById('modalSave').onclick=()=>onSave(close);
+  }
+  function field(label,input,full=false){return `<label class="field ${full?'full':''}"><span>${label}</span>${input}</label>`}
+  function opts(values,val){return values.map(v=>`<option ${String(v)===String(val)?'selected':''}>${esc(v)}</option>`).join('')}
+
+  function shiftModal(shift){
+    const f=shift?clone(shift):{associationId:yd().associations[0]?.id||'',day:'Vrijdag',daypart:'Middag',from:'13:00',to:'18:00',bar:Object.keys(yd().barCaps||{})[0]||'',people:1};
+    const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort();
+    const body=`<div class="form-grid">
+      ${field('Vereniging',`<select id="fAssoc">${yd().associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(a=>`<option value="${attr(a.id)}" ${a.id===f.associationId?'selected':''}>${esc(a.name)}</option>`).join('')}</select>`)}
+      ${field('Bar',`<input id="fBar" list="barlist" value="${attr(f.bar)}"><datalist id="barlist">${bars.map(b=>`<option value="${attr(b)}">`).join('')}</datalist>`)}
+      ${field('Dag',`<select id="fDay">${opts(DAYS,f.day)}</select>`)}${field('Dagdeel',`<select id="fPart">${opts(PARTS,f.daypart)}</select>`)}
+      ${field('Van',`<input id="fFrom" type="time" value="${attr(f.from)}">`)}${field('Tot',`<input id="fTo" type="time" value="${attr(f.to)}">`)}
+      ${field('Aantal personen',`<input id="fPeople" type="number" min="1" value="${f.people}">`)}</div>`;
+    showModal(shift?'Dienst wijzigen':'Dienst toevoegen',body,close=>{
+      const n={id:shift?.id||uid('shift'),associationId:val('fAssoc'),bar:val('fBar').trim(),day:val('fDay'),daypart:val('fPart'),from:val('fFrom'),to:val('fTo'),people:Number(val('fPeople'))};
+      if(!n.associationId||!n.bar||!n.from||!n.to||n.people<1)return alert('Vul alle velden geldig in.');
+      yd().shifts=shift?yd().shifts.map(s=>s.id===shift.id?n:s):[...yd().shifts,n];save();close();render();
+    });
+  }
+
+  function assocModal(a){
+    const f=a?clone(a):{name:'',planningName:'',barchef:'',phone:'',email:'',meeting1:'Onbekend',meeting2:'Onbekend',certificates:'Nee',wristbands:'Nee',shirts:'Nee',mealVouchers:'Geen',notes:'',rateOverride:null};
+    const tri=['Ja','Nee','Onbekend'];
+    const body=`<div class="form-grid">
+      ${field('Naam vereniging',`<input id="aName" value="${attr(f.name)}">`)}${field('Naam in planning',`<input id="aPlanning" value="${attr(f.planningName)}">`)}
+      ${field('Naam barchef',`<input id="aBarchef" value="${attr(f.barchef)}">`)}${field('Telefoon',`<input id="aPhone" value="${attr(f.phone)}">`)}
+      ${field('E-mail',`<input id="aEmail" type="email" value="${attr(f.email)}">`)}${field('Tarief uitzondering',`<select id="aRate"><option value="default" ${f.rateOverride==null?'selected':''}>Standaardtarief</option><option value="0" ${f.rateOverride===0?'selected':''}>€ 0,00</option></select>`)}
+      ${field('Barchefmeeting 1',`<select id="aM1">${opts(tri,f.meeting1)}</select>`)}${field('Barchefmeeting 2',`<select id="aM2">${opts(tri,f.meeting2)}</select>`)}
+      ${field('Certificaten',`<select id="aCert">${opts(tri,f.certificates)}</select>`)}${field('Polsbandjes ontvangen',`<select id="aWrist">${opts(tri,f.wristbands)}</select>`)}
+      ${field('Maten kleding ingeleverd',`<select id="aShirts">${opts(tri,f.shirts)}</select>`)}${field('Eetbonnen',`<input id="aMeal" value="${attr(f.mealVouchers)}">`)}
+      ${field('Opmerkingen',`<textarea id="aNotes" rows="3">${esc(f.notes)}</textarea>`,true)}</div>`;
+    showModal(a?'Vereniging wijzigen':'Vereniging toevoegen',body,close=>{
+      const n={id:a?.id||uid('assoc'),name:val('aName').trim(),planningName:val('aPlanning').trim()||val('aName').trim(),barchef:val('aBarchef').trim(),phone:val('aPhone').trim(),email:val('aEmail').trim(),meeting1:val('aM1'),meeting2:val('aM2'),certificates:val('aCert'),wristbands:val('aWrist'),shirts:val('aShirts'),mealVouchers:val('aMeal').trim(),notes:val('aNotes').trim(),rateOverride:val('aRate')==='default'?null:Number(val('aRate'))};
+      if(!n.name)return alert('Vul een naam van de vereniging in.'); yd().associations=a?yd().associations.map(x=>x.id===a.id?n:x):[...yd().associations,n];save();close();render();
+    });
+  }
+  function val(id){return document.getElementById(id).value}
+
+  function dataModal(){
+    const body=`<div class="data-panel"><div class="notice"><b>!</b><div><strong>Gegevens staan lokaal op dit apparaat.</strong><p>Vercel host de app, maar wijzigingen worden alleen in deze browser opgeslagen. Gebruik daarom regelmatig een back-up.</p></div></div>
+      ${field('Standaard vergoeding per persoon/uur',`<input id="rateInput" type="number" step="0.10" value="${yd().rate}">`)}
+      <div class="data-actions"><button class="primary" id="backupDownload">⇩ Back-up downloaden</button><button class="secondary" id="backupImport">⇧ Back-up importeren</button><input hidden id="backupFile" type="file" accept="application/json"></div></div>`;
+    showModal('Data & back-up',body,close=>{yd().rate=Number(val('rateInput'));save();close();render()},false);
+    document.getElementById('backupDownload').onclick=downloadBackup;
+    document.getElementById('backupImport').onclick=()=>document.getElementById('backupFile').click();
+    document.getElementById('backupFile').onchange=importBackup;
+  }
+  function downloadBackup(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`vappie-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url)}
+  function importBackup(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x.years)throw 0;if(confirm('Deze back-up vervangt de huidige lokale gegevens. Doorgaan?')){db=x;save();render()}}catch{alert('Geen geldige Vappie back-up.')}};reader.readAsText(file)}
+  function newYear(){const current=Number(db.activeYear), input=prompt('Nieuw festivaljaar:',String(current+1));if(!input||db.years[input])return;const copy=confirm(`Gegevens van ${db.activeYear} kopiëren naar ${input}?\nOK = kopiëren, Annuleren = leeg jaar.`);db.years[input]=copy?clone(yd()):{rate:6.5,associations:[],shifts:[],barCaps:clone(yd().barCaps||{})};db.activeYear=input;save();page='home';render()}
+
+  render();
+})();
