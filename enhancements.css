@@ -1,0 +1,112 @@
+
+/* Vappie dashboard + administratie uitbreiding v6 */
+:root{
+  --v6-yellow:#f6df00;
+  --v6-ink:#111111;
+  --v6-muted:#6e6e73;
+  --v6-line:#e8e8ec;
+  --v6-card:#ffffff;
+  --v6-soft:#f7f7f8;
+}
+
+.v6-dashboard-extra{display:none}
+.v6-admin-scrollbar{display:none}
+
+@media (min-width: 900px){
+  .v6-dashboard-extra{
+    display:block;
+    max-width:1500px;
+    margin:22px auto 0;
+  }
+  .v6-kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+    margin:0 0 16px;
+  }
+  .v6-kpi{
+    background:var(--v6-card);
+    border:1px solid var(--v6-line);
+    border-radius:16px;
+    padding:18px 20px;
+    min-height:108px;
+    box-shadow:0 3px 14px rgba(0,0,0,.035);
+  }
+  .v6-kpi span{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--v6-muted);font-weight:800}
+  .v6-kpi strong{display:block;margin-top:9px;font-size:27px;line-height:1.05;color:var(--v6-ink)}
+  .v6-kpi small{display:block;margin-top:7px;color:var(--v6-muted)}
+  .v6-kpi-icon{
+    float:right;width:38px;height:38px;border-radius:11px;background:var(--v6-yellow);
+    display:grid;place-items:center;font-size:18px;color:#111;font-weight:900
+  }
+  .v6-dashboard-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);
+    gap:16px;
+  }
+  .v6-panel{
+    background:#fff;border:1px solid var(--v6-line);border-radius:16px;padding:18px 20px;
+    box-shadow:0 3px 14px rgba(0,0,0,.035)
+  }
+  .v6-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:14px}
+  .v6-panel-head h3{margin:2px 0 0;font-size:18px}
+  .v6-panel-head span{font-size:11px;letter-spacing:.08em;font-weight:900;color:#777;text-transform:uppercase}
+  .v6-badge{background:#111;color:#fff;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+  .v6-attention-list,.v6-recent-list{display:grid;gap:8px}
+  .v6-attention-item,.v6-recent-item{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:11px 12px;background:var(--v6-soft);border-radius:11px
+  }
+  .v6-attention-item b,.v6-recent-item b{display:block;font-size:13px}
+  .v6-attention-item small,.v6-recent-item small{display:block;color:var(--v6-muted);margin-top:2px}
+  .v6-attention-dot{width:9px;height:9px;border-radius:50%;background:var(--v6-yellow);flex:0 0 auto}
+  .v6-left{display:flex;align-items:center;gap:10px;min-width:0}
+  .v6-right{font-size:12px;color:var(--v6-muted);white-space:nowrap}
+  .v6-festival{
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    padding:14px;border-radius:13px;background:#111;color:#fff;margin-bottom:12px
+  }
+  .v6-festival strong{display:block;font-size:20px}
+  .v6-festival small{color:#c9c9cc}
+  .v6-festival-number{font-size:28px;font-weight:900;color:var(--v6-yellow)}
+  .v6-day-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .v6-day-stat{background:var(--v6-soft);padding:11px;border-radius:10px;text-align:center}
+  .v6-day-stat span{display:block;color:var(--v6-muted);font-size:11px}
+  .v6-day-stat strong{display:block;margin-top:4px;font-size:17px}
+  .v6-bottom-grid{
+    display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:16px;margin-top:16px
+  }
+  .v6-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .v6-action{
+    appearance:none;border:1px solid var(--v6-line);background:#fff;border-radius:11px;padding:12px;
+    font:inherit;font-weight:800;text-align:left;cursor:pointer
+  }
+  .v6-action:hover{border-color:#111;transform:translateY(-1px)}
+  .v6-action i{font-style:normal;display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:var(--v6-yellow);margin-right:7px}
+  .v6-empty{padding:15px;background:var(--v6-soft);border-radius:11px;color:var(--v6-muted);font-size:13px}
+
+  /* Administratie: permanente, sticky horizontale scrollbalk */
+  .v6-admin-scrollbar{
+    display:block;
+    position:fixed;
+    left:0;bottom:0;
+    height:18px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    z-index:9997;
+    background:#f2f2f3;
+    border-top:1px solid #d7d7da;
+    box-shadow:0 -2px 8px rgba(0,0,0,.08);
+  }
+  .v6-admin-scrollbar > div{height:1px}
+  .v6-admin-scrollbar::-webkit-scrollbar{height:16px}
+  .v6-admin-scrollbar::-webkit-scrollbar-thumb{background:#777;border-radius:9px;border:3px solid #f2f2f3}
+  .v6-admin-scrollbar::-webkit-scrollbar-track{background:#e7e7e9}
+  body.v6-admin-active{padding-bottom:18px}
+}
+
+/* Extra bescherming voor brede administratietabel */
+body.v6-admin-active .table-scroll{
+  overflow-x:auto !important;
+  overscroll-behavior-x:contain;
+}

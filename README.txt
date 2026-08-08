@@ -1,29 +1,59 @@
-VAPPIE SYNC FIX v5
-==================
+VAPPIE DASHBOARD UPDATE v6
+===========================
 
-Deze ZIP bevat alleen de 2 bestanden die je in de root van je GitHub repository hoeft te vervangen:
+Deze ZIP is een updatepakket voor de bestaande repository:
+cwmunten/App-Verenigingen
 
-1. index.html
-2. service-worker.js
+WAT IS NIEUW
+------------
+1. Laptop-dashboard:
+   - prominente bestaande zoekfunctie blijft bovenaan;
+   - 4 KPI's: verenigingen, diensten, ingeplande personen en totale vergoeding;
+   - blok "Aandacht nodig";
+   - compact festival/planning-overzicht;
+   - lokaal logboek "Recente wijzigingen";
+   - snelle acties.
 
-Wat is aangepast:
-- Supabase is bij een nieuwe start de bron van waarheid.
-- Een oude lokale 'dirty' sync-vlag wordt bij de start verwijderd, zodat de iPhone niet eerst verouderde lokale data naar Supabase terugschrijft.
-- Na >30 seconden op de achtergrond herlaadt de PWA bij terugkomst, zodat actuele Supabase-data opnieuw wordt opgehaald.
-- app.js, styles.css, seedData.js en manifest.webmanifest gebruiken network-first caching.
-- Nieuwe cacheversie v5 verwijdert de oude PWA-cache.
-- Service worker controleert bij iedere start expliciet op een update.
+2. Administratie op laptop:
+   - permanente horizontale scrollbar onderin het scherm;
+   - scrollbar loopt synchroon met de brede administratietabel;
+   - blijft bereikbaar tijdens verticaal scrollen.
 
-UPLOAD NAAR GITHUB
-------------------
-Open de repository App-Verenigingen, upload deze twee bestanden naar de ROOT en kies voor Replace/Commit changes.
-Vercel zal daarna automatisch opnieuw deployen als je repository eraan gekoppeld is.
+3. Smartphone:
+   - extra dashboardblokken worden bewust niet getoond;
+   - mobiele zoekervaring blijft eenvoudig.
 
-IPHONE EERSTE KEER NA UPDATE
-----------------------------
-1. Open Vappie eerst één keer in Safari.
-2. Wacht een paar seconden tot de nieuwe service worker actief is.
-3. Sluit de Vappie-app volledig en open hem opnieuw vanaf het beginscherm.
-4. Controleer dezelfde vereniging als op de laptop.
+4. Sync:
+   - sync-fix blijft behouden;
+   - Supabase-verkeer wordt niet gecachet;
+   - app-code gebruikt network-first caching.
 
-Als iOS toch nog de oude PWA vasthoudt, verwijder Vappie één keer van het beginscherm en voeg hem daarna opnieuw toe.
+INSTALLEREN IN GITHUB
+---------------------
+Upload/vervang in de hoofdmap van App-Verenigingen:
+- index.html                    (vervangen)
+- service-worker.js            (vervangen)
+- enhancements.js              (nieuw)
+- enhancements.css             (nieuw)
+
+Laat de bestaande bestanden staan:
+- app.js
+- styles.css
+- seedData.js
+- manifest.webmanifest
+- icons/
+
+Na commit zal Vercel normaal automatisch opnieuw deployen.
+
+IPHONE/PWA
+----------
+Door de nieuwe cacheversie v6 zou de update automatisch moeten doorkomen.
+Als de oude versie toch blijft staan:
+1. open de site eenmaal rechtstreeks in Safari;
+2. ververs de pagina;
+3. sluit de beginscherm-app volledig en open opnieuw.
+
+OPMERKING RECENTE WIJZIGINGEN
+-----------------------------
+Het logboek wordt lokaal per apparaat opgebouwd vanaf deze update.
+Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
