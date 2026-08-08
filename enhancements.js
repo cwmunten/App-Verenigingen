@@ -284,6 +284,7 @@
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
+    v16OrderNavigation();
   }
 
 
@@ -491,6 +492,19 @@
     v11AdminMeta();
     v11GroupAdminActions();
   }
+
+  // ===== v16: vaste menuvolgorde =====
+  function v16OrderNavigation(){
+    const nav=document.querySelector('.sidebar-nav');
+    if(!nav)return;
+    const order=['home','planning','admin','financial','occupancy'];
+    const items=[...nav.querySelectorAll('[data-page]')];
+    order.forEach(page=>{
+      const item=items.find(el=>el.dataset.page===page);
+      if(item)nav.appendChild(item);
+    });
+  }
+
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
@@ -504,5 +518,6 @@
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
+    v16OrderNavigation();
   },5000);
 })();
