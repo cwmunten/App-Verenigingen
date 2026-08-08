@@ -3,3 +3,17 @@
 @media(max-width:680px){.topbar{height:66px}.brand small{display:none}.brand-mark{width:36px;height:36px}.top-actions .icon-btn:first-of-type{display:none}.home-main{padding:0 14px 50px}.search-hero{padding-top:9vh}.search-hero h1{font-size:52px}.hero-search{height:62px;padding:0 14px;box-shadow:5px 5px 0 var(--pink)}.hero-search input{font-size:16px}.hero-search kbd{display:none}.result-head{padding:20px;display:block}.earnings{display:inline-block;margin-top:14px;text-align:left}.contact-strip{padding:14px 20px;display:grid}.shift-list{padding:8px 20px 18px}.shift-header{display:none}.shift-row{grid-template-columns:1fr 1fr;gap:8px 16px}.shift-row>span:nth-child(2){grid-column:1/-1}.shift-row>span:last-child{justify-content:flex-start}.main{padding:32px 14px 50px}.page-header{align-items:flex-start;flex-direction:column}.page-header h1{font-size:40px}.kpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:15px}.kpi strong{font-size:23px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.mini-search{min-width:100%}.year-select{padding:6px 8px}.top-actions{gap:4px}.icon-btn{width:35px;height:35px}}
 
 .nav b{font-size:16px}.mobile-menu{font-size:24px}.search-icon{font-size:28px}.modal-head button{font-size:25px}.data-panel>.field{margin-bottom:18px}
+
+/* Volledig administratief overzicht */
+.admin-full-table table{min-width:2050px}
+.admin-full-table th{white-space:normal;min-width:135px;vertical-align:bottom}
+.admin-full-table th:first-child{min-width:220px}
+.admin-full-table th:nth-child(2){min-width:180px}
+.admin-full-table th:nth-child(3){min-width:220px}
+.admin-full-table th:nth-child(4){min-width:170px}
+.admin-full-table th:nth-child(5){min-width:170px}
+.admin-full-table th:nth-child(12){min-width:220px}
+.admin-full-table td{vertical-align:top}
+.admin-notes{white-space:normal;max-width:300px}
+.admin-full-table .sticky-actions{position:sticky;right:0;background:var(--card,#fff);box-shadow:-8px 0 12px rgba(0,0,0,.04);white-space:nowrap}
+.admin-full-table thead th:last-child{position:sticky;right:0;background:var(--card,#fff);z-index:2}

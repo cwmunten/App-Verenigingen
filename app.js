@@ -101,10 +101,18 @@
   }
 
   function adminHtml(){
-    const q=norm(adminQuery), list=yd().associations.filter(a=>!q||norm(a.name).includes(q)||norm(a.barchef).includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
-    return `${pageHeader('ADMINISTRATIE','Verenigingen & barchefs','Wijzig contact- en administratiegegevens of voeg een vereniging toe.','<button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button>')}
-      <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging of barchef..."></div><span class="count">${list.length} verenigingen</span></div>
-      <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th>Barchef</th><th>Telefoon</th><th>E-mail</th><th>Certificaten</th><th>Shirts</th><th></th></tr></thead><tbody>${list.map(a=>`<tr><td><strong>${esc(a.name)}</strong><small>Planning: ${esc(a.planningName)}</small></td><td>${esc(a.barchef)}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.email||'—')}</td><td>${status(a.certificates)}</td><td>${status(a.shirts)}</td><td class="actions"><button data-edit-assoc="${attr(a.id)}">✎</button><button data-delete-assoc="${attr(a.id)}">⌫</button></td></tr>`).join('')}</tbody></table></div></div>`;
+    const q=norm(adminQuery), list=yd().associations.filter(a=>!q||[a.name,a.barchef,a.email,a.phone,a.planningName,a.notes].some(v=>norm(v||'').includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    return `${pageHeader('ADMINISTRATIE','Volledig administratief overzicht','Alle gegevens uit het Excel-tabblad “Verenigingen & Administratie”. Wijzigen kan via het potloodje.','<button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button>')}
+      <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging, barchef, e-mail, telefoon of opmerking..."></div><span class="count">${list.length} verenigingen</span></div>
+      <div class="table-card admin-full-table"><div class="table-scroll"><table><thead><tr>
+        <th>Naam vereniging</th><th>Naam Barchef 1</th><th>E-mail adres Barchef 1</th><th>Telefoonnummer Barchef 1</th><th>Naam in planning</th>
+        <th>Aanwezig Barchefmeeting 1</th><th>Aanwezig Barchefmeeting 2</th><th>Certificaten aanwezig</th><th>Polsbandjes ontvangen</th>
+        <th>Maten kleding ingeleverd</th><th>Eetbonnen nodig</th><th>Opmerkingen</th><th></th>
+      </tr></thead><tbody>${list.map(a=>`<tr>
+        <td><strong>${esc(a.name)}</strong></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
+        <td>${status(a.meeting1)}</td><td>${status(a.meeting2)}</td><td>${status(a.certificates)}</td><td>${status(a.wristbands)}</td><td>${status(a.shirts)}</td>
+        <td>${esc(a.mealVouchers||'—')}</td><td class="admin-notes">${esc(a.notes||'—')}</td><td class="actions sticky-actions"><button title="Wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><button title="Verwijderen" data-delete-assoc="${attr(a.id)}">⌫</button></td>
+      </tr>`).join('')}</tbody></table></div></div>`;
   }
   function status(v){return `<span class="status ${String(v).toLowerCase()==='ja'?'good':'neutral'}">${esc(v||'Onbekend')}</span>`}
 
