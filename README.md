@@ -31,3 +31,8 @@ Wijzigingen worden lokaal opgeslagen in `localStorage` van de browser. Gebruik *
 - De Excel-import leest `Verenigingen & Administratie` en `Werkschema` uit het ZPF-werkboek en kan administratie en/of planning vervangen voor het actieve festivaljaar.
 - Het rapport toont de diensten per dag in aparte kolommen (woensdag t/m zondag) en kan als PDF/print of CSV voor Excel worden geëxporteerd.
 - Voor Excel-import gebruikt Vappie SheetJS 0.20.3 via de officiële SheetJS CDN.
+
+## Aanpassingen in deze versie
+- Automatisch verversen iedere 2 minuten. Open bewerkvensters worden niet onderbroken.
+- Planning kan nu ook op vereniging worden gefilterd.
+- Zoekresultaten op Home tonen alle administratiegegevens, alle diensten en een financieel overzicht per vereniging.

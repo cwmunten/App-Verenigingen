@@ -19,3 +19,25 @@
 .admin-full-table thead th:last-child{position:sticky;right:0;background:var(--card,#fff);z-index:2}
 
 .header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.import-options{display:grid;gap:10px;margin:0 0 16px}.import-options label{display:flex;align-items:center;gap:9px;background:#f7f6f2;border:1px solid #ddd;padding:12px 14px;font-weight:700}.import-options input{width:18px;height:18px}.import-warning{font-size:12px;line-height:1.45;color:#665f3a;background:#fff8cf;border:1px solid #eadb7c;padding:12px 14px;margin-bottom:18px}@media(max-width:680px){.header-actions{width:100%;justify-content:flex-start}.header-actions .primary,.header-actions .secondary{flex:1 1 auto}}
+
+/* Uitgebreid zoekresultaat op home */
+.home-detail-section{padding:22px 28px;border-top:1px solid var(--line)}
+.home-section-title{font-family:'Arial Black',Arial,sans-serif;text-transform:uppercase;font-size:17px;margin-bottom:14px}
+.home-admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.home-admin-item{background:#f7f6f2;border:1px solid #e7e3da;padding:12px 13px;min-height:70px}
+.home-admin-item span,.home-finance-grid span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#777;font-weight:800;margin-bottom:6px}
+.home-admin-item strong{display:block;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.finance-section{background:#fffdf1}
+.home-finance-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.home-finance-grid>div{background:#fff;border:1px solid #e6e0bd;padding:12px 13px}
+.home-finance-grid strong{font:20px/1.1 'Arial Black',Arial,sans-serif}
+.home-detail-section .shift-list{padding:0}
+
+@media(max-width:900px){
+  .home-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-finance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .home-detail-section{padding:18px 20px}
+  .home-admin-grid,.home-finance-grid{grid-template-columns:1fr}
+}

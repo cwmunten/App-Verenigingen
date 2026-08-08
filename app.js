@@ -17,7 +17,7 @@
   }
   function amount(shift,a,rate){ return durationHours(shift.from,shift.to)*Number(shift.people||0)*Number(a?.rateOverride ?? rate ?? 0); }
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
-  let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:''}, adminQuery='';
+  let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
   const app=document.getElementById('app');
   const save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
   const yd=()=>db.years[db.activeYear];
@@ -60,19 +60,35 @@
     </section>`;
   }
   function resultHtml(a){
-    const shifts=yd().shifts.filter(s=>s.associationId===a.id).sort(shiftSort), total=shifts.reduce((n,s)=>n+amount(s,a,yd().rate),0);
-    return `<article class="result-card"><div class="result-head"><div><span class="eyebrow">VERENIGING</span><h2>${esc(a.name)}</h2>${a.planningName!==a.name?`<small>Planningnaam: ${esc(a.planningName)}</small>`:''}</div><div class="earnings"><span>Verdiensten</span><strong>${money(total)}</strong></div></div>
+    const shifts=yd().shifts.filter(s=>s.associationId===a.id).sort(shiftSort);
+    const total=shifts.reduce((n,s)=>n+amount(s,a,yd().rate),0);
+    const personHours=shifts.reduce((n,s)=>n+durationHours(s.from,s.to)*Number(s.people||0),0);
+    const people=shifts.reduce((n,s)=>n+Number(s.people||0),0);
+    const rate=Number(a.rateOverride ?? yd().rate ?? 0);
+    const adminItems=[
+      ['Naam vereniging',a.name],['Naam Barchef',a.barchef||'—'],['Telefoon Barchef',a.phone||'—'],['E-mail Barchef',a.email||'—'],
+      ['Naam in planning',a.planningName||'—'],['Barchefmeeting 1',a.meeting1||'Onbekend'],['Barchefmeeting 2',a.meeting2||'Onbekend'],
+      ['Certificaten aanwezig',a.certificates||'Onbekend'],['Polsbandjes ontvangen',a.wristbands||'Onbekend'],['Maten kleding ingeleverd',a.shirts||'Onbekend'],
+      ['Eetbonnen nodig',a.mealVouchers||'—'],['Extra info / opmerkingen',a.notes||'—']
+    ];
+    return `<article class="result-card"><div class="result-head"><div><span class="eyebrow">VERENIGING</span><h2>${esc(a.name)}</h2>${a.planningName!==a.name?`<small>Planningnaam: ${esc(a.planningName)}</small>`:''}</div><div class="earnings"><span>Totale inkomsten</span><strong>${money(total)}</strong></div></div>
       <div class="contact-strip"><span>● ${esc(a.barchef||'Geen barchef')}</span><a ${a.phone?`href="tel:${attr(a.phone)}"`:''}>☎ ${esc(a.phone||'Geen telefoon')}</a><a ${a.email?`href="mailto:${attr(a.email)}"`:''}>✉ ${esc(a.email||'Geen e-mail')}</a></div>
-      <div class="shift-list"><div class="shift-header"><span>Dag</span><span>Bar</span><span>Tijd</span><span>Personen</span><span>Bedrag</span></div>
-      ${shifts.length?shifts.map(s=>`<div class="shift-row"><span><strong>${esc(s.day)}</strong><small>${esc(s.daypart)}</small></span><span>⌖ ${esc(s.bar)}</span><span>◷ ${esc(s.from)}–${esc(s.to)}</span><span>${s.people}</span><span>${money(amount(s,a,yd().rate))}</span></div>`).join(''):'<div class="no-shifts">Geen diensten gepland voor dit jaar.</div>'}</div></article>`;
+      <div class="home-detail-section"><div class="home-section-title">Administratie</div><div class="home-admin-grid">${adminItems.map(([label,value])=>`<div class="home-admin-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('')}</div></div>
+      <div class="home-detail-section finance-section"><div class="home-section-title">Financieel</div><div class="home-finance-grid">
+        <div><span>Totale inkomsten</span><strong>${money(total)}</strong></div><div><span>Tarief p.p. / uur</span><strong>${money(rate)}</strong></div><div><span>Aantal diensten</span><strong>${shifts.length}</strong></div><div><span>Persoonsuren</span><strong>${personHours.toFixed(1)}</strong></div><div><span>Ingeplande personen</span><strong>${people}</strong></div>
+      </div></div>
+      <div class="home-detail-section"><div class="home-section-title">Diensten</div><div class="shift-list"><div class="shift-header"><span>Dag</span><span>Bar</span><span>Tijd</span><span>Personen</span><span>Bedrag</span></div>
+      ${shifts.length?shifts.map(s=>`<div class="shift-row"><span><strong>${esc(s.day)}</strong><small>${esc(s.daypart)}</small></span><span>⌖ ${esc(s.bar)}</span><span>◷ ${esc(s.from)}–${esc(s.to)}</span><span>${s.people}</span><span>${money(amount(s,a,yd().rate))}</span></div>`).join(''):'<div class="no-shifts">Geen diensten gepland voor dit jaar.</div>'}</div></div></article>`;
   }
 
   function pageHeader(kicker,title,subtitle,action=''){return `<div class="page-header"><div><span class="eyebrow">${kicker}</span><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`}
   function planningHtml(){
     const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort();
-    const list=yd().shifts.filter(s=>(!filters.day||s.day===filters.day)&&(!filters.daypart||s.daypart===filters.daypart)&&(!filters.bar||s.bar===filters.bar)).sort(shiftSort);
+    const associations=yd().associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    const list=yd().shifts.filter(s=>(!filters.day||s.day===filters.day)&&(!filters.daypart||s.daypart===filters.daypart)&&(!filters.bar||s.bar===filters.bar)&&(!filters.associationId||s.associationId===filters.associationId)).sort(shiftSort);
+    const assocFilter=`<label class="filter-select"><span>Vereniging</span><select data-filter="associationId"><option value="">Alles</option>${associations.map(a=>`<option value="${attr(a.id)}" ${filters.associationId===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select></label>`;
     return `${pageHeader('PLANNING','Wie staat waar?','Filter, wijzig of voeg diensten toe.','<button class="primary" data-action="add-shift">＋ Dienst toevoegen</button>')}
-      <div class="filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
+      <div class="filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}${assocFilter}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
       <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Dag</th><th>Dagdeel</th><th>Bar</th><th>Vereniging</th><th>Tijd</th><th class="num">Personen</th><th></th></tr></thead><tbody>
       ${list.map(s=>{const a=assoc(s.associationId);return `<tr><td><strong>${esc(s.day)}</strong></td><td><span class="pill">${esc(s.daypart)}</span></td><td>${esc(s.bar)}</td><td><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><small>${esc(a?.barchef||'')}</small></td><td>${esc(s.from)} – ${esc(s.to)}</td><td class="num">${s.people}</td><td class="actions"><button data-edit-shift="${attr(s.id)}">✎</button><button data-delete-shift="${attr(s.id)}">⌫</button></td></tr>`}).join('')}</tbody></table></div></div>`;
   }
@@ -128,7 +144,7 @@
   }
   function bindPlanning(){
     document.querySelectorAll('[data-filter]').forEach(s=>s.onchange=e=>{filters[e.target.dataset.filter]=e.target.value;render()});
-    document.querySelector('[data-action="clear-filters"]').onclick=()=>{filters={day:'',daypart:'',bar:''};render()};
+    document.querySelector('[data-action="clear-filters"]').onclick=()=>{filters={day:'',daypart:'',bar:'',associationId:''};render()};
     document.querySelector('[data-action="add-shift"]').onclick=()=>shiftModal();
     document.querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>shiftModal(yd().shifts.find(s=>s.id===b.dataset.editShift)));
     document.querySelectorAll('[data-delete-shift]').forEach(b=>b.onclick=()=>{if(confirm('Deze dienst verwijderen?')){yd().shifts=yd().shifts.filter(s=>s.id!==b.dataset.deleteShift);save();render()}});
@@ -368,5 +384,29 @@
   function importBackup(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x.years)throw 0;if(confirm('Deze back-up vervangt de huidige lokale gegevens. Doorgaan?')){db=x;save();render()}}catch{alert('Geen geldige Vappie back-up.')}};reader.readAsText(file)}
   function newYear(){const current=Number(db.activeYear), input=prompt('Nieuw festivaljaar:',String(current+1));if(!input||db.years[input])return;const copy=confirm(`Gegevens van ${db.activeYear} kopiëren naar ${input}?\nOK = kopiëren, Annuleren = leeg jaar.`);db.years[input]=copy?clone(yd()):{rate:6.5,associations:[],shifts:[],barCaps:clone(yd().barCaps||{})};db.activeYear=input;save();page='home';render()}
 
+  function autoRefresh(){
+    if(document.hidden||document.querySelector('.modal-backdrop')) return;
+    const active=document.activeElement;
+    const activeId=active?.id||'';
+    const start=typeof active?.selectionStart==='number'?active.selectionStart:null;
+    const end=typeof active?.selectionEnd==='number'?active.selectionEnd:null;
+    try{
+      const stored=localStorage.getItem(STORAGE_KEY);
+      if(stored){
+        const fresh=JSON.parse(stored);
+        if(fresh?.years&&fresh?.activeYear) db=fresh;
+      }
+      render();
+      if(activeId){
+        const restored=document.getElementById(activeId);
+        if(restored){
+          restored.focus();
+          if(start!==null&&typeof restored.setSelectionRange==='function') restored.setSelectionRange(start,end??start);
+        }
+      }
+    }catch(err){ console.warn('Automatisch verversen overgeslagen:',err); }
+  }
+
   render();
+  setInterval(autoRefresh,120000);
 })();
