@@ -1,4 +1,4 @@
-VAPPIE FOTOALBUM UPDATE v24
+VAPPIE DASHBOARD UPDATE v18
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -103,13 +103,4 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
 
 17. Dagdeelkleuren v18: Avond geel, Middag lichtgroen. Geldt voor de dagdeelbadges in Planning/overzichten.
 
-18. Fotoalbum v24
-    - Nieuw hoofdmenu-item 'Fotoalbum'.
-    - Foto's kiezen uit de fotobibliotheek van smartphone of computer.
-    - GEEN camera-capture: de knop opent alleen de normale fotobibliotheek/bestandskiezer.
-    - Meerdere foto's tegelijk selecteren is mogelijk.
-    - Foto's worden voor upload verkleind naar maximaal 1600 px en JPEG kwaliteit 80%.
-    - Centrale opslag in privé Supabase Storage bucket 'vappie-photoalbum'.
-    - Galerij: 2 kolommen op smartphone, 4 op laptop.
-    - Klik op een foto voor grote weergave in lightbox.
-    - Eenmalig SUPABASE_FOTOALBUM_SETUP.sql uitvoeren in Supabase SQL Editor.
+Fotoalbum v25 toegevoegd.
