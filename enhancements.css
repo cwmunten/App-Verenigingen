@@ -354,3 +354,37 @@ body.v6-admin-active .table-scroll{
   background:#d9f2d5!important;
   color:#173c1d!important;
 }
+
+
+/* ===== v24 Fotoalbum ===== */
+.v24-album-page{max-width:1500px;margin:0 auto}
+.v24-album-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}
+.v24-album-head h1{margin:3px 0 5px}
+.v24-album-head p{margin:0;color:#6d6d72}
+.v24-album-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.v24-album-toolbar strong{font-size:18px}
+.v24-album-status{margin-bottom:12px;color:#6c6c71;font-size:13px}
+.v24-photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.v24-photo-card{background:#fff;border:1px solid #e2e2e5;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.035)}
+.v24-photo-button{display:block;width:100%;border:0;background:#fff;padding:0;cursor:pointer;text-align:left}
+.v24-photo-button img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee}
+.v24-photo-button small{display:block;padding:9px 11px;color:#68686d}
+.v24-album-empty,.v24-album-error{padding:30px;border:1px dashed #d6d6da;border-radius:14px;background:#fafafa;text-align:center;display:grid;gap:6px}
+.v24-album-empty b{font-size:28px}.v24-album-empty strong,.v24-album-error strong{font-size:16px;color:#111}
+.v24-album-empty span,.v24-album-error span{color:#6c6c71}
+.v24-lightbox{position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.91);display:grid;place-items:center;padding:30px}
+.v24-lightbox img{max-width:min(1200px,96vw);max-height:84vh;border-radius:10px;box-shadow:0 20px 70px rgba(0,0,0,.5)}
+.v24-lightbox small{position:fixed;bottom:18px;color:#fff}
+.v24-lightbox-close{position:fixed;right:18px;top:15px;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#111;font-size:28px;cursor:pointer}
+
+@media(max-width:899px){
+  .v24-album-head{display:block;margin-bottom:16px}
+  .v24-album-head p{font-size:13px}
+  .v24-upload-btn{width:100%!important;margin-top:14px!important;min-height:48px!important}
+  .v24-album-toolbar .secondary{min-height:40px!important;padding:8px 10px!important}
+  .v24-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .v24-photo-card{border-radius:11px}
+  .v24-photo-button small{font-size:11px;padding:7px 8px}
+  .v24-lightbox{padding:12px}
+  .v24-lightbox img{max-width:97vw;max-height:80vh}
+}

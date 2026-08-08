@@ -280,11 +280,13 @@
   }
 
   function refresh(){
+    v24EnsurePhotoAlbumNav();
+    v16OrderNavigation();
+    v24OrderNav();
     injectDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
-    v16OrderNavigation();
     v18ColorDayparts();
   }
 
@@ -533,6 +535,209 @@
     });
   }
 
+
+  // ===== v24: Fotoalbum vanuit fotobibliotheek, centraal in Supabase Storage =====
+  const V24_PHOTO_BUCKET='vappie-photoalbum';
+  const V24_SB_URL='https://ngijjzcizhwoeieaelgz.supabase.co';
+  const V24_SB_KEY='sb_publishable_fQFpxmC6XeNeJ0yOv52S7g_VIbs2jLg';
+  let v24PhotoClient=null;
+
+  function v24EnsurePhotoAlbumNav(){
+    const nav=document.querySelector('.sidebar-nav');
+    if(!nav)return;
+    let btn=nav.querySelector('[data-v24-page="photoalbum"]');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.type='button';
+      btn.dataset.v24Page='photoalbum';
+      btn.innerHTML='<b>▧</b><span>Fotoalbum</span>';
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.sidebar-nav button').forEach(x=>x.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('nav')?.classList.remove('open');
+        v24RenderPhotoAlbum();
+      });
+      nav.appendChild(btn);
+    }
+  }
+
+  function v24OrderNav(){
+    const nav=document.querySelector('.sidebar-nav');
+    if(!nav)return;
+    const regular=[...nav.querySelectorAll(':scope > [data-page]')];
+    const order=['home','planning','admin','financial','occupancy'];
+    const photo=nav.querySelector(':scope > [data-v24-page="photoalbum"]');
+    const expected=[
+      ...order.map(k=>regular.find(el=>el.dataset.page===k)).filter(Boolean),
+      ...(photo?[photo]:[])
+    ];
+    const current=[...nav.children].filter(el=>el.matches?.('[data-page],[data-v24-page="photoalbum"]'));
+    if(current.length===expected.length && current.every((el,i)=>el===expected[i]))return;
+    const frag=document.createDocumentFragment();
+    expected.forEach(el=>frag.appendChild(el));
+    nav.appendChild(frag);
+  }
+
+  async function v24Client(){
+    if(v24PhotoClient)return v24PhotoClient;
+    if(!window.supabase?.createClient){
+      await new Promise((resolve,reject)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        s.async=true;
+        s.onload=resolve;
+        s.onerror=()=>reject(new Error('Supabase-module kon niet worden geladen.'));
+        document.head.appendChild(s);
+      });
+    }
+    v24PhotoClient=window.supabase.createClient(V24_SB_URL,V24_SB_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+    });
+    return v24PhotoClient;
+  }
+
+  function v24AlbumShell(){
+    return `<section class="v24-album-page">
+      <div class="v24-album-head">
+        <div>
+          <span class="eyebrow">TEAM VERENIGINGEN</span>
+          <h1>Fotoalbum</h1>
+          <p>Foto's van Team Verenigingen op één plek.</p>
+        </div>
+        <button class="primary v24-upload-btn" id="v24UploadBtn">＋ Foto's toevoegen</button>
+      </div>
+      <input id="v24PhotoInput" type="file" accept="image/*" multiple hidden>
+      <div class="v24-album-toolbar">
+        <strong>Galerij</strong>
+        <button type="button" class="secondary" id="v24RefreshPhotos">↻ Vernieuwen</button>
+      </div>
+      <div id="v24AlbumStatus" class="v24-album-status">Fotoalbum laden…</div>
+      <div id="v24PhotoGrid" class="v24-photo-grid"></div>
+    </section>`;
+  }
+
+  async function v24RenderPhotoAlbum(){
+    const main=document.querySelector('.workspace-main');
+    if(!main)return;
+    main.className='workspace-main main';
+    main.innerHTML=v24AlbumShell();
+    document.getElementById('v24UploadBtn')?.addEventListener('click',()=>document.getElementById('v24PhotoInput')?.click());
+    document.getElementById('v24PhotoInput')?.addEventListener('change',v24UploadSelected);
+    document.getElementById('v24RefreshPhotos')?.addEventListener('click',v24LoadGallery);
+    await v24LoadGallery();
+  }
+
+  async function v24ResizePhoto(file){
+    const bitmap=await createImageBitmap(file);
+    const max=1600;
+    const factor=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const w=Math.max(1,Math.round(bitmap.width*factor));
+    const h=Math.max(1,Math.round(bitmap.height*factor));
+    const canvas=document.createElement('canvas');
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.drawImage(bitmap,0,0,w,h);
+    bitmap.close?.();
+    return await new Promise((resolve,reject)=>{
+      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Foto kon niet worden verwerkt.')),'image/jpeg',0.80);
+    });
+  }
+
+  async function v24UploadSelected(e){
+    const files=[...(e.target.files||[])];
+    if(!files.length)return;
+    const status=document.getElementById('v24AlbumStatus');
+    try{
+      const client=await v24Client();
+      const {data:{session}}=await client.auth.getSession();
+      if(!session)throw new Error('Je bent niet aangemeld bij Supabase.');
+
+      let done=0;
+      for(const file of files){
+        if(!file.type.startsWith('image/'))continue;
+        if(status)status.textContent=`Foto ${done+1} van ${files.length} voorbereiden…`;
+        const blob=await v24ResizePhoto(file);
+        const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+        const user=(session.user?.email||'gebruiker').split('@')[0].replace(/[^a-z0-9_-]/gi,'-').toLowerCase();
+        const filename=`${stamp}_${user}_${Math.random().toString(36).slice(2,8)}.jpg`;
+        const {error}=await client.storage.from(V24_PHOTO_BUCKET).upload(filename,blob,{
+          contentType:'image/jpeg',
+          cacheControl:'3600',
+          upsert:false
+        });
+        if(error)throw error;
+        done++;
+      }
+      e.target.value='';
+      if(status)status.textContent=`${done} foto${done===1?'':'\\'s'} toegevoegd ✓`;
+      await v24LoadGallery();
+    }catch(err){
+      console.error(err);
+      if(status)status.innerHTML=`<div class="v24-album-error"><strong>Uploaden lukt nog niet.</strong><span>${esc(err?.message||err)}</span></div>`;
+    }
+  }
+
+  async function v24LoadGallery(){
+    const status=document.getElementById('v24AlbumStatus');
+    const grid=document.getElementById('v24PhotoGrid');
+    if(!status||!grid)return;
+    status.textContent='Galerij laden…';
+    grid.innerHTML='';
+    try{
+      const client=await v24Client();
+      const {data:{session}}=await client.auth.getSession();
+      if(!session)throw new Error('Je bent niet aangemeld bij Supabase.');
+
+      const {data,error}=await client.storage.from(V24_PHOTO_BUCKET).list('',{
+        limit:200,
+        sortBy:{column:'created_at',order:'desc'}
+      });
+      if(error)throw error;
+
+      const photos=(data||[]).filter(f=>f?.name && !f.name.startsWith('.'));
+      if(!photos.length){
+        status.innerHTML='<div class="v24-album-empty"><b>▧</b><strong>Nog geen foto\\'s</strong><span>Voeg foto\\'s toe vanuit de fotobibliotheek van je smartphone.</span></div>';
+        return;
+      }
+
+      status.textContent=`${photos.length} foto${photos.length===1?'':'\\'s'}`;
+      for(const photo of photos){
+        const {data:signed,error:signedError}=await client.storage.from(V24_PHOTO_BUCKET).createSignedUrl(photo.name,3600);
+        if(signedError||!signed?.signedUrl)continue;
+        const date=photo.created_at?new Date(photo.created_at):null;
+        const card=document.createElement('article');
+        card.className='v24-photo-card';
+        card.innerHTML=`<button type="button" class="v24-photo-button">
+          <img loading="lazy" src="${signed.signedUrl}" alt="Foto uit Vappie fotoalbum">
+          <small>${date?date.toLocaleString('nl-NL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</small>
+        </button>`;
+        card.querySelector('button').onclick=()=>v24OpenLarge(signed.signedUrl,date);
+        grid.appendChild(card);
+      }
+    }catch(err){
+      console.error(err);
+      const msg=String(err?.message||err);
+      status.innerHTML=`<div class="v24-album-error"><strong>Fotoalbum niet beschikbaar.</strong><span>${esc(msg)}</span></div>`;
+    }
+  }
+
+  function v24OpenLarge(url,date){
+    const box=document.createElement('div');
+    box.className='v24-lightbox';
+    box.innerHTML=`<button class="v24-lightbox-close" aria-label="Sluiten">×</button>
+      <img src="${url}" alt="Vergrote foto">
+      <small>${date?date.toLocaleString('nl-NL',{dateStyle:'long',timeStyle:'short'}):''}</small>`;
+    box.addEventListener('click',e=>{
+      if(e.target===box || e.target.closest('.v24-lightbox-close'))box.remove();
+    });
+    document.body.appendChild(box);
+  }
+
+  document.addEventListener('click',e=>{
+    const normal=e.target.closest?.('.sidebar-nav [data-page]');
+    if(normal)document.querySelector('[data-v24-page="photoalbum"]')?.classList.remove('active');
+  },true);
+
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
@@ -543,10 +748,12 @@
       document.querySelector('.v6-dashboard-extra')?.remove();
       injectDashboard();
     }
+    v24EnsurePhotoAlbumNav();
+    v16OrderNavigation();
+    v24OrderNav();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
-    v16OrderNavigation();
     v18ColorDayparts();
   },5000);
 })();
