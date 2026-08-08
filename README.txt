@@ -111,3 +111,5 @@ v26
 - 'Bekijk album' opent het Fotoalbum.
 - Foto's in de galerij hebben een verwijderknop met bevestiging.
 - De Supabase SQL bevat nu ook een DELETE-policy.
+
+v27: Lokaal logboek / Recente wijzigingen verwijderd van Home. Overige v26 functies behouden.

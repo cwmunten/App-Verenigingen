@@ -128,10 +128,6 @@
 
         <div class="v6-bottom-grid">
           <article class="v6-panel">
-            <div class="v6-panel-head"><div><span>Lokaal logboek</span><h3>Recente wijzigingen</h3></div><b class="v6-badge">dit apparaat</b></div>
-            <div class="v6-recent-list">${recentHtml}</div>
-          </article>
-          <article class="v6-panel">
             <div class="v6-panel-head"><div><span>Snel naar</span><h3>Snelle acties</h3></div></div>
             <div class="v6-actions">
               <button class="v6-action" data-v6-action="admin"><i>＋</i> Vereniging</button>
