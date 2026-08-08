@@ -285,6 +285,7 @@
     v10InjectAdminMailButton();
     v11Polish();
     v16OrderNavigation();
+    v18ColorDayparts();
   }
 
 
@@ -517,6 +518,21 @@
 
   // v17: extra veiligheid - navigatieknoppen krijgen geen eigen click-handler hier.
   // De originele app.js onclick-handlers blijven volledig leidend.
+
+  // ===== v18: verschillende kleuren voor dagdelen =====
+  function v18ColorDayparts(){
+    document.querySelectorAll('.workspace-main td, .workspace-main .badge, .workspace-main .pill, .workspace-main span').forEach(el=>{
+      const text=String(el.textContent||'').trim().toLocaleLowerCase('nl-NL');
+      if(text==='avond'){
+        el.classList.add('v18-daypart','v18-evening');
+        el.classList.remove('v18-afternoon');
+      }else if(text==='middag'){
+        el.classList.add('v18-daypart','v18-afternoon');
+        el.classList.remove('v18-evening');
+      }
+    });
+  }
+
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
@@ -531,5 +547,6 @@
     v10InjectAdminMailButton();
     v11Polish();
     v16OrderNavigation();
+    v18ColorDayparts();
   },5000);
 })();

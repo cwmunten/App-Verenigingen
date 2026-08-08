@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v17
+VAPPIE DASHBOARD UPDATE v18
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -100,3 +100,5 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - herschikken gebeurt alleen nog wanneer de volgorde daadwerkelijk fout staat;
     - voorkomt een MutationObserver-lus die klikken op menu-items kon blokkeren;
     - originele navigatiehandlers uit app.js blijven leidend.
+
+17. Dagdeelkleuren v18: Avond geel, Middag lichtgroen. Geldt voor de dagdeelbadges in Planning/overzichten.

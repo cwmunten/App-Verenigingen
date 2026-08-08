@@ -335,3 +335,22 @@ body.v6-admin-active .table-scroll{
     justify-content:start!important;
   }
 }
+
+
+/* v18: dagdeelkleuren */
+.v18-daypart{
+  display:inline-block!important;
+  width:auto!important;
+  border-radius:7px!important;
+  padding:5px 11px!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+}
+.v18-evening{
+  background:#f6ef38!important;
+  color:#111!important;
+}
+.v18-afternoon{
+  background:#d9f2d5!important;
+  color:#173c1d!important;
+}
