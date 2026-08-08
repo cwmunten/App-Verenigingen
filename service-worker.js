@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v12-admin-actions';
+const CACHE = 'vappie-cache-v13-more-menu';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

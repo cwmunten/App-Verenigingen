@@ -276,3 +276,29 @@ body.v6-admin-active .table-scroll{
     min-height:46px!important;
   }
 }
+
+
+/* ===== v13: Meer-menu strak uitlijnen ===== */
+@media (min-width:900px){
+  .v12-more-wrap .v11-more-menu{
+    min-width:245px!important;
+    padding:7px!important;
+  }
+  .v12-more-wrap .v11-more-menu button{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:9px!important;
+    width:100%!important;
+    min-height:43px!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+  }
+  .v12-more-wrap .v11-more-menu .v10-mail-all span{
+    display:none!important;
+  }
+}

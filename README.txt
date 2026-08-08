@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v12
+VAPPIE DASHBOARD UPDATE v13
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -86,3 +86,5 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - Meer bevat: Mail alle verenigingen, Excel importeren, Rapport exporteren.
     - Smartphone: mail, import, export en Meer zijn volledig verborgen.
     - Smartphone toont alleen de functionele knop '+ Vereniging toevoegen'.
+
+12. Meer-menu v13: alle opties links en gelijk uitgelijnd, consistente rijhoogte en spacing; aantalbadge achter 'Mail alle verenigingen' verwijderd.

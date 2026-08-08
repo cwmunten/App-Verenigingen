@@ -483,6 +483,10 @@
         original.click();
         wrap.classList.remove('open');
       });
+      if(clone.hasAttribute('data-v10-mail-all')){
+        clone.querySelector('span')?.remove();
+        clone.innerHTML='✉ Mail alle verenigingen';
+      }
       menu.appendChild(clone);
       original.classList.add('v11-secondary-hidden','v12-desktop-source-action');
     });
