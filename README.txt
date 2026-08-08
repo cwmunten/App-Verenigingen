@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v19
+VAPPIE DASHBOARD UPDATE v21
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -111,3 +111,18 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - Opslag gebeurt centraal in Supabase Storage bucket 'vappie-photos'.
     - Album gebruikt signed URLs; de bucket blijft privé.
     - Voer éénmalig SUPABASE_PHOTOS_SETUP.sql uit in de Supabase SQL Editor.
+
+19. Herstel v20
+    - Opgelost: dashboard op Home verdween door een navigatie/MutationObserver-conflict.
+    - Opgelost: menu-item Foto's werd daardoor niet stabiel weergegeven.
+    - Foto's staat nu vast onder Bezettingsoverzicht.
+    - Laptop: Foto's opent het album.
+    - Smartphone: Foto's opent album + Camera-knop.
+    - Home-dashboard wordt na iedere normale render gecontroleerd en zo nodig opnieuw opgebouwd.
+
+20. Home reset v21
+    - Klik op Home geeft weer een volledig verse Home-pagina.
+    - De laatst gezochte vereniging wordt niet meer onthouden.
+    - Zoekveld start leeg.
+    - De normale Supabase startsynchronisatie draait opnieuw bij de reload.
+    - Ook klikken op het Vappie-logo/brand linksboven geeft een verse Home.

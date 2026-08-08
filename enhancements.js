@@ -279,14 +279,23 @@
     }
   }
 
+
+  function v20RepairHomeDashboard(){
+    const main=document.querySelector('.workspace-main.home-main');
+    const homeActive=document.querySelector('.sidebar-nav [data-page="home"].active');
+    if(!main||!homeActive)return;
+    if(!main.querySelector('.v6-dashboard-extra')) injectDashboard();
+  }
+
   function refresh(){
+    v19EnsurePhotoNav();
+    v16OrderNavigation();
     injectDashboard();
+    v20RepairHomeDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
-    v16OrderNavigation();
     v18ColorDayparts();
-    v19EnsurePhotoNav();
   }
 
 
@@ -364,10 +373,35 @@
     },120);
   }
 
+
+  document.addEventListener('click',e=>{
+    const brand=e.target.closest?.('.sidebar-brand[data-page="home"]');
+    if(brand){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      location.href=location.pathname+location.search;
+    }
+  },true);
+
   document.addEventListener('click',e=>{
     const home=e.target.closest?.('.sidebar-nav [data-page="home"]');
     if(home){
-      e.preventDefault();e.stopImmediatePropagation();location.reload();return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      // v21: Home is altijd een verse start.
+      // Wis eerst de zoekterm uit de bestaande Home-state en eventuele zichtbare zoekvelden.
+      try{
+        document.querySelectorAll('#mainSearch, .hero-search input').forEach(input=>{
+          input.value='';
+          input.dispatchEvent(new Event('input',{bubbles:true}));
+        });
+      }catch{}
+
+      // Volledige reload: app.js start opnieuw met searchQuery='' en haalt
+      // bij gekoppelde Supabase opnieuw de centrale data op.
+      location.href=location.pathname+location.search;
+      return;
     }
     const addShift=e.target.closest?.('[data-action="add-shift"]');
     if(addShift&&!v9BypassAddShift){
@@ -499,20 +533,23 @@
   function v16OrderNavigation(){
     const nav=document.querySelector('.sidebar-nav');
     if(!nav)return;
-    const order=['home','planning','admin','financial','occupancy'];
-    const items=[...nav.querySelectorAll(':scope > [data-page]')];
 
-    // Alleen herschikken wanneer de volgorde echt afwijkt.
-    // Dit voorkomt een MutationObserver-lus die de navigatie kon blokkeren.
-    const current=items.map(el=>el.dataset.page).join('|');
-    const desired=order.filter(page=>items.some(el=>el.dataset.page===page)).join('|');
-    if(current===desired)return;
+    // Vaste volgorde inclusief de later toegevoegde Foto's-knop.
+    const standard=['home','planning','admin','financial','occupancy'];
+    const standardItems=[...nav.querySelectorAll(':scope > [data-page]')];
+    const photoItem=nav.querySelector(':scope > [data-v19-page="photos"]');
+
+    const expected=[
+      ...standard.map(page=>standardItems.find(el=>el.dataset.page===page)).filter(Boolean),
+      ...(photoItem?[photoItem]:[])
+    ];
+    const current=[...nav.children].filter(el=>el.matches?.('[data-page],[data-v19-page="photos"]'));
+
+    // Alleen DOM-mutaties uitvoeren als de echte volgorde afwijkt.
+    if(current.length===expected.length && current.every((el,i)=>el===expected[i]))return;
 
     const frag=document.createDocumentFragment();
-    order.forEach(page=>{
-      const item=items.find(el=>el.dataset.page===page);
-      if(item)frag.appendChild(item);
-    });
+    expected.forEach(el=>frag.appendChild(el));
     nav.appendChild(frag);
   }
 
@@ -708,6 +745,14 @@
     }
   }
 
+
+  document.addEventListener('click',e=>{
+    const normal=e.target.closest?.('.sidebar-nav [data-page]');
+    if(normal){
+      document.querySelector('[data-v19-page="photos"]')?.classList.remove('active');
+    }
+  },true);
+
   // Wanneer een normale Vappie-menuknop wordt gekozen, vervalt de foto-weergave vanzelf
   // doordat app.js de workspace opnieuw rendert. Observer voegt de Foto's-knop daarna terug.
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
@@ -720,11 +765,12 @@
       document.querySelector('.v6-dashboard-extra')?.remove();
       injectDashboard();
     }
+    v19EnsurePhotoNav();
+    v16OrderNavigation();
+    v20RepairHomeDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
-    v16OrderNavigation();
     v18ColorDayparts();
-    v19EnsurePhotoNav();
   },5000);
 })();
