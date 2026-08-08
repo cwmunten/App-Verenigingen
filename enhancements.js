@@ -288,6 +288,7 @@
     v18ColorDayparts();
     v25EnsurePhotoAlbumNav();
     v25OrderPhotoNav();
+    v26RefreshHomePhotos();
   }
 
 
@@ -648,9 +649,28 @@
       e.target.value='';
       if(status)status.textContent=done===1?'1 foto toegevoegd ✓':`${done} foto's toegevoegd ✓`;
       await v25LoadGallery();
+      v26RefreshHomePhotos(true);
     }catch(err){
       console.error('Foto-upload fout:',err);
       if(status)status.innerHTML=`<div class="v25-album-error"><strong>Uploaden lukt niet.</strong><span>${esc(err?.message||err)}</span></div>`;
+    }
+  }
+
+
+  async function v26DeletePhoto(name){
+    if(!name)return;
+    if(!confirm("Deze foto definitief uit het fotoalbum verwijderen?"))return;
+    try{
+      const client=await v25Client();
+      const {data:{session}}=await client.auth.getSession();
+      if(!session)throw new Error("Je bent niet aangemeld bij Supabase.");
+      const {error}=await client.storage.from(V25_PHOTO_BUCKET).remove([name]);
+      if(error)throw error;
+      await v25LoadGallery();
+      v26RefreshHomePhotos(true);
+    }catch(err){
+      console.error("Foto verwijderen fout:",err);
+      alert(`Foto verwijderen mislukt: ${err?.message||err}`);
     }
   }
 
@@ -678,8 +698,9 @@
         const date=photo.created_at?new Date(photo.created_at):null;
         const card=document.createElement('article');
         card.className='v25-photo-card';
-        card.innerHTML=`<button type="button" class="v25-photo-button"><img loading="lazy" src="${signed.signedUrl}" alt="Foto uit Vappie fotoalbum"><small>${date?date.toLocaleString('nl-NL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</small></button>`;
-        card.querySelector('button').addEventListener('click',()=>v25OpenLarge(signed.signedUrl,date));
+        card.innerHTML=`<button type="button" class="v25-photo-button"><img loading="lazy" src="${signed.signedUrl}" alt="Foto uit Vappie fotoalbum"><small>${date?date.toLocaleString('nl-NL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</small></button><button type="button" class="v26-photo-delete" title="Foto verwijderen" aria-label="Foto verwijderen">⌫</button>`;
+        card.querySelector('.v25-photo-button').addEventListener('click',()=>v25OpenLarge(signed.signedUrl,date));
+        card.querySelector('.v26-photo-delete').addEventListener('click',e=>{e.stopPropagation();v26DeletePhoto(photo.name)});
         grid.appendChild(card);
       }
     }catch(err){
@@ -700,6 +721,71 @@
     const normal=e.target.closest?.('.sidebar-nav [data-page]');
     if(normal)document.querySelector('[data-v25-page="photoalbum"]')?.classList.remove('active');
   },true);
+
+
+  let v26HomeLoading=false;
+
+  function v26EnsureHomePhotos(){
+    if(window.matchMedia('(max-width: 899px)').matches)return null;
+    const main=document.querySelector('.workspace-main');
+    const dashboard=main?.querySelector('.v6-dashboard-extra');
+    const home=!!document.querySelector('.sidebar-nav [data-page="home"].active');
+    if(!dashboard||!home)return null;
+
+    let block=dashboard.querySelector('.v26-home-photos');
+    if(!block){
+      block=document.createElement('section');
+      block.className='v26-home-photos';
+      block.innerHTML=`<div class="v26-home-photos-head"><div><span>FOTOALBUM</span><h3>Laatste foto's</h3></div><button type="button" class="secondary" data-v26-open-album>Bekijk album →</button></div><div class="v26-home-photo-grid" data-v26-home-grid><div class="v26-home-photo-empty">Laatste foto's laden…</div></div>`;
+      dashboard.appendChild(block);
+      block.querySelector('[data-v26-open-album]')?.addEventListener('click',()=>document.querySelector('[data-v25-page="photoalbum"]')?.click());
+    }
+    return block;
+  }
+
+  async function v26RefreshHomePhotos(force=false){
+    const block=v26EnsureHomePhotos();
+    if(!block||v26HomeLoading)return;
+    const grid=block.querySelector('[data-v26-home-grid]');
+    if(!grid)return;
+    if(!force&&grid.dataset.loaded==='1')return;
+
+    v26HomeLoading=true;
+    try{
+      const client=await v25Client();
+      const {data:{session}}=await client.auth.getSession();
+      if(!session)throw new Error("Niet aangemeld");
+
+      const {data,error}=await client.storage.from(V25_PHOTO_BUCKET).list('',{limit:2,sortBy:{column:'created_at',order:'desc'}});
+      if(error)throw error;
+      const photos=(data||[]).filter(f=>f?.name&&!f.name.startsWith('.')).slice(0,2);
+
+      if(!photos.length){
+        grid.innerHTML=`<div class="v26-home-photo-empty">Nog geen foto's in het album.</div>`;
+        grid.dataset.loaded='1';
+        return;
+      }
+
+      grid.innerHTML='';
+      for(const photo of photos){
+        const {data:signed,error:signedError}=await client.storage.from(V25_PHOTO_BUCKET).createSignedUrl(photo.name,3600);
+        if(signedError||!signed?.signedUrl)continue;
+        const date=photo.created_at?new Date(photo.created_at):null;
+        const item=document.createElement('button');
+        item.type='button';
+        item.className='v26-home-photo';
+        item.innerHTML=`<img src="${signed.signedUrl}" alt="Recente foto"><span>${date?date.toLocaleString('nl-NL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>`;
+        item.addEventListener('click',()=>v25OpenLarge(signed.signedUrl,date));
+        grid.appendChild(item);
+      }
+      grid.dataset.loaded='1';
+    }catch(err){
+      console.warn("Laatste foto's op Home niet geladen:",err);
+      grid.innerHTML=`<div class="v26-home-photo-empty">Fotoalbum tijdelijk niet beschikbaar.</div>`;
+    }finally{
+      v26HomeLoading=false;
+    }
+  }
 
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});

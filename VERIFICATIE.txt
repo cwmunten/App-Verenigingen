@@ -1,0 +1,7 @@
+VAPPIE v26 VERIFICATIE
+======================
+OK - enhancements.js
+OK - service-worker.js
+OK - Home laatste 2 foto's
+OK - Foto verwijderen
+OK - Delete policy

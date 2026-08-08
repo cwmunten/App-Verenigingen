@@ -104,3 +104,10 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
 17. Dagdeelkleuren v18: Avond geel, Middag lichtgroen. Geldt voor de dagdeelbadges in Planning/overzichten.
 
 Fotoalbum v25 toegevoegd.
+
+v26
+- Laptop Home toont de twee laatst geüploade foto's.
+- Klik op een Home-foto voor grote weergave.
+- 'Bekijk album' opent het Fotoalbum.
+- Foto's in de galerij hebben een verwijderknop met bevestiging.
+- De Supabase SQL bevat nu ook een DELETE-policy.
