@@ -11,26 +11,47 @@
   <meta name="description" content="Vappie - verenigingenbeheer voor Zomerparkfeest" />
   <title>Vappie | Team Verenigingen</title>
   <link rel="manifest" href="./manifest.webmanifest" />
-<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
-  <link rel="stylesheet" href="./styles.css" />
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=3">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=3">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Vappie">
-
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
+  <link rel="stylesheet" href="./styles.css?v=syncfix5" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=5">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=5">
 </head>
 <body>
   <div id="app"></div>
   <noscript>Vappie heeft JavaScript nodig om te werken.</noscript>
-  <script src="./seedData.js"></script>
+
+  <script>
+    // SYNC FIX v5: Supabase is de bron van waarheid bij iedere nieuwe app-start.
+    // Een achtergebleven 'dirty' vlag van iPhone/PWA mag niet eerst oude lokale
+    // data terug naar Supabase schrijven voordat de actuele clouddata is opgehaald.
+    try { localStorage.removeItem('vappie-supabase-dirty-v1'); } catch (_) {}
+
+    // Wanneer de PWA langere tijd op de achtergrond stond en weer wordt geopend,
+    // herladen we één keer zodat app.js opnieuw de actuele Supabase-data ophaalt.
+    let vappieHiddenAt = 0;
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        vappieHiddenAt = Date.now();
+      } else if (vappieHiddenAt && Date.now() - vappieHiddenAt > 30000) {
+        location.reload();
+      }
+    });
+  </script>
+
+  <script src="./seedData.js?v=syncfix5"></script>
   <script async src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="./app.js"></script>
+  <script src="./app.js?v=syncfix5"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(err => console.warn('PWA service worker niet actief:', err)));
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('/service-worker.js?v=5', { updateViaCache: 'none' });
+          await reg.update();
+        } catch (err) {
+          console.warn('PWA service worker niet actief:', err);
+        }
+      });
     }
   </script>
 </body>
