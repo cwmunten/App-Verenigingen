@@ -281,16 +281,53 @@
 
 
   function v20RepairHomeDashboard(){
-    const main=document.querySelector('.workspace-main.home-main');
-    const homeActive=document.querySelector('.sidebar-nav [data-page="home"].active');
-    if(!main||!homeActive)return;
-    if(!main.querySelector('.v6-dashboard-extra')) injectDashboard();
+    const homeBtn=document.querySelector('.sidebar-nav [data-page="home"]');
+    const main=document.querySelector('.workspace-main');
+    if(!homeBtn||!main)return;
+
+    const homeActive=homeBtn.classList.contains('active');
+    const hasHomeSearch=!!main.querySelector('#mainSearch');
+    if(!homeActive && !hasHomeSearch)return;
+
+    // Als het dashboard al bestaat: niets doen.
+    if(main.querySelector('.v6-dashboard-extra'))return;
+
+    // injectDashboard() verwachtte eerder een specifieke CSS-class. Die eis omzeilen we hier.
+    const html=dashboardHTML();
+    if(!html)return;
+
+    const searchHero=main.querySelector('.search-hero');
+    if(searchHero){
+      searchHero.insertAdjacentHTML('afterend',html);
+    }else{
+      main.insertAdjacentHTML('beforeend',html);
+    }
+
+    // Acties van het dashboard opnieuw binden.
+    bindAttentionActions(main);
+    main.querySelectorAll('[data-v6-action]').forEach(btn=>{
+      if(btn.dataset.v22Bound==='1')return;
+      btn.dataset.v22Bound='1';
+      btn.addEventListener('click',()=>{
+        const action=btn.dataset.v6Action;
+        if(action==='data'){
+          document.querySelector('[data-action="data"]')?.click();
+          return;
+        }
+        document.querySelector(`.sidebar-nav [data-page="${action}"]`)?.click();
+        setTimeout(()=>{
+          if(action==='planning') document.querySelector('[data-action="add-shift"]')?.click();
+          if(action==='admin' && btn.textContent.includes('Vereniging')){
+            document.querySelector('[data-action="add-assoc"]')?.click();
+          }
+        },100);
+      });
+    });
   }
 
   function refresh(){
     v19EnsurePhotoNav();
     v16OrderNavigation();
-    injectDashboard();
     v20RepairHomeDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
@@ -591,7 +628,8 @@
       btn=document.createElement('button');
       btn.type='button';
       btn.dataset.v19Page='photos';
-      btn.innerHTML='<b>▧</b><span>Foto\\'s</span>';
+      btn.className='v19-photo-nav';
+      btn.innerHTML='<b>▧</b><span>Foto\'s</span>';
       btn.addEventListener('click',()=>{
         document.querySelectorAll('.sidebar-nav button').forEach(x=>x.classList.remove('active'));
         btn.classList.add('active');
@@ -665,11 +703,11 @@
 
       const files=(data||[]).filter(f=>f.name&&!f.name.startsWith('.'));
       if(!files.length){
-        status.innerHTML='<div class="v19-empty"><b>📷</b><strong>Nog geen foto\\'s</strong><span>Foto\\'s die met Vappie worden gemaakt verschijnen hier automatisch.</span></div>';
+        status.innerHTML='<div class="v19-empty"><b>📷</b><strong>Nog geen foto\'s</strong><span>Foto\'s die met Vappie worden gemaakt verschijnen hier automatisch.</span></div>';
         return;
       }
 
-      status.textContent=`${files.length} foto${files.length===1?'':'\\'s'}`;
+      status.textContent=files.length===1?'1 foto':`${files.length} foto's`;
       for(const file of files){
         const {data:signed,error:signedError}=await client.storage.from(V19_PHOTO_BUCKET).createSignedUrl(file.name,3600);
         if(signedError||!signed?.signedUrl)continue;
@@ -759,7 +797,9 @@
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
   window.addEventListener('load',refresh);
-  setTimeout(refresh,250);
+  setTimeout(refresh,50);
+  setTimeout(refresh,300);
+  setTimeout(refresh,900);
   setInterval(()=>{
     if(document.querySelector('.workspace-main.home-main')){
       document.querySelector('.v6-dashboard-extra')?.remove();

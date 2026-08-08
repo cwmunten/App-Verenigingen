@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v21
+VAPPIE DASHBOARD UPDATE v22
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -126,3 +126,11 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - Zoekveld start leeg.
     - De normale Supabase startsynchronisatie draait opnieuw bij de reload.
     - Ook klikken op het Vappie-logo/brand linksboven geeft een verse Home.
+
+21. Herstel v22
+    - Dashboard op Home wordt niet meer gekoppeld aan één specifieke CSS-class.
+    - Zodra Home actief is en het zoekveld zichtbaar is, wordt het laptopdashboard direct opgebouwd.
+    - Foto's-knop wordt na iedere render opnieuw gecontroleerd en teruggezet indien nodig.
+    - Home blijft een verse start met leeg zoekveld.
+
+22. v23 getest: JavaScript syntax gecontroleerd; fout in Foto\'s-string opgelost; Home-dashboard/Fotos selectors en cacheversie gecontroleerd.
