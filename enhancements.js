@@ -427,8 +427,7 @@
     btn.type='button';
     btn.className='secondary v10-mail-all';
     btn.dataset.v10MailAll='1';
-    const count=v10AssociationEmails().length;
-    btn.innerHTML=`✉ Mail alle verenigingen${count?` <span>${count}</span>`:''}`;
+    btn.innerHTML='✉ Mail alle verenigingen';
     btn.title=`Nieuwe e-mail aan ${V10_MAILBOX} met alle verenigingen in BCC`;
     btn.addEventListener('click',v10MailAllAssociations);
 

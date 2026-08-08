@@ -302,3 +302,36 @@ body.v6-admin-active .table-scroll{
     display:none!important;
   }
 }
+
+
+/* ===== v14: definitieve uitlijning Meer-menu ===== */
+@media (min-width:900px){
+  .v12-more-wrap .v11-more-menu{
+    width:260px!important;
+    min-width:260px!important;
+    padding:8px!important;
+  }
+  .v12-more-wrap .v11-more-menu button{
+    display:grid!important;
+    grid-template-columns:22px 1fr!important;
+    align-items:center!important;
+    justify-items:start!important;
+    column-gap:8px!important;
+    width:100%!important;
+    min-height:44px!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+  }
+  .v12-more-wrap .v11-more-menu button + button{
+    margin-top:2px!important;
+  }
+  .v12-more-wrap .v11-more-menu .v10-mail-all span,
+  .v10-mail-all span{
+    display:none!important;
+  }
+  .v12-more-wrap .v11-more-menu .v10-mail-all{
+    justify-content:start!important;
+  }
+}
