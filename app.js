@@ -1,6 +1,14 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'vappie-data-v2';
+  const SUPABASE_CONFIG_KEY = 'vappie-supabase-config-v1';
+  const SUPABASE_LINKED_KEY = 'vappie-supabase-linked-v1';
+  const SUPABASE_DIRTY_KEY = 'vappie-supabase-dirty-v1';
+  const SUPABASE_ROW_ID = 'main';
+  const DEFAULT_SUPABASE_CONFIG = Object.freeze({
+    url: 'https://ngijjzcizhwoeieaelgz.supabase.co',
+    key: 'sb_publishable_fQFpxmC6XeNeJ0yOv52S7g_VIbs2jLg'
+  });
   const DAYS = ['Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
   const PARTS = ['Middag','Avond'];
   const clone = x => JSON.parse(JSON.stringify(x));
@@ -19,26 +27,199 @@
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
   let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
   const app=document.getElementById('app');
-  const save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+
+  let supabaseClient=null, supabaseUser=null, supabaseStatus='local', supabasePushTimer=null;
+  const getSupabaseConfig=()=>{try{return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY))||DEFAULT_SUPABASE_CONFIG}catch{return DEFAULT_SUPABASE_CONFIG}};
+  const isSupabaseLinked=()=>localStorage.getItem(SUPABASE_LINKED_KEY)==='1';
+  const isSupabaseDirty=()=>localStorage.getItem(SUPABASE_DIRTY_KEY)==='1';
+  const setSupabaseDirty=v=>v?localStorage.setItem(SUPABASE_DIRTY_KEY,'1'):localStorage.removeItem(SUPABASE_DIRTY_KEY);
+  const validRemoteData=x=>x&&typeof x==='object'&&x.years&&typeof x.years==='object';
+  let lastSyncAt=null;
+  function syncLabel(){
+    if(!supabaseUser)return 'Niet aangemeld';
+    if(!isSupabaseLinked())return 'Aangemeld';
+    if(supabaseStatus==='syncing'||isSupabaseDirty())return 'Synchroniseren…';
+    if(supabaseStatus==='error')return 'Offline · lokaal';
+    return 'Gesynchroniseerd';
+  }
+  function syncClass(){return !supabaseUser?'neutral':supabaseStatus==='error'?'bad':(supabaseStatus==='syncing'||isSupabaseDirty())?'busy':'ok'}
+  function updateSyncChip(){
+    const chip=document.getElementById('syncChip');
+    if(!chip)return;
+    chip.className=`sync-chip ${syncClass()}`;
+    chip.innerHTML=`<span></span><b>${esc(syncLabel())}</b>`;
+    chip.title=lastSyncAt?`Laatste synchronisatie: ${lastSyncAt.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Supabase synchronisatiestatus';
+  }
+
+  function save({sync=true}={}){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+    if(sync&&isSupabaseLinked()){
+      setSupabaseDirty(true);
+      supabaseStatus='syncing';
+      updateSyncChip();
+      queueRemotePush();
+    }
+  }
+  function queueRemotePush(){
+    if(!supabaseClient||!supabaseUser||!isSupabaseLinked())return;
+    clearTimeout(supabasePushTimer);
+    supabasePushTimer=setTimeout(()=>pushRemote().catch(err=>console.warn('Supabase opslaan uitgesteld:',err)),450);
+  }
+  async function pushRemote(){
+    if(!supabaseClient||!supabaseUser)throw new Error('Niet aangemeld bij Supabase.');
+    supabaseStatus='syncing'; updateSyncChip();
+    const payload=clone(db);
+    const {error}=await supabaseClient.from('vappie_state').upsert({id:SUPABASE_ROW_ID,data:payload,updated_by:supabaseUser.id,updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(error){supabaseStatus='error';updateSyncChip();throw error;}
+    setSupabaseDirty(false); supabaseStatus='connected'; lastSyncAt=new Date(); updateSyncChip();
+    return true;
+  }
+  async function pullRemote({renderAfter=false,force=false}={}){
+    if(!supabaseClient||!supabaseUser)throw new Error('Niet aangemeld bij Supabase.');
+    if(isSupabaseDirty()&&!force){
+      try{await pushRemote()}catch(err){console.warn('Lokale wijzigingen konden nog niet naar Supabase; ophalen overgeslagen.',err);return false;}
+    }
+    supabaseStatus='syncing'; updateSyncChip();
+    const {data,error}=await supabaseClient.from('vappie_state').select('data,updated_at').eq('id',SUPABASE_ROW_ID).maybeSingle();
+    if(error){supabaseStatus='error';updateSyncChip();throw error;}
+    if(!data||!validRemoteData(data.data)){supabaseStatus='connected';lastSyncAt=new Date();updateSyncChip();return false;}
+    const localYear=db.activeYear;
+    db=clone(data.data);
+    if(localYear&&db.years[localYear])db.activeYear=localYear;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+    setSupabaseDirty(false); supabaseStatus='connected'; lastSyncAt=new Date(); updateSyncChip();
+    if(renderAfter)render();
+    return true;
+  }
+  function loadSupabaseLibrary(){
+    if(window.supabase?.createClient)return Promise.resolve();
+    return new Promise((resolve,reject)=>{
+      const existing=document.querySelector('script[data-vappie-supabase]');
+      if(existing){existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',()=>reject(new Error('Supabase-module kon niet worden geladen.')),{once:true});return;}
+      const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';script.async=true;script.dataset.vappieSupabase='1';
+      const timer=setTimeout(()=>reject(new Error('Supabase-module laden duurde te lang.')),10000);
+      script.onload=()=>{clearTimeout(timer);resolve()};script.onerror=()=>{clearTimeout(timer);reject(new Error('Supabase-module kon niet worden geladen.'))};document.head.appendChild(script);
+    });
+  }
+  async function initSupabase(){
+    const cfg=getSupabaseConfig();
+    if(!cfg?.url||!cfg?.key){supabaseStatus='local';return false;}
+    try{
+      await loadSupabaseLibrary();
+      supabaseClient=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const {data:{session}}=await supabaseClient.auth.getSession();
+      supabaseUser=session?.user||null;
+      supabaseStatus=supabaseUser?'connected':'configured';
+      supabaseClient.auth.onAuthStateChange((event,sessionNow)=>{
+        supabaseUser=sessionNow?.user||null;
+        supabaseStatus=supabaseUser?'connected':'configured';
+        if(event==='SIGNED_OUT') showLoginGate();
+        else updateSyncChip();
+      });
+      return true;
+    }catch(err){
+      console.warn('Supabase initialisatie mislukt; lokale Vappie blijft beschikbaar.',err);
+      supabaseStatus='error';
+      return false;
+    }
+  }
+
+  function showLoginGate(message=''){
+    app.innerHTML=`<main class="login-screen"><section class="login-shell">
+      <aside class="login-visual">
+        <div class="login-visual-brand"><span class="brand-mark">Z</span><div><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></div></div>
+        <div class="login-visual-copy">
+          <span class="login-label">ZOMERPARKFEEST · TEAM VERENIGINGEN</span>
+          <h2>Alles voor de verenigingen.<br>Op één plek.</h2>
+          <p>Planning, bezetting, administratie en financiën centraal en altijd gesynchroniseerd.</p>
+          <div class="login-feature"><i>✓</i><span>Veilig gekoppeld met Supabase</span></div>
+          <div class="login-feature"><i>✓</i><span>Lokale back-up blijft beschikbaar</span></div>
+          <div class="login-feature"><i>✓</i><span>Automatische synchronisatie</span></div>
+        </div>
+        <div class="login-visual-footer"><span class="brand-mark mini">Z</span><span>Samen maken<br>we het feest!</span></div>
+      </aside>
+      <section class="login-card login-panel">
+        <div class="login-brand mobile-login-brand"><span class="brand-mark">Z</span><div><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></div></div>
+        <div class="login-panel-inner">
+          <div class="hero-kicker">VEILIG AANMELDEN</div>
+          <h1>Welkom terug</h1>
+          <p>Meld je aan om Vappie te openen. Je Supabase-sessie wordt op dit apparaat onthouden.</p>
+          ${message?`<div class="login-message">${esc(message)}</div>`:''}
+          <form id="startupLoginForm" class="login-form">
+            <label class="field"><span>E-mailadres</span><input id="startupEmail" type="email" autocomplete="username" required placeholder="naam@voorbeeld.nl"></label>
+            <label class="field"><span>Wachtwoord</span><input id="startupPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
+            <button class="primary login-submit" type="submit">Inloggen bij Vappie <span>→</span></button>
+          </form>
+          <button class="text-btn offline-open" id="offlineOpen">Offline lokaal openen</button>
+          <small class="login-foot">Geen verbinding? Je kunt Vappie lokaal blijven gebruiken. Synchronisatie hervat na opnieuw aanmelden.</small>
+        </div>
+      </section>
+    </section></main>`;
+    document.getElementById('startupLoginForm').onsubmit=startupLogin;
+    document.getElementById('offlineOpen').onclick=()=>{supabaseStatus='error';render();};
+  }
+
+  async function startupLogin(e){
+    e.preventDefault();
+    const btn=e.currentTarget.querySelector('button[type="submit"]');
+    const email=document.getElementById('startupEmail').value.trim();
+    const password=document.getElementById('startupPassword').value;
+    btn.disabled=true;btn.textContent='Aanmelden…';
+    try{
+      if(!supabaseClient){const ok=await initSupabase();if(!ok||!supabaseClient)throw new Error('Supabase kon niet worden bereikt.');}
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      supabaseUser=data.user; supabaseStatus='connected';
+      await testSupabaseAccess();
+      if(isSupabaseLinked()){
+        try{await pullRemote();}catch(err){console.warn('Startsync mislukt; lokale gegevens blijven beschikbaar.',err);}
+      }
+      render();
+    }catch(err){showLoginGate(`Inloggen mislukt: ${err?.message||err}`);}
+  }
+
+  async function boot(){
+    const available=await initSupabase();
+    if(!available){showLoginGate('Supabase is momenteel niet bereikbaar. Je kunt eventueel offline lokaal verder werken.');return;}
+    if(!supabaseUser){showLoginGate();return;}
+    if(isSupabaseLinked()){
+      try{await pullRemote();}catch(err){console.warn('Supabase start-sync mislukt; lokale Vappie blijft actief.',err);supabaseStatus='error';}
+    }
+    render();
+  }
   const yd=()=>db.years[db.activeYear];
   const assoc=id=>yd().associations.find(a=>a.id===id);
   const sortedYears=()=>Object.keys(db.years).sort((a,b)=>Number(b)-Number(a));
 
   function render(){
+    const userEmail=supabaseUser?.email||'Vappie gebruiker';
     app.innerHTML=`
-      <header class="topbar">
-        <button class="mobile-menu" data-action="mobile-menu">☰</button>
-        <button class="brand" data-page="home"><span class="brand-mark">V</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></button>
-        <nav class="nav" id="nav">
-          ${navBtn('home','⌂','Zoeken')}${navBtn('planning','▣','Planning')}${navBtn('financial','€','Financieel')}${navBtn('occupancy','◉','Bezetting')}${navBtn('admin','☷','Administratie')}
-        </nav>
-        <div class="top-actions">
-          <div class="year-select">▦ <select id="yearSelect">${sortedYears().map(y=>`<option ${y===db.activeYear?'selected':''}>${esc(y)}</option>`).join('')}</select></div>
-          <button class="icon-btn" data-action="new-year" title="Nieuw jaar">＋</button>
-          <button class="icon-btn" data-action="data" title="Data en back-up">◫</button>
-        </div>
-      </header>
-      <main class="${page==='home'?'home-main':'main'}">${renderPage()}</main>
+      <div class="dashboard-shell">
+        <aside class="sidebar" id="nav">
+          <div class="sidebar-brand" data-page="home"><span class="brand-mark">Z</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></div>
+          <button class="nav-close" data-action="mobile-menu" aria-label="Menu sluiten">×</button>
+          <nav class="sidebar-nav">
+            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}<button class="install-app-btn" data-action="install-app"><b>⇩</b><span>Installeer Vappie</span></button>
+            <button data-action="data"><b>⇧</b><span>Data / back-up</span></button>
+          </nav>
+          <div class="sidebar-foot">
+            <div><strong>Vappie</strong> · ${esc(db.activeYear)}</div>
+            <small>© Zomerparkfeest Venlo</small>
+            <div class="sidebar-tagline"><span class="brand-mark mini">Z</span><b>Samen maken<br>we het feest!</b></div>
+          </div>
+        </aside>
+        <section class="workspace">
+          <header class="workspace-topbar">
+            <button class="mobile-menu" data-action="mobile-menu" aria-label="Menu openen">☰</button>
+            <button class="sync-chip ${syncClass()}" id="syncChip" data-action="data" title="Supabase synchronisatiestatus"><span></span><b>${esc(syncLabel())}</b></button>
+            <div class="topbar-spacer"></div>
+            <div class="year-select compact">▦ <select id="yearSelect">${sortedYears().map(y=>`<option ${y===db.activeYear?'selected':''}>${esc(y)}</option>`).join('')}</select></div>
+            <button class="icon-btn" data-action="new-year" title="Nieuw jaar">＋</button>
+            <button class="user-chip" data-action="data" title="Account en synchronisatie"><span class="user-avatar">●</span><span>${esc(userEmail)}</span></button>
+          </header>
+          <main class="workspace-main ${page==='home'?'home-main':'main'}">${renderPage()}</main>
+        </section>
+      </div>
       <div id="modalRoot"></div>`;
     bindGlobal();
     if(page==='home') bindHome();
@@ -46,7 +227,7 @@
     if(page==='financial') bindFinancial();
     if(page==='admin') bindAdmin();
   }
-  function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b>${label}</button>`}
+  function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b><span>${label}</span></button>`}
   function renderPage(){ return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
 
   function homeHtml(){
@@ -90,7 +271,7 @@
     return `${pageHeader('PLANNING','Wie staat waar?','Filter, wijzig of voeg diensten toe.','<button class="primary" data-action="add-shift">＋ Dienst toevoegen</button>')}
       <div class="filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}${assocFilter}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
       <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Dag</th><th>Dagdeel</th><th>Bar</th><th>Vereniging</th><th>Tijd</th><th class="num">Personen</th><th></th></tr></thead><tbody>
-      ${list.map(s=>{const a=assoc(s.associationId);return `<tr><td><strong>${esc(s.day)}</strong></td><td><span class="pill">${esc(s.daypart)}</span></td><td>${esc(s.bar)}</td><td><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><small>${esc(a?.barchef||'')}</small></td><td>${esc(s.from)} – ${esc(s.to)}</td><td class="num">${s.people}</td><td class="actions"><button data-edit-shift="${attr(s.id)}">✎</button><button data-delete-shift="${attr(s.id)}">⌫</button></td></tr>`}).join('')}</tbody></table></div></div>`;
+      ${list.map(s=>{const a=assoc(s.associationId);return `<tr><td><strong>${esc(s.day)}</strong></td><td><span class="pill">${esc(s.daypart)}</span></td><td>${esc(s.bar)}</td><td><button class="association-link" data-view-assoc="${attr(a?.id||'')}" title="Bekijk volledige gegevens van ${attr(a?.name||'deze vereniging')}"><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><small>${esc(a?.barchef||'')}</small><em>Bekijk gegevens →</em></button></td><td>${esc(s.from)} – ${esc(s.to)}</td><td class="num">${s.people}</td><td class="actions"><button data-edit-shift="${attr(s.id)}">✎</button><button data-delete-shift="${attr(s.id)}">⌫</button></td></tr>`}).join('')}</tbody></table></div></div>`;
   }
   function selectFilter(key,label,opts){return `<label class="filter-select"><span>${label}</span><select data-filter="${key}"><option value="">Alles</option>${opts.map(o=>`<option ${filters[key]===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`}
   function shiftSort(a,b){return DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||PARTS.indexOf(a.daypart)-PARTS.indexOf(b.daypart)||String(a.bar).localeCompare(String(b.bar),'nl')}
@@ -132,12 +313,31 @@
   }
   function status(v){return `<span class="status ${String(v).toLowerCase()==='ja'?'good':'neutral'}">${esc(v||'Onbekend')}</span>`}
 
+  let deferredInstallPrompt=null;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.querySelectorAll('.install-app-btn').forEach(b=>b.hidden=false)});
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;document.querySelectorAll('.install-app-btn').forEach(b=>b.hidden=true)});
+  function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+  function installApp(){
+    if(isStandalone())return alert('Vappie is al als app geïnstalleerd op dit apparaat.');
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(()=>{deferredInstallPrompt=null});
+      return;
+    }
+    const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    const text=isiOS
+      ? '<div class="install-help"><div class="install-icon-preview"><span class="brand-mark">Z</span></div><h3>Vappie op je beginscherm</h3><p>Open Vappie in <b>Safari</b>, tik onderin op <b>Delen</b> (vierkant met pijltje omhoog) en kies <b>Zet op beginscherm</b>. Daarna opent Vappie als zelfstandige app met het gele Z-icoon.</p></div>'
+      : '<div class="install-help"><div class="install-icon-preview"><span class="brand-mark">Z</span></div><h3>Vappie installeren</h3><p>Open het browsermenu en kies <b>App installeren</b> of <b>Toevoegen aan startscherm</b>. Vappie gebruikt daarna het gele Z-icoon.</p></div>';
+    showModal('Vappie installeren',text,null,false);
+  }
+
   function bindGlobal(){
     document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page; render()});
-    document.getElementById('yearSelect').onchange=e=>{db.activeYear=e.target.value;save();render()};
-    document.querySelector('[data-action="mobile-menu"]').onclick=()=>document.getElementById('nav').classList.toggle('open');
+    document.getElementById('yearSelect').onchange=e=>{db.activeYear=e.target.value;save({sync:false});render()};
+    document.querySelectorAll('[data-action="mobile-menu"]').forEach(b=>b.onclick=()=>document.getElementById('nav')?.classList.toggle('open'));
     document.querySelector('[data-action="new-year"]').onclick=newYear;
-    document.querySelector('[data-action="data"]').onclick=dataModal;
+    document.querySelectorAll('[data-action="data"]').forEach(b=>b.onclick=dataModal);
+    document.querySelectorAll('[data-action="install-app"]').forEach(b=>{b.onclick=installApp;b.hidden=isStandalone()});
   }
   function bindHome(){
     const input=document.getElementById('mainSearch'); input.oninput=e=>{searchQuery=e.target.value; const pos=e.target.selectionStart; render(); const n=document.getElementById('mainSearch'); n.focus(); n.setSelectionRange(pos,pos)}; input.focus();
@@ -148,6 +348,7 @@
     document.querySelector('[data-action="add-shift"]').onclick=()=>shiftModal();
     document.querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>shiftModal(yd().shifts.find(s=>s.id===b.dataset.editShift)));
     document.querySelectorAll('[data-delete-shift]').forEach(b=>b.onclick=()=>{if(confirm('Deze dienst verwijderen?')){yd().shifts=yd().shifts.filter(s=>s.id!==b.dataset.deleteShift);save();render()}});
+    document.querySelectorAll('[data-view-assoc]').forEach(b=>b.onclick=()=>associationDetailModal(b.dataset.viewAssoc));
   }
   function bindFinancial(){}
 
@@ -214,7 +415,7 @@
     if(!w) return alert('Het printvenster is geblokkeerd door de browser. Sta pop-ups voor Vappie toe en probeer opnieuw.');
     w.document.write(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>Vappie rapport ${esc(db.activeYear)}</title><style>
       *{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#171717;margin:0;background:#fff}main{padding:18px}.report-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:5px solid #171717;padding-bottom:10px;margin-bottom:14px}.logo{font:900 30px Arial Black,Arial,sans-serif;text-transform:uppercase}.logo i{font-style:normal;background:#ff3f93;padding:3px 8px;margin-right:8px}.meta{text-align:right;color:#666;font-size:10px}.summary{display:flex;justify-content:space-between;background:#f3e800;padding:9px 12px;margin-bottom:14px;font-weight:700;font-size:11px}.report-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8px}.report-table th{background:#171717;color:#fff;text-align:left;padding:6px 5px;font-size:7px;text-transform:uppercase;letter-spacing:.3px}.report-table td{padding:6px 5px;border:1px solid #ddd;vertical-align:top;word-break:break-word}.report-table th:nth-child(1){width:11%}.report-table th:nth-child(2){width:8%}.report-table th:nth-child(3){width:7%}.report-table th:nth-child(4){width:10%}.report-table th:nth-child(n+5):nth-child(-n+9){width:9%}.report-table th:nth-child(10){width:7%}.report-table th:nth-child(11){width:11%}.service{padding:0 0 5px;margin-bottom:5px;border-bottom:1px dotted #bbb;line-height:1.25}.service:last-child{border-bottom:0;margin-bottom:0}.income{font-weight:800;white-space:nowrap}.day-cell{background:#fcfbf7}@media print{main{padding:0}.report-top{margin-top:0}.report-table tr{break-inside:avoid}@page{size:A3 landscape;margin:7mm}}
-    </style></head><body><main><header class="report-top"><div class="logo"><i>V</i>Vappie</div><div class="meta">Zomerparkfeest · ${esc(db.activeYear)}<br>Gegenereerd: ${esc(generated)}</div></header><div class="summary"><span>${rows.length} vereniging${rows.length===1?'':'en'}</span><span>Totaal inkomsten: ${money(total)}</span></div><table class="report-table"><thead><tr><th>Naam vereniging</th><th>Barchef</th><th>Telefoon</th><th>E-mail</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Inkomsten</th><th>Extra info</th></tr></thead><tbody>${bodyRows}</tbody></table></main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150));<\/script></body></html>`);
+    </style></head><body><main><header class="report-top"><div class="logo"><i>Z</i>Vappie</div><div class="meta">Zomerparkfeest · ${esc(db.activeYear)}<br>Gegenereerd: ${esc(generated)}</div></header><div class="summary"><span>${rows.length} vereniging${rows.length===1?'':'en'}</span><span>Totaal inkomsten: ${money(total)}</span></div><table class="report-table"><thead><tr><th>Naam vereniging</th><th>Barchef</th><th>Telefoon</th><th>E-mail</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Inkomsten</th><th>Extra info</th></tr></thead><tbody>${bodyRows}</tbody></table></main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150));<\/script></body></html>`);
     w.document.close();
   }
 
@@ -330,6 +531,17 @@
     document.querySelectorAll('[data-delete-assoc]').forEach(b=>b.onclick=()=>{const a=yd().associations.find(x=>x.id===b.dataset.deleteAssoc),n=yd().shifts.filter(s=>s.associationId===a.id).length;if(n)return alert(`Deze vereniging heeft nog ${n} diensten. Verwijder of wijzig die eerst in Planning.`);if(confirm(`${a.name} verwijderen?`)){yd().associations=yd().associations.filter(x=>x.id!==a.id);save();render()}});
   }
 
+  function associationDetailModal(id){
+    const a=yd().associations.find(x=>x.id===id);
+    if(!a)return alert('Vereniging niet gevonden.');
+    const root=document.getElementById('modalRoot');
+    root.innerHTML=`<div class="modal-backdrop"><div class="modal wide association-detail-modal"><div class="modal-head"><div><span class="eyebrow">VOLLEDIG VERENIGINGSOVERZICHT</span><h2>${esc(a.name)}</h2></div><button id="assocDetailClose" aria-label="Sluiten">×</button></div><div class="modal-body association-detail-body">${resultHtml(a)}<div class="modal-actions"><button class="secondary" id="assocDetailCloseBottom">Sluiten</button><button class="primary" id="assocDetailEdit">✎ Administratie wijzigen</button></div></div></div></div>`;
+    const close=()=>root.innerHTML='';
+    document.getElementById('assocDetailClose').onclick=close;
+    document.getElementById('assocDetailCloseBottom').onclick=close;
+    document.getElementById('assocDetailEdit').onclick=()=>{close();assocModal(a)};
+  }
+
   function showModal(title,body,onSave,wide=true){
     const root=document.getElementById('modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal ${wide?'wide':''}"><div class="modal-head"><h2>${esc(title)}</h2><button id="modalClose">×</button></div><div class="modal-body">${body}<div class="modal-actions"><button class="secondary" id="modalCancel">Annuleren</button>${onSave?'<button class="primary" id="modalSave">✓ Opslaan</button>':''}</div></div></div></div>`;
     const close=()=>root.innerHTML=''; document.getElementById('modalClose').onclick=close;document.getElementById('modalCancel').onclick=close; if(onSave)document.getElementById('modalSave').onclick=()=>onSave(close);
@@ -371,42 +583,133 @@
   }
   function val(id){return document.getElementById(id).value}
 
+  function supabaseStatusHtml(){
+    const cfg=getSupabaseConfig(), linked=isSupabaseLinked();
+    const label=!cfg?'Niet ingesteld':supabaseUser&&linked?'Synchronisatie actief':supabaseUser?'Aangemeld · nog niet gekoppeld':supabaseStatus==='error'?'Verbindingsfout':'Geconfigureerd · niet aangemeld';
+    const cls=supabaseUser&&linked?'ok':supabaseStatus==='error'?'bad':'neutral';
+    return `<div class="sync-status ${cls}"><span class="sync-dot"></span><div><strong>Supabase: ${esc(label)}</strong><small>${supabaseUser?esc(supabaseUser.email||'Aangemelde gebruiker'):'Lokale opslag blijft altijd actief.'}</small></div></div>`;
+  }
   function dataModal(){
-    const body=`<div class="data-panel"><div class="notice"><b>!</b><div><strong>Gegevens staan lokaal op dit apparaat.</strong><p>Vercel host de app, maar wijzigingen worden alleen in deze browser opgeslagen. Gebruik daarom regelmatig een back-up.</p></div></div>
+    const cfg=getSupabaseConfig();
+    const remoteBlock=!cfg?`<div class="supabase-box"><h3>Supabase koppelen</h3><p>Optioneel. Vappie blijft eerst volledig lokaal werken. Gebruik alleen je <b>Project URL</b> en <b>Publishable key</b> (of legacy anon public key). Gebruik nooit een Secret/service_role key.</p>
+      ${field('Supabase Project URL',`<input id="sbUrl" placeholder="https://xxxx.supabase.co">`,true)}
+      ${field('Supabase Publishable / anon public key',`<input id="sbKey" type="password" placeholder="sb_publishable_... of anon public key">`,true)}
+      <button class="secondary" id="sbSaveConfig">Koppeling opslaan & testen</button></div>`:
+      !supabaseUser?`<div class="supabase-box"><h3>Supabase aanmelden</h3><p>Jouw Vappie is al gekoppeld aan het Supabase-project <b>ngijjzcizhwoeieaelgz</b>. Meld je aan met een gebruiker uit Supabase Auth. Vappie controleert daarna automatisch of database en beveiligingsregels correct werken.</p>
+      ${field('E-mail',`<input id="sbEmail" type="email" autocomplete="username">`,true)}
+      ${field('Wachtwoord',`<input id="sbPassword" type="password" autocomplete="current-password">`,true)}
+      <div class="data-actions"><button class="primary" id="sbLogin">Aanmelden & verbinding testen</button></div></div>`:
+      !isSupabaseLinked()?`<div class="supabase-box"><h3>Eerste synchronisatie</h3><p>Kies bewust welke gegevens het startpunt zijn. Zo wordt je huidige werk nooit automatisch overschreven.</p><div class="data-actions"><button class="primary" id="sbLocalFirst">Lokale Vappie → Supabase</button><button class="secondary" id="sbRemoteFirst">Supabase → deze Vappie</button></div><button class="text-btn" id="sbLogout">Uitloggen</button></div>`:
+      `<div class="supabase-box"><h3>Supabase synchronisatie</h3><p>Wijzigingen worden eerst lokaal opgeslagen en daarna naar Supabase gestuurd. Iedere 2 minuten haalt Vappie ook de centrale gegevens opnieuw op.</p><div class="data-actions"><button class="primary" id="sbSyncNow">↻ Nu synchroniseren</button><button class="secondary" id="sbStopLink">Koppeling stoppen</button><button class="secondary" id="sbLogout">Uitloggen</button></div></div>`;
+    const body=`<div class="data-panel">${supabaseStatusHtml()}<div class="notice"><b>✓</b><div><strong>Lokale opslag blijft de veiligheidsbasis.</strong><p>Ook bij een storing van Supabase blijft Vappie op dit apparaat werken. Maak daarnaast regelmatig een back-up.</p></div></div>
       ${field('Standaard vergoeding per persoon/uur',`<input id="rateInput" type="number" step="0.10" value="${yd().rate}">`)}
-      <div class="data-actions"><button class="primary" id="backupDownload">⇩ Back-up downloaden</button><button class="secondary" id="backupImport">⇧ Back-up importeren</button><input hidden id="backupFile" type="file" accept="application/json"></div></div>`;
-    showModal('Data & back-up',body,close=>{yd().rate=Number(val('rateInput'));save();close();render()},false);
+      <div class="data-actions"><button class="primary" id="backupDownload">⇩ Back-up downloaden</button><button class="secondary" id="backupImport">⇧ Back-up importeren</button><input hidden id="backupFile" type="file" accept="application/json"></div>${remoteBlock}</div>`;
+    showModal('Data, back-up & Supabase',body,close=>{yd().rate=Number(val('rateInput'));save();close();render()},false);
     document.getElementById('backupDownload').onclick=downloadBackup;
     document.getElementById('backupImport').onclick=()=>document.getElementById('backupFile').click();
     document.getElementById('backupFile').onchange=importBackup;
+    bindSupabasePanel();
+  }
+  function bindSupabasePanel(){
+    const by=id=>document.getElementById(id);
+    if(by('sbSaveConfig'))by('sbSaveConfig').onclick=saveSupabaseConfig;
+    if(by('sbLogin'))by('sbLogin').onclick=supabaseLogin;
+    if(by('sbClearConfig'))by('sbClearConfig').onclick=clearSupabaseConfig;
+    if(by('sbLocalFirst'))by('sbLocalFirst').onclick=linkLocalFirst;
+    if(by('sbRemoteFirst'))by('sbRemoteFirst').onclick=linkRemoteFirst;
+    if(by('sbSyncNow'))by('sbSyncNow').onclick=syncNow;
+    if(by('sbStopLink'))by('sbStopLink').onclick=()=>{if(confirm('Supabase-synchronisatie stoppen? De lokale gegevens blijven behouden.')){localStorage.removeItem(SUPABASE_LINKED_KEY);setSupabaseDirty(false);dataModal();}};
+    if(by('sbLogout'))by('sbLogout').onclick=supabaseLogout;
+  }
+  async function saveSupabaseConfig(){
+    const url=val('sbUrl').trim().replace(/\/$/,''), key=val('sbKey').trim();
+    if(!/^https:\/\/.+\.supabase\.co$/i.test(url))return alert('Vul een geldige Supabase Project URL in.');
+    if(!key)return alert('Vul de Publishable key of anon public key in.');
+    if(key.startsWith('sb_secret_')||key.startsWith('service_role'))return alert('Gebruik nooit een Secret/service_role key in Vappie. Gebruik de Publishable key of anon public key.');
+    try{
+      await loadSupabaseLibrary();
+      const test=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+      // De tabel is bewust niet toegankelijk vóór inloggen. Daarom testen we hier
+      // alleen of de browserclient correct kan worden opgebouwd; de echte verbinding
+      // en RLS-rechten worden bij het aanmelden getest.
+      localStorage.setItem(SUPABASE_CONFIG_KEY,JSON.stringify({url,key}));
+      supabaseClient=test;
+      const {data:{session}}=await test.auth.getSession();
+      supabaseUser=session?.user||null;
+      supabaseStatus=supabaseUser?'connected':'configured';
+      alert('Supabase-configuratie opgeslagen. Meld je nu aan om de verbinding en rechten te testen. De lokale Vappie is ongewijzigd gebleven.');
+      dataModal();
+    }catch(err){alert(`Supabase-configuratie kon niet worden opgeslagen: ${err?.message||err}`);}
+  }
+  async function testSupabaseAccess(){
+    if(!supabaseClient||!supabaseUser)throw new Error('Niet aangemeld bij Supabase.');
+    const {error}=await supabaseClient.from('vappie_state').select('id').limit(1);
+    if(error)throw new Error(`Databasecontrole mislukt: ${error.message}. Controleer of supabase_setup.sql is uitgevoerd en RLS correct staat.`);
+    return true;
+  }
+  async function supabaseLogin(){
+    try{
+      if(!supabaseClient){await initSupabase();if(!supabaseClient)throw new Error('Supabase is niet geconfigureerd.');}
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email:val('sbEmail').trim(),password:val('sbPassword')});
+      if(error)throw error;
+      supabaseUser=data.user;supabaseStatus='connected';
+      await testSupabaseAccess();
+      alert('Aangemeld en databaseverbinding getest. Kies nu welke data het startpunt is.');
+      dataModal();
+    }catch(err){
+      supabaseStatus='error';
+      alert(`Aanmelden/verbindingstest mislukt: ${err?.message||err}`);
+    }
+  }
+  async function supabaseLogout(){
+    try{if(supabaseClient)await supabaseClient.auth.signOut();}catch{}
+    supabaseUser=null;setSupabaseDirty(false);supabaseStatus='configured';
+    document.getElementById('modalRoot')?.remove();
+    showLoginGate('Je bent uitgelogd.');
+  }
+  function clearSupabaseConfig(){
+    if(!confirm('Supabase-configuratie van dit apparaat wissen? De lokale Vappie-data blijven behouden.'))return;
+    localStorage.removeItem(SUPABASE_CONFIG_KEY);localStorage.removeItem(SUPABASE_LINKED_KEY);setSupabaseDirty(false);supabaseClient=null;supabaseUser=null;supabaseStatus='local';dataModal();
+  }
+  async function linkLocalFirst(){
+    if(!confirm('Je huidige lokale Vappie wordt als startpunt naar Supabase gekopieerd. Doorgaan?'))return;
+    try{localStorage.setItem(SUPABASE_LINKED_KEY,'1');setSupabaseDirty(true);await pushRemote();alert('Gelukt. Supabase synchronisatie is nu actief.');dataModal();render();}
+    catch(err){localStorage.removeItem(SUPABASE_LINKED_KEY);alert(`Koppelen mislukt. Lokale data zijn niet gewijzigd: ${err?.message||err}`);dataModal();}
+  }
+  async function linkRemoteFirst(){
+    if(!confirm('De gegevens uit Supabase worden op dit apparaat gebruikt. Maak zo nodig eerst een back-up. Doorgaan?'))return;
+    try{const ok=await pullRemote({force:true});if(!ok)return alert('Er staat nog geen Vappie-dataset in Supabase. Kies “Lokale Vappie → Supabase”.');localStorage.setItem(SUPABASE_LINKED_KEY,'1');setSupabaseDirty(false);alert('Gelukt. Supabase synchronisatie is nu actief.');document.getElementById('modalRoot').innerHTML='';render();}
+    catch(err){alert(`Ophalen mislukt. Lokale data zijn behouden: ${err?.message||err}`);}
+  }
+  async function syncNow(){
+    try{if(isSupabaseDirty())await pushRemote();await pullRemote({force:true});alert('Synchronisatie voltooid.');document.getElementById('modalRoot').innerHTML='';render();}
+    catch(err){alert(`Synchronisatie mislukt. Lokale Vappie blijft bruikbaar: ${err?.message||err}`);}
   }
   function downloadBackup(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`vappie-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url)}
   function importBackup(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x.years)throw 0;if(confirm('Deze back-up vervangt de huidige lokale gegevens. Doorgaan?')){db=x;save();render()}}catch{alert('Geen geldige Vappie back-up.')}};reader.readAsText(file)}
   function newYear(){const current=Number(db.activeYear), input=prompt('Nieuw festivaljaar:',String(current+1));if(!input||db.years[input])return;const copy=confirm(`Gegevens van ${db.activeYear} kopiëren naar ${input}?\nOK = kopiëren, Annuleren = leeg jaar.`);db.years[input]=copy?clone(yd()):{rate:6.5,associations:[],shifts:[],barCaps:clone(yd().barCaps||{})};db.activeYear=input;save();page='home';render()}
 
-  function autoRefresh(){
+  async function autoRefresh(){
     if(document.hidden||document.querySelector('.modal-backdrop')) return;
     const active=document.activeElement;
     const activeId=active?.id||'';
     const start=typeof active?.selectionStart==='number'?active.selectionStart:null;
     const end=typeof active?.selectionEnd==='number'?active.selectionEnd:null;
     try{
-      const stored=localStorage.getItem(STORAGE_KEY);
-      if(stored){
-        const fresh=JSON.parse(stored);
-        if(fresh?.years&&fresh?.activeYear) db=fresh;
+      if(supabaseClient&&supabaseUser&&isSupabaseLinked()){
+        await pullRemote();
+      }else{
+        const stored=localStorage.getItem(STORAGE_KEY);
+        if(stored){const fresh=JSON.parse(stored);if(fresh?.years&&fresh?.activeYear)db=fresh;}
       }
       render();
       if(activeId){
         const restored=document.getElementById(activeId);
-        if(restored){
-          restored.focus();
-          if(start!==null&&typeof restored.setSelectionRange==='function') restored.setSelectionRange(start,end??start);
-        }
+        if(restored){restored.focus();if(start!==null&&typeof restored.setSelectionRange==='function')restored.setSelectionRange(start,end??start);}
       }
-    }catch(err){ console.warn('Automatisch verversen overgeslagen:',err); }
+    }catch(err){console.warn('Automatisch verversen overgeslagen; lokale Vappie blijft actief:',err);}
   }
 
-  render();
+  boot();
   setInterval(autoRefresh,120000);
 })();
