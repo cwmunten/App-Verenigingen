@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v9
+VAPPIE DASHBOARD UPDATE v10
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -69,3 +69,12 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
 
 7. Home altijd vers: klik op Home herlaadt de app zodat de normale Supabase startsync opnieuw draait.
 8. Dienst toevoegen: eerst keuze bestaande of nieuwe vereniging. Bij nieuw eerst Administratie; na opslaan automatisch naar Planning met de nieuwe vereniging geselecteerd.
+
+
+9. Mail alle verenigingen
+   - In Administratie staat een nieuwe knop: 'Mail alle verenigingen'.
+   - Aan: verenigingen@zomerparkfeest.nl
+   - Alle geldige, unieke e-mailadressen uit Administratie worden in BCC gezet.
+   - Lege en dubbele adressen worden automatisch overgeslagen.
+   - De afzender wordt door het standaard mailprogramma bepaald. Zorg dat
+     verenigingen@zomerparkfeest.nl daar als verzendaccount/afzender beschikbaar is.

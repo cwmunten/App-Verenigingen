@@ -282,6 +282,7 @@
   function refresh(){
     injectDashboard();
     setupAdminBar();
+    v10InjectAdminMailButton();
   }
 
 
@@ -376,6 +377,64 @@
     }
   },true);
 
+
+  // ===== v10: mail alle verenigingen via BCC =====
+  const V10_MAILBOX='verenigingen@zomerparkfeest.nl';
+
+  function v10ValidEmail(value){
+    const s=String(value||'').trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) ? s : '';
+  }
+
+  function v10AssociationEmails(){
+    try{
+      const db=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      const y=db?.years?.[db.activeYear];
+      const emails=(y?.associations||[])
+        .map(a=>v10ValidEmail(a.email))
+        .filter(Boolean)
+        .filter(e=>e!==V10_MAILBOX);
+      return [...new Set(emails)].sort();
+    }catch{return []}
+  }
+
+  function v10MailAllAssociations(){
+    const emails=v10AssociationEmails();
+    if(!emails.length){
+      alert('Er zijn geen geldige e-mailadressen van verenigingen gevonden in Administratie.');
+      return;
+    }
+
+    const bcc=encodeURIComponent(emails.join(','));
+    const to=encodeURIComponent(V10_MAILBOX);
+    const url=`mailto:${to}?bcc=${bcc}`;
+
+    // Het standaard mailprogramma bepaalt de afzender.
+    // Wanneer verenigingen@zomerparkfeest.nl als verzendaccount is ingesteld,
+    // kan de gebruiker dit adres als afzender gebruiken.
+    window.location.href=url;
+  }
+
+  function v10InjectAdminMailButton(){
+    const adminActive=!!document.querySelector('.sidebar-nav [data-page="admin"].active');
+    if(!adminActive)return;
+
+    const actions=document.querySelector('.workspace-main .header-actions');
+    if(!actions || actions.querySelector('[data-v10-mail-all]'))return;
+
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='secondary v10-mail-all';
+    btn.dataset.v10MailAll='1';
+    const count=v10AssociationEmails().length;
+    btn.innerHTML=`✉ Mail alle verenigingen${count?` <span>${count}</span>`:''}`;
+    btn.title=`Nieuwe e-mail aan ${V10_MAILBOX} met alle verenigingen in BCC`;
+    btn.addEventListener('click',v10MailAllAssociations);
+
+    // Plaats vóór export/import zodat de mailactie goed zichtbaar is.
+    actions.prepend(btn);
+  }
+
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
@@ -387,5 +446,6 @@
       injectDashboard();
     }
     setupAdminBar();
+    v10InjectAdminMailButton();
   },5000);
 })();

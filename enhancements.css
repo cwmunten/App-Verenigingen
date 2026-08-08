@@ -150,3 +150,17 @@ body.v6-admin-active .table-scroll{
 .v9-flow-option i{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:#f6df00;color:#111;font-style:normal;font-size:20px;font-weight:900}
 .v9-flow-option strong{display:block;font-size:15px}.v9-flow-option small{display:block;color:#666;margin-top:4px;line-height:1.35}.v9-flow-option>b{font-size:22px}
 .v9-flow-cancel{display:block;margin:16px auto 0;border:0;background:transparent;color:#666;font:inherit;font-weight:700;cursor:pointer}
+
+
+/* v10: mail alle verenigingen */
+.v10-mail-all{
+  display:inline-flex !important;
+  align-items:center;
+  gap:7px;
+}
+.v10-mail-all span{
+  min-width:22px;height:22px;padding:0 6px;border-radius:999px;
+  display:inline-grid;place-items:center;
+  background:#111;color:#fff;font-size:11px;font-weight:900;
+}
+.v10-mail-all:hover span{background:#f6df00;color:#111}
