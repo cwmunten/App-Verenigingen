@@ -256,3 +256,21 @@ table{min-width:800px}th{background:#f8f8f7;color:#4f4f4f;border-bottom:1px soli
   .admin-full-table td:first-child{box-shadow:8px 0 12px rgba(0,0,0,.035)}
   .admin-full-table table{min-width:1850px}
 }
+
+
+/* Administratie: alle kolommen vrij horizontaal scrollbaar; acties uitsluitend helemaal rechts. */
+.admin-full-table .sticky-actions,
+.admin-full-table thead th:last-child{position:static!important;right:auto!important;box-shadow:none!important}
+.admin-full-table .table-scroll{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+.admin-full-table th:first-child,
+.admin-full-table td:first-child{position:static!important;left:auto!important;box-shadow:none!important}
+.admin-mobile-edit{display:none!important}
+.admin-full-table .sticky-actions{display:table-cell!important;min-width:92px;text-align:right}
+.admin-full-table thead th:last-child{display:table-cell!important;min-width:92px}
+@media(max-width:680px){
+  .admin-full-table table{min-width:2050px}
+  .admin-full-table .sticky-actions,
+  .admin-full-table thead th:last-child{display:table-cell!important;position:static!important}
+  .admin-full-table th:first-child,
+  .admin-full-table td:first-child{position:static!important;left:auto!important;box-shadow:none!important}
+}

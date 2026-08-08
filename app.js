@@ -317,7 +317,7 @@
         <th>Aanwezig Barchefmeeting 1</th><th>Aanwezig Barchefmeeting 2</th><th>Certificaten aanwezig</th><th>Polsbandjes ontvangen</th>
         <th>Maten kleding ingeleverd</th><th>Eetbonnen nodig</th><th>Opmerkingen</th><th></th>
       </tr></thead><tbody>${list.map(a=>`<tr>
-        <td><div class="admin-name-cell"><button class="admin-mobile-edit" title="Wijzigen" aria-label="${attr(a.name)} wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><strong>${esc(a.name)}</strong></div></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
+        <td><div class="admin-name-cell"><strong>${esc(a.name)}</strong></div></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
         <td>${status(a.meeting1)}</td><td>${status(a.meeting2)}</td><td>${status(a.certificates)}</td><td>${status(a.wristbands)}</td><td>${status(a.shirts)}</td>
         <td>${esc(a.mealVouchers||'—')}</td><td class="admin-notes">${esc(a.notes||'—')}</td><td class="actions sticky-actions"><button class="admin-desktop-edit" title="Wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><button class="admin-delete-btn" title="Verwijderen" data-delete-assoc="${attr(a.id)}">⌫</button></td>
       </tr>`).join('')}</tbody></table></div></div>`;
@@ -613,9 +613,8 @@
       !isSupabaseLinked()?`<div class="supabase-box"><h3>Eerste synchronisatie</h3><p>Kies bewust welke gegevens het startpunt zijn. Zo wordt je huidige werk nooit automatisch overschreven.</p><div class="data-actions"><button class="primary" id="sbLocalFirst">Lokale Vappie → Supabase</button><button class="secondary" id="sbRemoteFirst">Supabase → deze Vappie</button></div><button class="text-btn" id="sbLogout">Uitloggen</button></div>`:
       `<div class="supabase-box"><h3>Supabase synchronisatie</h3><p>Wijzigingen worden eerst lokaal opgeslagen en daarna naar Supabase gestuurd. Iedere 2 minuten haalt Vappie ook de centrale gegevens opnieuw op.</p><div class="data-actions"><button class="primary" id="sbSyncNow">↻ Nu synchroniseren</button><button class="secondary" id="sbStopLink">Koppeling stoppen</button><button class="secondary" id="sbLogout">Uitloggen</button></div></div>`;
     const body=`<div class="data-panel">${supabaseStatusHtml()}<div class="notice"><b>✓</b><div><strong>Lokale opslag blijft de veiligheidsbasis.</strong><p>Ook bij een storing van Supabase blijft Vappie op dit apparaat werken. Maak daarnaast regelmatig een back-up.</p></div></div>
-      ${field('Standaard vergoeding per persoon/uur',`<input id="rateInput" type="number" step="0.10" value="${yd().rate}">`)}
       <div class="data-actions"><button class="primary" id="backupDownload">⇩ Back-up downloaden</button><button class="secondary" id="backupImport">⇧ Back-up importeren</button><input hidden id="backupFile" type="file" accept="application/json"></div>${remoteBlock}</div>`;
-    showModal('Data, back-up & Supabase',body,close=>{yd().rate=Number(val('rateInput'));save();close();render()},false);
+    showModal('Data, back-up & Supabase',body,close=>{close();render()},false);
     document.getElementById('backupDownload').onclick=downloadBackup;
     document.getElementById('backupImport').onclick=()=>document.getElementById('backupFile').click();
     document.getElementById('backupFile').onchange=importBackup;
