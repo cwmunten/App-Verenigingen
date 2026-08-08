@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v8-dashboard-clean';
+const CACHE = 'vappie-cache-v9-home-planning-flow';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

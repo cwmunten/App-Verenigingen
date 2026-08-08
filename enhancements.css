@@ -136,3 +136,17 @@ body.v6-admin-active .table-scroll{
 }
 
 @media (min-width:900px){.v6-dashboard-grid{grid-template-columns:1fr}}
+
+.v9-flow-backdrop{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.58);display:grid;place-items:center;padding:20px}
+.v9-flow-modal{width:min(620px,100%);background:#fff;border-radius:20px;padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.3)}
+.v9-flow-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.v9-flow-head span{font-size:11px;font-weight:900;letter-spacing:.09em;color:#747474}
+.v9-flow-head h2{margin:5px 0 0;font-size:25px;line-height:1.15}
+.v9-flow-head>button{border:0;background:#f2f2f3;border-radius:10px;width:36px;height:36px;font-size:23px;cursor:pointer}
+.v9-flow-intro{color:#666;margin:13px 0 18px;line-height:1.5}
+.v9-flow-options{display:grid;gap:10px}
+.v9-flow-option{width:100%;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:13px;border:1px solid #e1e1e3;background:#fff;border-radius:14px;padding:15px;text-align:left;font:inherit;cursor:pointer}
+.v9-flow-option:hover{border-color:#111;background:#fffdeb;transform:translateY(-1px)}
+.v9-flow-option i{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:#f6df00;color:#111;font-style:normal;font-size:20px;font-weight:900}
+.v9-flow-option strong{display:block;font-size:15px}.v9-flow-option small{display:block;color:#666;margin-top:4px;line-height:1.35}.v9-flow-option>b{font-size:22px}
+.v9-flow-cancel{display:block;margin:16px auto 0;border:0;background:transparent;color:#666;font:inherit;font-weight:700;cursor:pointer}

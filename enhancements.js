@@ -284,6 +284,98 @@
     setupAdminBar();
   }
 
+
+  let v9BypassAddShift=false;
+  let v9PendingNewAssociation=false;
+  let v9AssociationIdsBefore=new Set();
+
+  function v9Data(){
+    try{
+      const db=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      return {db,y:db?.years?.[db.activeYear]};
+    }catch{return {db:null,y:null}}
+  }
+  function v9CloseFlowModal(){ document.getElementById('v9FlowModal')?.remove(); }
+
+  function v9OpenShiftChoice(){
+    v9CloseFlowModal();
+    const wrap=document.createElement('div');
+    wrap.id='v9FlowModal';
+    wrap.className='v9-flow-backdrop';
+    wrap.innerHTML=`
+      <section class="v9-flow-modal">
+        <div class="v9-flow-head">
+          <div><span>DIENST TOEVOEGEN</span><h2>Welke vereniging wil je inplannen?</h2></div>
+          <button type="button" data-v9-flow="close">×</button>
+        </div>
+        <p class="v9-flow-intro">Kies of de vereniging al in Vappie staat of eerst nieuw moet worden aangemaakt.</p>
+        <div class="v9-flow-options">
+          <button type="button" class="v9-flow-option" data-v9-flow="existing">
+            <i>✓</i><div><strong>Bestaande vereniging</strong><small>Ga direct door naar de planning en kies de vereniging.</small></div><b>→</b>
+          </button>
+          <button type="button" class="v9-flow-option" data-v9-flow="new">
+            <i>＋</i><div><strong>Nieuwe vereniging</strong><small>Vul eerst de administratie in. Daarna opent automatisch de nieuwe dienst.</small></div><b>→</b>
+          </button>
+        </div>
+        <button type="button" class="v9-flow-cancel" data-v9-flow="close">Annuleren</button>
+      </section>`;
+    document.body.appendChild(wrap);
+
+    wrap.querySelectorAll('[data-v9-flow="close"]').forEach(b=>b.onclick=v9CloseFlowModal);
+    wrap.addEventListener('click',e=>{if(e.target===wrap)v9CloseFlowModal()});
+
+    wrap.querySelector('[data-v9-flow="existing"]').onclick=()=>{
+      v9CloseFlowModal();
+      const add=document.querySelector('[data-action="add-shift"]');
+      if(add){v9BypassAddShift=true;add.click();setTimeout(()=>v9BypassAddShift=false,0)}
+    };
+
+    wrap.querySelector('[data-v9-flow="new"]').onclick=()=>{
+      v9CloseFlowModal();
+      const {y}=v9Data();
+      v9AssociationIdsBefore=new Set((y?.associations||[]).map(a=>String(a.id)));
+      v9PendingNewAssociation=true;
+      document.querySelector('.sidebar-nav [data-page="admin"]')?.click();
+      setTimeout(()=>document.querySelector('[data-action="add-assoc"]')?.click(),120);
+    };
+  }
+
+  function v9ContinueAfterNewAssociation(){
+    if(!v9PendingNewAssociation)return;
+    const {y}=v9Data();
+    const created=[...(y?.associations||[])].reverse().find(a=>!v9AssociationIdsBefore.has(String(a.id)));
+    if(!created)return;
+    v9PendingNewAssociation=false;
+    document.querySelector('.sidebar-nav [data-page="planning"]')?.click();
+    setTimeout(()=>{
+      const add=document.querySelector('[data-action="add-shift"]');
+      if(!add)return;
+      v9BypassAddShift=true;add.click();
+      setTimeout(()=>{
+        v9BypassAddShift=false;
+        const select=document.getElementById('fAssoc');
+        if(select){select.value=created.id;select.dispatchEvent(new Event('change',{bubbles:true}))}
+      },50);
+    },120);
+  }
+
+  document.addEventListener('click',e=>{
+    const home=e.target.closest?.('.sidebar-nav [data-page="home"]');
+    if(home){
+      e.preventDefault();e.stopImmediatePropagation();location.reload();return;
+    }
+    const addShift=e.target.closest?.('[data-action="add-shift"]');
+    if(addShift&&!v9BypassAddShift){
+      e.preventDefault();e.stopImmediatePropagation();v9OpenShiftChoice();return;
+    }
+    if(v9PendingNewAssociation&&e.target.closest?.('#modalSave')){
+      setTimeout(v9ContinueAfterNewAssociation,180);return;
+    }
+    if(v9PendingNewAssociation&&e.target.closest?.('#modalCancel,#modalClose')){
+      v9PendingNewAssociation=false;
+    }
+  },true);
+
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);

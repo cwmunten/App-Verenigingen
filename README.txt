@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v8
+VAPPIE DASHBOARD UPDATE v9
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -66,3 +66,6 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
    - zo kun je telefoon, e-mail, barchef of certificaten meteen aanvullen.
 
 6. Dashboard opgeschoond: het blok 'Festival / Planning in één oogopslag' is verwijderd. 'Aandacht nodig' gebruikt nu de volle breedte.
+
+7. Home altijd vers: klik op Home herlaadt de app zodat de normale Supabase startsync opnieuw draait.
+8. Dienst toevoegen: eerst keuze bestaande of nieuwe vereniging. Bij nieuw eerst Administratie; na opslaan automatisch naar Planning met de nieuwe vereniging geselecteerd.
