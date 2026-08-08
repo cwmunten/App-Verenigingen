@@ -43,6 +43,7 @@
     bindGlobal();
     if(page==='home') bindHome();
     if(page==='planning') bindPlanning();
+    if(page==='financial') bindFinancial();
     if(page==='admin') bindAdmin();
   }
   function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b>${label}</button>`}
@@ -83,7 +84,7 @@
     const rows=yd().associations.map(a=>{const ss=yd().shifts.filter(s=>s.associationId===a.id);return {a,services:ss.length,hours:ss.reduce((n,s)=>n+durationHours(s.from,s.to)*s.people,0),amount:ss.reduce((n,s)=>n+amount(s,a,yd().rate),0)}}).filter(r=>r.services).sort((a,b)=>b.amount-a.amount);
     const total=rows.reduce((n,r)=>n+r.amount,0), hours=rows.reduce((n,r)=>n+r.hours,0), persons=yd().shifts.reduce((n,s)=>n+s.people,0);
     const byDay=DAYS.map(day=>({day,amount:yd().shifts.filter(s=>s.day===day).reduce((n,s)=>n+amount(s,am[s.associationId],yd().rate),0)})).filter(x=>x.amount>0); const max=Math.max(1,...byDay.map(x=>x.amount));
-    return `${pageHeader('FINANCIEEL','Verdiensten in beeld',`Berekend met standaardtarief ${money(yd().rate)} per persoon per uur; uitzonderingen zijn per vereniging mogelijk.`)}
+    return `${pageHeader('FINANCIEEL','Verdiensten in beeld',`Berekend met standaardtarief ${money(yd().rate)} per persoon per uur; uitzonderingen zijn per vereniging mogelijk.`,`<button class="primary" data-action="export-report">⇩ Rapport exporteren</button>`)}
       <div class="kpis">${kpi('Totale vergoeding',money(total))}${kpi('Persoonsuren',Math.round(hours).toLocaleString('nl-NL'))}${kpi('Ingeplande personen',persons.toLocaleString('nl-NL'))}${kpi('Verenigingen met diensten',rows.length)}</div>
       <div class="two-col"><div class="table-card"><div class="card-title">Per vereniging</div><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th class="num">Diensten</th><th class="num">Persoonsuren</th><th class="num">Bedrag</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.a.name)}</strong>${r.a.rateOverride===0?'<small>€ 0,00 tarief</small>':''}</td><td class="num">${r.services}</td><td class="num">${r.hours.toFixed(1)}</td><td class="num"><strong>${money(r.amount)}</strong></td></tr>`).join('')}</tbody></table></div></div>
       <div class="side-card"><div class="card-title">Kosten per dag</div>${byDay.map(x=>`<div class="bar-stat"><div><strong>${x.day}</strong><span>${money(x.amount)}</span></div><div class="bar-track"><i style="width:${(x.amount/max)*100}%"></i></div></div>`).join('')}</div></div>`;
@@ -124,6 +125,75 @@
     document.querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>shiftModal(yd().shifts.find(s=>s.id===b.dataset.editShift)));
     document.querySelectorAll('[data-delete-shift]').forEach(b=>b.onclick=()=>{if(confirm('Deze dienst verwijderen?')){yd().shifts=yd().shifts.filter(s=>s.id!==b.dataset.deleteShift);save();render()}});
   }
+  function bindFinancial(){
+    const btn=document.querySelector('[data-action="export-report"]');
+    if(btn) btn.onclick=reportModal;
+  }
+
+  function reportRows(associationId='all'){
+    return yd().associations
+      .filter(a=>associationId==='all'||a.id===associationId)
+      .map(a=>{
+        const shifts=yd().shifts.filter(s=>s.associationId===a.id).sort(shiftSort);
+        const income=shifts.reduce((n,s)=>n+amount(s,a,yd().rate),0);
+        const services=shifts.map(s=>`${s.day} ${s.daypart} · ${s.bar} · ${s.people} pers. · ${s.from}–${s.to}`).join(' | ');
+        return {a,shifts,income,services};
+      })
+      .filter(r=>r.shifts.length>0)
+      .sort((x,y)=>x.a.name.localeCompare(y.a.name,'nl'));
+  }
+
+  function reportModal(){
+    const assocs=yd().associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    const body=`<div class="data-panel">
+      <div class="notice"><b>i</b><div><strong>Rapport ${esc(db.activeYear)}</strong><p>Exporteer één vereniging of alle verenigingen met diensten. Het PDF-rapport opent in een printvenster; kies daar eventueel “Opslaan als PDF”.</p></div></div>
+      ${field('Vereniging',`<select id="reportAssoc"><option value="all">Alle verenigingen met diensten</option>${assocs.map(a=>`<option value="${attr(a.id)}">${esc(a.name)}</option>`).join('')}</select>`)}
+      <div class="data-actions report-actions"><button class="primary" id="reportPrint">▣ Afdrukken / PDF</button><button class="secondary" id="reportCsv">⇩ CSV voor Excel</button></div>
+    </div>`;
+    showModal('Rapport exporteren',body,null,false);
+    document.getElementById('reportPrint').onclick=()=>printReport(val('reportAssoc'));
+    document.getElementById('reportCsv').onclick=()=>downloadReportCsv(val('reportAssoc'));
+  }
+
+  function csvCell(v){
+    const x=String(v??'').replace(/"/g,'""');
+    return `"${x}"`;
+  }
+
+  function downloadReportCsv(associationId){
+    const rows=reportRows(associationId);
+    if(!rows.length) return alert('Voor deze selectie zijn geen diensten gevonden.');
+    const header=['Naam vereniging','Naam Barchef','Telefoon Barchef','Email Barchef','Gewerkte diensten','Inkomsten','Extra info'];
+    const lines=[header.map(csvCell).join(';')];
+    rows.forEach(r=>lines.push([
+      r.a.name,r.a.barchef||'',r.a.phone||'',r.a.email||'',r.services,
+      Number(r.income).toFixed(2).replace('.',','),r.a.notes||''
+    ].map(csvCell).join(';')));
+    const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    const suffix=associationId==='all'?'alle-verenigingen':(assoc(associationId)?.name||'vereniging').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
+    a.href=url;a.download=`vappie-rapport-${db.activeYear}-${suffix}.csv`;a.click();URL.revokeObjectURL(url);
+  }
+
+  function printReport(associationId){
+    const rows=reportRows(associationId);
+    if(!rows.length) return alert('Voor deze selectie zijn geen diensten gevonden.');
+    const total=rows.reduce((n,r)=>n+r.income,0);
+    const generated=new Intl.DateTimeFormat('nl-NL',{dateStyle:'long',timeStyle:'short'}).format(new Date());
+    const cards=rows.map(r=>`<section class="report-card">
+      <div class="report-card-head"><div><span>VERENIGING</span><h2>${esc(r.a.name)}</h2></div><div class="income"><small>Inkomsten</small><strong>${money(r.income)}</strong></div></div>
+      <div class="contact-grid"><div><b>Naam Barchef</b><span>${esc(r.a.barchef||'—')}</span></div><div><b>Telefoon Barchef</b><span>${esc(r.a.phone||'—')}</span></div><div><b>E-mail Barchef</b><span>${esc(r.a.email||'—')}</span></div></div>
+      <h3>Gewerkte diensten</h3>
+      <table><thead><tr><th>Dag</th><th>Dagdeel</th><th>Bar</th><th>Tijd</th><th>Personen</th><th>Bedrag</th></tr></thead><tbody>${r.shifts.map(s=>`<tr><td>${esc(s.day)}</td><td>${esc(s.daypart)}</td><td>${esc(s.bar)}</td><td>${esc(s.from)}–${esc(s.to)}</td><td>${s.people}</td><td>${money(amount(s,r.a,yd().rate))}</td></tr>`).join('')}</tbody></table>
+      <div class="extra"><b>Extra info</b><p>${esc(r.a.notes||'—').replace(/\n/g,'<br>')}</p></div>
+    </section>`).join('');
+    const w=window.open('','_blank');
+    if(!w) return alert('Het printvenster is geblokkeerd door de browser. Sta pop-ups voor Vappie toe en probeer opnieuw.');
+    w.document.write(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>Vappie rapport ${esc(db.activeYear)}</title><style>
+      *{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#171717;margin:0;background:#fff}main{max-width:1100px;margin:0 auto;padding:28px}.report-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:5px solid #171717;padding-bottom:14px;margin-bottom:24px}.logo{font:900 34px Arial Black,Arial,sans-serif;text-transform:uppercase}.logo i{font-style:normal;background:#ff3f93;padding:3px 8px;margin-right:8px}.meta{text-align:right;color:#666;font-size:12px}.summary{display:flex;justify-content:space-between;background:#f3e800;padding:12px 16px;margin-bottom:24px;font-weight:700}.report-card{border:1px solid #d8d4ca;margin:0 0 24px;page-break-inside:avoid}.report-card-head{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;border-bottom:1px solid #ddd}.report-card-head span{font-size:10px;letter-spacing:1.5px;font-weight:800}.report-card h2{margin:4px 0 0;font-size:23px}.income{text-align:right}.income small{display:block;font-size:10px;text-transform:uppercase}.income strong{font-size:22px}.contact-grid{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;padding:14px 20px;background:#171717;color:white}.contact-grid b{display:block;font-size:9px;text-transform:uppercase;color:#bbb;margin-bottom:4px}.contact-grid span{font-size:12px}.report-card h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:18px 20px 8px}table{width:calc(100% - 40px);margin:0 20px;border-collapse:collapse;font-size:11px}th{text-align:left;background:#eee;padding:7px;border-bottom:1px solid #ccc}td{padding:7px;border-bottom:1px solid #eee}.extra{margin:16px 20px 20px;padding:12px;background:#f7f6f2}.extra b{font-size:10px;text-transform:uppercase}.extra p{margin:5px 0 0;font-size:12px;line-height:1.45}@media print{main{padding:0}.report-card{break-inside:avoid}.report-top{margin-top:0}@page{size:A4 landscape;margin:10mm}}
+    </style></head><body><main><header class="report-top"><div class="logo"><i>V</i>Vappie</div><div class="meta">Zomerparkfeest · ${esc(db.activeYear)}<br>Gegenereerd: ${esc(generated)}</div></header><div class="summary"><span>${rows.length} vereniging${rows.length===1?'':'en'}</span><span>Totaal inkomsten: ${money(total)}</span></div>${cards}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150));<\/script></body></html>`);
+    w.document.close();
+  }
+
   function bindAdmin(){
     const input=document.getElementById('adminSearch'); input.oninput=e=>{adminQuery=e.target.value; const pos=e.target.selectionStart; render(); const n=document.getElementById('adminSearch'); n.focus(); n.setSelectionRange(pos,pos)};
     document.querySelector('[data-action="add-assoc"]').onclick=()=>assocModal();
