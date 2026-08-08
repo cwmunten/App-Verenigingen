@@ -1,4 +1,4 @@
-const CACHE = 'vappie-shell-v1';
+const CACHE = 'vappie-cache-v3';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png'
