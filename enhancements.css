@@ -110,3 +110,29 @@ body.v6-admin-active .table-scroll{
   overflow-x:auto !important;
   overscroll-behavior-x:contain;
 }
+
+
+/* v7: controlepunten zijn echte actieknoppen */
+.v7-attention-action{
+  width:100%;
+  border:1px solid transparent;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  color:inherit;
+}
+.v7-attention-action:hover{
+  border-color:#d7d7da;
+  background:#fffbe0;
+  transform:translateY(-1px);
+}
+.v7-attention-action:focus-visible{
+  outline:3px solid rgba(246,223,0,.55);
+  outline-offset:2px;
+}
+.v7-attention-action .v6-right{
+  font-weight:800;
+  color:#111;
+}
+
+@media (min-width:900px){.v6-dashboard-grid{grid-template-columns:1fr}}

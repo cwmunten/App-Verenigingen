@@ -107,7 +107,7 @@
       : '<div class="v6-empty">Nog geen wijzigingen op dit apparaat geregistreerd. Nieuwe aanpassingen verschijnen hier automatisch.</div>';
 
     const attentionHtml=attention.length
-      ? attention.map(x=>`<div class="v6-attention-item"><div class="v6-left"><i class="v6-attention-dot"></i><div><b>${esc(x.a.name)}</b><small>Ontbreekt / controleren: ${esc(x.miss.join(', '))}</small></div></div><span class="v6-right">${x.miss.length} punt${x.miss.length===1?'':'en'}</span></div>`).join('')
+      ? attention.map(x=>`<button type="button" class="v6-attention-item v7-attention-action" data-v7-assoc-id="${esc(x.a.id||'')}" data-v7-assoc-name="${esc(x.a.name||'')}" title="Open ${esc(x.a.name||'vereniging')} direct in Administratie"><div class="v6-left"><i class="v6-attention-dot"></i><div><b>${esc(x.a.name)}</b><small>Ontbreekt / controleren: ${esc(x.miss.join(', '))}</small></div></div><span class="v6-right">Open →</span></button>`).join('')
       : '<div class="v6-empty">Mooi: geen opvallend ontbrekende basisgegevens gevonden.</div>';
 
     return `
@@ -123,14 +123,6 @@
           <article class="v6-panel">
             <div class="v6-panel-head"><div><span>Controle</span><h3>Aandacht nodig</h3></div><b class="v6-badge">${attention.length}${attention.length===6?'+':''}</b></div>
             <div class="v6-attention-list">${attentionHtml}</div>
-          </article>
-
-          <article class="v6-panel">
-            <div class="v6-panel-head"><div><span>Festival</span><h3>Planning in één oogopslag</h3></div></div>
-            ${first ? `<div class="v6-festival"><div><small>Eerstvolgende festivaldag in de planning</small><strong>${esc(first.day)}</strong><small>${first.services} diensten · ${first.clubs} verenigingen</small></div><div class="v6-festival-number">${first.people}</div></div>` : '<div class="v6-empty">Nog geen diensten ingepland.</div>'}
-            <div class="v6-day-stats">
-              ${dayData.slice(0,3).map(d=>`<div class="v6-day-stat"><span>${esc(d.day)}</span><strong>${d.people}</strong><span>personen</span></div>`).join('')}
-            </div>
           </article>
         </div>
 
@@ -152,11 +144,80 @@
       </section>`;
   }
 
+
+  function findAdminSearch(){
+    return document.querySelector(
+      '#adminSearch, input[data-admin-search], .admin-search input, ' +
+      '.workspace-main input[placeholder*="vereniging" i], .workspace-main input[placeholder*="administratie" i]'
+    );
+  }
+
+  function openAssociationFromAttention(id, name){
+    // 1. Open Administratie.
+    document.querySelector('.sidebar-nav [data-page="admin"]')?.click();
+
+    // 2. Zoek direct op de vereniging zodat alleen de juiste rij zichtbaar blijft.
+    setTimeout(()=>{
+      const input=findAdminSearch();
+      if(input){
+        input.focus();
+        input.value=name || '';
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        input.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+
+      // 3. Probeer de bestaande bewerkactie van Vappie direct te openen.
+      setTimeout(()=>{
+        const explicitSelectors = [
+          `[data-edit-association="${CSS.escape(id||'')}"]`,
+          `[data-edit-assoc="${CSS.escape(id||'')}"]`,
+          `[data-association-id="${CSS.escape(id||'')}"][data-action*="edit"]`,
+          `[data-edit="${CSS.escape(id||'')}"]`
+        ];
+        let editBtn = null;
+        for(const selector of explicitSelectors){
+          try { editBtn=document.querySelector(selector); } catch {}
+          if(editBtn) break;
+        }
+
+        // Fallback: vind de zichtbare rij met de verenigingsnaam en pak daar potlood/bewerkknop.
+        if(!editBtn && name){
+          const rows=[...document.querySelectorAll('.workspace-main table tbody tr, .workspace-main .admin-row, .workspace-main [class*="association"]')];
+          const row=rows.find(r=>String(r.textContent||'').toLocaleLowerCase('nl-NL').includes(String(name).toLocaleLowerCase('nl-NL')));
+          if(row){
+            editBtn =
+              row.querySelector('[data-edit-association],[data-edit-assoc],[data-action*="edit"],button[title*="bewerk" i],button[aria-label*="bewerk" i]') ||
+              [...row.querySelectorAll('button')].find(b=>/✎|✏|bewerk|wijzig/i.test(b.textContent+' '+(b.title||'')+' '+(b.getAttribute('aria-label')||'')));
+          }
+        }
+
+        if(editBtn){
+          editBtn.click();
+        }else{
+          // De vereniging staat in elk geval direct gefilterd en gemarkeerd.
+          const input2=findAdminSearch();
+          input2?.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+      },120);
+    },100);
+  }
+
+  function bindAttentionActions(root){
+    root.querySelectorAll('.v7-attention-action').forEach(btn=>{
+      if(btn.dataset.v7Bound==='1') return;
+      btn.dataset.v7Bound='1';
+      btn.addEventListener('click',()=>{
+        openAssociationFromAttention(btn.dataset.v7AssocId||'', btn.dataset.v7AssocName||'');
+      });
+    });
+  }
+
   function injectDashboard(){
     const main=document.querySelector('.workspace-main.home-main');
     if(!main) return;
     if(main.querySelector('.v6-dashboard-extra')) return;
     main.insertAdjacentHTML('beforeend',dashboardHTML());
+    bindAttentionActions(main);
     main.querySelectorAll('[data-v6-action]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const action=btn.dataset.v6Action;

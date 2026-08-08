@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v6
+VAPPIE DASHBOARD UPDATE v8
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -57,3 +57,12 @@ OPMERKING RECENTE WIJZIGINGEN
 -----------------------------
 Het logboek wordt lokaal per apparaat opgebouwd vanaf deze update.
 Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
+
+5. Klikbare controlepunten:
+   - ieder punt onder 'Aandacht nodig' is nu klikbaar;
+   - klik opent direct Administratie;
+   - Vappie filtert meteen op de betreffende vereniging;
+   - waar mogelijk wordt direct het bestaande bewerkscherm (potlood) geopend;
+   - zo kun je telefoon, e-mail, barchef of certificaten meteen aanvullen.
+
+6. Dashboard opgeschoond: het blok 'Festival / Planning in één oogopslag' is verwijderd. 'Aandacht nodig' gebruikt nu de volle breedte.
