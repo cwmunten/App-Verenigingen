@@ -438,20 +438,8 @@
 
   // ===== v11: rustigere, consistente pagina-opbouw =====
   function v11AdminMeta(){
-    const active=!!document.querySelector('.sidebar-nav [data-page="admin"].active');
-    if(!active)return;
-    const main=document.querySelector('.workspace-main');
-    if(!main||main.querySelector('.v11-admin-meta'))return;
-    const h1=main.querySelector('h1');
-    if(!h1)return;
-    try{
-      const db=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
-      const count=db?.years?.[db.activeYear]?.associations?.length||0;
-      const meta=document.createElement('div');
-      meta.className='v11-admin-meta';
-      meta.textContent=`${count} verenigingen · Festivaljaar ${db?.activeYear||''}`;
-      h1.insertAdjacentElement('afterend',meta);
-    }catch{}
+    // v15: bewust geen aantal verenigingen / festivaljaar onder de titel.
+    document.querySelectorAll('.v11-admin-meta').forEach(el=>el.remove());
   }
 
   function v11GroupAdminActions(){

@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v14
+VAPPIE DASHBOARD UPDATE v15
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -90,3 +90,5 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
 12. Meer-menu v13: alle opties links en gelijk uitgelijnd, consistente rijhoogte en spacing; aantalbadge achter 'Mail alle verenigingen' verwijderd.
 
 13. Meer-menu v14: teller volledig verwijderd uit de bronknop én dropdown; vaste icoonkolom en tekstkolom voor exacte uitlijning van Mail, Import en Export.
+
+14. Administratie v15: tekst met aantal verenigingen en festivaljaar onder de paginatitel verwijderd op laptop en smartphone.
