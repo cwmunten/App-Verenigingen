@@ -354,37 +354,3 @@ body.v6-admin-active .table-scroll{
   background:#d9f2d5!important;
   color:#173c1d!important;
 }
-
-
-/* ===== v19 Fotoalbum ===== */
-.v19-photos-page{max-width:1500px;margin:0 auto}
-.v19-photo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}
-.v19-photo-head h1{margin:3px 0 5px}
-.v19-photo-head p{margin:0;color:#6d6d72}
-.v19-photo-toolbar{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
-.v19-photo-toolbar strong{font-size:18px}
-.v19-photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.v19-photo-card{background:#fff;border:1px solid #e3e3e6;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.035)}
-.v19-photo-open{display:block;width:100%;border:0;background:#fff;padding:0;cursor:pointer;text-align:left}
-.v19-photo-open img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee}
-.v19-photo-open span{display:block;padding:9px 11px;color:#68686d;font-size:12px}
-.v19-photo-status{margin-bottom:12px;color:#6c6c71;font-size:13px}
-.v19-empty,.v19-error{padding:28px;border:1px dashed #d8d8dc;border-radius:14px;background:#fafafa;display:grid;gap:5px;text-align:center}
-.v19-empty b{font-size:28px}.v19-empty strong,.v19-error strong{font-size:16px;color:#111}
-.v19-empty span,.v19-error span{color:#6d6d72}
-.v19-lightbox{position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.9);display:grid;place-items:center;padding:35px}
-.v19-lightbox img{max-width:min(1200px,95vw);max-height:82vh;border-radius:10px;box-shadow:0 20px 70px rgba(0,0,0,.5)}
-.v19-lightbox small{position:fixed;bottom:18px;color:#fff}
-.v19-lightbox-close{position:fixed;right:20px;top:16px;width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#111;font-size:28px;cursor:pointer}
-
-@media (max-width:899px){
-  .v19-photo-head{align-items:center;margin-bottom:16px}
-  .v19-photo-head p{font-size:13px}
-  .v19-camera-btn{min-width:112px!important;min-height:46px!important}
-  .v19-photo-toolbar .secondary{min-height:40px!important;padding:8px 11px!important}
-  .v19-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  .v19-photo-card{border-radius:11px}
-  .v19-photo-open span{font-size:11px;padding:7px 8px}
-  .v19-lightbox{padding:14px}
-  .v19-lightbox img{max-width:96vw;max-height:80vh}
-}

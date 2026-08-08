@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v22
+VAPPIE DASHBOARD UPDATE v18
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -102,35 +102,3 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - originele navigatiehandlers uit app.js blijven leidend.
 
 17. Dagdeelkleuren v18: Avond geel, Middag lichtgroen. Geldt voor de dagdeelbadges in Planning/overzichten.
-
-18. Fotoalbum v19
-    - Nieuw hoofdmenu-item 'Foto's'.
-    - Smartphone: Camera + Album.
-    - Laptop: alleen Album.
-    - Foto's worden vóór upload verkleind naar maximaal 1600 px en als JPEG kwaliteit 0,78 opgeslagen.
-    - Opslag gebeurt centraal in Supabase Storage bucket 'vappie-photos'.
-    - Album gebruikt signed URLs; de bucket blijft privé.
-    - Voer éénmalig SUPABASE_PHOTOS_SETUP.sql uit in de Supabase SQL Editor.
-
-19. Herstel v20
-    - Opgelost: dashboard op Home verdween door een navigatie/MutationObserver-conflict.
-    - Opgelost: menu-item Foto's werd daardoor niet stabiel weergegeven.
-    - Foto's staat nu vast onder Bezettingsoverzicht.
-    - Laptop: Foto's opent het album.
-    - Smartphone: Foto's opent album + Camera-knop.
-    - Home-dashboard wordt na iedere normale render gecontroleerd en zo nodig opnieuw opgebouwd.
-
-20. Home reset v21
-    - Klik op Home geeft weer een volledig verse Home-pagina.
-    - De laatst gezochte vereniging wordt niet meer onthouden.
-    - Zoekveld start leeg.
-    - De normale Supabase startsynchronisatie draait opnieuw bij de reload.
-    - Ook klikken op het Vappie-logo/brand linksboven geeft een verse Home.
-
-21. Herstel v22
-    - Dashboard op Home wordt niet meer gekoppeld aan één specifieke CSS-class.
-    - Zodra Home actief is en het zoekveld zichtbaar is, wordt het laptopdashboard direct opgebouwd.
-    - Foto's-knop wordt na iedere render opnieuw gecontroleerd en teruggezet indien nodig.
-    - Home blijft een verse start met leeg zoekveld.
-
-22. v23 getest: JavaScript syntax gecontroleerd; fout in Foto\'s-string opgelost; Home-dashboard/Fotos selectors en cacheversie gecontroleerd.

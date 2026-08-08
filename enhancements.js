@@ -279,59 +279,12 @@
     }
   }
 
-
-  function v20RepairHomeDashboard(){
-    const homeBtn=document.querySelector('.sidebar-nav [data-page="home"]');
-    const main=document.querySelector('.workspace-main');
-    if(!homeBtn||!main)return;
-
-    const homeActive=homeBtn.classList.contains('active');
-    const hasHomeSearch=!!main.querySelector('#mainSearch');
-    if(!homeActive && !hasHomeSearch)return;
-
-    // Als het dashboard al bestaat: niets doen.
-    if(main.querySelector('.v6-dashboard-extra'))return;
-
-    // injectDashboard() verwachtte eerder een specifieke CSS-class. Die eis omzeilen we hier.
-    const html=dashboardHTML();
-    if(!html)return;
-
-    const searchHero=main.querySelector('.search-hero');
-    if(searchHero){
-      searchHero.insertAdjacentHTML('afterend',html);
-    }else{
-      main.insertAdjacentHTML('beforeend',html);
-    }
-
-    // Acties van het dashboard opnieuw binden.
-    bindAttentionActions(main);
-    main.querySelectorAll('[data-v6-action]').forEach(btn=>{
-      if(btn.dataset.v22Bound==='1')return;
-      btn.dataset.v22Bound='1';
-      btn.addEventListener('click',()=>{
-        const action=btn.dataset.v6Action;
-        if(action==='data'){
-          document.querySelector('[data-action="data"]')?.click();
-          return;
-        }
-        document.querySelector(`.sidebar-nav [data-page="${action}"]`)?.click();
-        setTimeout(()=>{
-          if(action==='planning') document.querySelector('[data-action="add-shift"]')?.click();
-          if(action==='admin' && btn.textContent.includes('Vereniging')){
-            document.querySelector('[data-action="add-assoc"]')?.click();
-          }
-        },100);
-      });
-    });
-  }
-
   function refresh(){
-    v19EnsurePhotoNav();
-    v16OrderNavigation();
-    v20RepairHomeDashboard();
+    injectDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
+    v16OrderNavigation();
     v18ColorDayparts();
   }
 
@@ -410,35 +363,10 @@
     },120);
   }
 
-
-  document.addEventListener('click',e=>{
-    const brand=e.target.closest?.('.sidebar-brand[data-page="home"]');
-    if(brand){
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      location.href=location.pathname+location.search;
-    }
-  },true);
-
   document.addEventListener('click',e=>{
     const home=e.target.closest?.('.sidebar-nav [data-page="home"]');
     if(home){
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      // v21: Home is altijd een verse start.
-      // Wis eerst de zoekterm uit de bestaande Home-state en eventuele zichtbare zoekvelden.
-      try{
-        document.querySelectorAll('#mainSearch, .hero-search input').forEach(input=>{
-          input.value='';
-          input.dispatchEvent(new Event('input',{bubbles:true}));
-        });
-      }catch{}
-
-      // Volledige reload: app.js start opnieuw met searchQuery='' en haalt
-      // bij gekoppelde Supabase opnieuw de centrale data op.
-      location.href=location.pathname+location.search;
-      return;
+      e.preventDefault();e.stopImmediatePropagation();location.reload();return;
     }
     const addShift=e.target.closest?.('[data-action="add-shift"]');
     if(addShift&&!v9BypassAddShift){
@@ -570,23 +498,20 @@
   function v16OrderNavigation(){
     const nav=document.querySelector('.sidebar-nav');
     if(!nav)return;
+    const order=['home','planning','admin','financial','occupancy'];
+    const items=[...nav.querySelectorAll(':scope > [data-page]')];
 
-    // Vaste volgorde inclusief de later toegevoegde Foto's-knop.
-    const standard=['home','planning','admin','financial','occupancy'];
-    const standardItems=[...nav.querySelectorAll(':scope > [data-page]')];
-    const photoItem=nav.querySelector(':scope > [data-v19-page="photos"]');
-
-    const expected=[
-      ...standard.map(page=>standardItems.find(el=>el.dataset.page===page)).filter(Boolean),
-      ...(photoItem?[photoItem]:[])
-    ];
-    const current=[...nav.children].filter(el=>el.matches?.('[data-page],[data-v19-page="photos"]'));
-
-    // Alleen DOM-mutaties uitvoeren als de echte volgorde afwijkt.
-    if(current.length===expected.length && current.every((el,i)=>el===expected[i]))return;
+    // Alleen herschikken wanneer de volgorde echt afwijkt.
+    // Dit voorkomt een MutationObserver-lus die de navigatie kon blokkeren.
+    const current=items.map(el=>el.dataset.page).join('|');
+    const desired=order.filter(page=>items.some(el=>el.dataset.page===page)).join('|');
+    if(current===desired)return;
 
     const frag=document.createDocumentFragment();
-    expected.forEach(el=>frag.appendChild(el));
+    order.forEach(page=>{
+      const item=items.find(el=>el.dataset.page===page);
+      if(item)frag.appendChild(item);
+    });
     nav.appendChild(frag);
   }
 
@@ -608,209 +533,20 @@
     });
   }
 
-
-  // ===== v19: Fotoalbum + smartphonecamera via Supabase Storage =====
-  const V19_PHOTO_BUCKET='vappie-photos';
-  const V19_SUPABASE_URL='https://ngijjzcizhwoeieaelgz.supabase.co';
-  const V19_SUPABASE_KEY='sb_publishable_fQFpxmC6XeNeJ0yOv52S7g_VIbs2jLg';
-  let v19PhotoClient=null;
-  let v19PhotoObjectUrls=[];
-
-  function v19IsPhone(){
-    return window.matchMedia('(max-width: 899px)').matches;
-  }
-
-  function v19EnsurePhotoNav(){
-    const nav=document.querySelector('.sidebar-nav');
-    if(!nav)return;
-    let btn=nav.querySelector('[data-v19-page="photos"]');
-    if(!btn){
-      btn=document.createElement('button');
-      btn.type='button';
-      btn.dataset.v19Page='photos';
-      btn.className='v19-photo-nav';
-      btn.innerHTML='<b>▧</b><span>Foto\'s</span>';
-      btn.addEventListener('click',()=>{
-        document.querySelectorAll('.sidebar-nav button').forEach(x=>x.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('nav')?.classList.remove('open');
-        v19RenderPhotos();
-      });
-      nav.appendChild(btn);
-    }
-  }
-
-  async function v19Client(){
-    if(v19PhotoClient)return v19PhotoClient;
-    if(!window.supabase?.createClient){
-      await new Promise((resolve,reject)=>{
-        const s=document.createElement('script');
-        s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-        s.async=true;
-        s.onload=resolve;
-        s.onerror=()=>reject(new Error('Supabase-module kon niet worden geladen.'));
-        document.head.appendChild(s);
-      });
-    }
-    v19PhotoClient=window.supabase.createClient(V19_SUPABASE_URL,V19_SUPABASE_KEY,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
-    });
-    return v19PhotoClient;
-  }
-
-  function v19PhotoShell(message='Fotoalbum laden…'){
-    return `<section class="v19-photos-page">
-      <div class="v19-photo-head">
-        <div><span class="eyebrow">TEAM VERENIGINGEN</span><h1>Foto's</h1><p>Gedeeld fotoalbum van Team Verenigingen.</p></div>
-        ${v19IsPhone()?'<button class="primary v19-camera-btn" id="v19CameraBtn">📷 Camera</button>':''}
-      </div>
-      ${v19IsPhone()?'<input id="v19CameraInput" type="file" accept="image/*" capture="environment" hidden>':''}
-      <div class="v19-photo-toolbar"><strong>Album</strong><button type="button" class="secondary" id="v19RefreshPhotos">↻ Vernieuwen</button></div>
-      <div id="v19PhotoStatus" class="v19-photo-status">${message}</div>
-      <div id="v19PhotoGrid" class="v19-photo-grid"></div>
-    </section>`;
-  }
-
-  async function v19RenderPhotos(){
-    const main=document.querySelector('.workspace-main');
-    if(!main)return;
-    v19PhotoObjectUrls.forEach(u=>URL.revokeObjectURL(u));
-    v19PhotoObjectUrls=[];
-    main.className='workspace-main main';
-    main.innerHTML=v19PhotoShell();
-
-    document.getElementById('v19RefreshPhotos')?.addEventListener('click',v19LoadPhotos);
-    document.getElementById('v19CameraBtn')?.addEventListener('click',()=>document.getElementById('v19CameraInput')?.click());
-    document.getElementById('v19CameraInput')?.addEventListener('change',v19HandleCamera);
-    await v19LoadPhotos();
-  }
-
-  async function v19LoadPhotos(){
-    const status=document.getElementById('v19PhotoStatus');
-    const grid=document.getElementById('v19PhotoGrid');
-    if(!status||!grid)return;
-    status.textContent='Fotoalbum laden…';
-    grid.innerHTML='';
-    try{
-      const client=await v19Client();
-      const {data:{session}}=await client.auth.getSession();
-      if(!session)throw new Error('Je bent niet aangemeld bij Supabase.');
-
-      const {data,error}=await client.storage.from(V19_PHOTO_BUCKET).list('',{
-        limit:100,sortBy:{column:'created_at',order:'desc'}
-      });
-      if(error)throw error;
-
-      const files=(data||[]).filter(f=>f.name&&!f.name.startsWith('.'));
-      if(!files.length){
-        status.innerHTML='<div class="v19-empty"><b>📷</b><strong>Nog geen foto\'s</strong><span>Foto\'s die met Vappie worden gemaakt verschijnen hier automatisch.</span></div>';
-        return;
-      }
-
-      status.textContent=files.length===1?'1 foto':`${files.length} foto's`;
-      for(const file of files){
-        const {data:signed,error:signedError}=await client.storage.from(V19_PHOTO_BUCKET).createSignedUrl(file.name,3600);
-        if(signedError||!signed?.signedUrl)continue;
-        const date=file.created_at?new Date(file.created_at):null;
-        const card=document.createElement('article');
-        card.className='v19-photo-card';
-        card.innerHTML=`<button type="button" class="v19-photo-open"><img loading="lazy" src="${signed.signedUrl}" alt="Vappie foto"><span>${date?date.toLocaleString('nl-NL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span></button>`;
-        card.querySelector('button').onclick=()=>v19OpenPhoto(signed.signedUrl,date);
-        grid.appendChild(card);
-      }
-    }catch(err){
-      console.error('Fotoalbum fout:',err);
-      const msg=String(err?.message||err);
-      if(/bucket|not found|row-level|policy|permission|unauthorized/i.test(msg)){
-        status.innerHTML='<div class="v19-error"><strong>Fotoalbum is nog niet geactiveerd in Supabase.</strong><span>Voer éénmalig het bestand <b>SUPABASE_PHOTOS_SETUP.sql</b> uit in de Supabase SQL Editor.</span></div>';
-      }else{
-        status.innerHTML=`<div class="v19-error"><strong>Fotoalbum kon niet worden geladen.</strong><span>${esc(msg)}</span></div>`;
-      }
-    }
-  }
-
-  function v19OpenPhoto(url,date){
-    const root=document.createElement('div');
-    root.className='v19-lightbox';
-    root.innerHTML=`<button class="v19-lightbox-close" aria-label="Sluiten">×</button><img src="${url}" alt="Vappie foto"><small>${date?date.toLocaleString('nl-NL',{dateStyle:'long',timeStyle:'short'}):''}</small>`;
-    root.addEventListener('click',e=>{if(e.target===root||e.target.closest('.v19-lightbox-close'))root.remove()});
-    document.body.appendChild(root);
-  }
-
-  async function v19ResizeImage(file){
-    const bitmap=await createImageBitmap(file);
-    const max=1600;
-    const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
-    const w=Math.max(1,Math.round(bitmap.width*scale));
-    const h=Math.max(1,Math.round(bitmap.height*scale));
-    const canvas=document.createElement('canvas');
-    canvas.width=w;canvas.height=h;
-    const ctx=canvas.getContext('2d',{alpha:false});
-    ctx.drawImage(bitmap,0,0,w,h);
-    bitmap.close?.();
-    return await new Promise((resolve,reject)=>{
-      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Foto kon niet worden verkleind.')),'image/jpeg',0.78);
-    });
-  }
-
-  async function v19HandleCamera(e){
-    const file=e.target.files?.[0];
-    if(!file)return;
-    const status=document.getElementById('v19PhotoStatus');
-    try{
-      if(status)status.textContent='Foto voorbereiden…';
-      const blob=await v19ResizeImage(file);
-      if(status)status.textContent='Foto uploaden naar album…';
-      const client=await v19Client();
-      const {data:{session}}=await client.auth.getSession();
-      if(!session)throw new Error('Je bent niet aangemeld bij Supabase.');
-
-      const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-      const user=(session.user?.email||'gebruiker').split('@')[0].replace(/[^a-z0-9_-]/gi,'-').toLowerCase();
-      const path=`${stamp}_${user}_${Math.random().toString(36).slice(2,7)}.jpg`;
-
-      const {error}=await client.storage.from(V19_PHOTO_BUCKET).upload(path,blob,{
-        contentType:'image/jpeg',cacheControl:'3600',upsert:false
-      });
-      if(error)throw error;
-
-      if(status)status.textContent='Foto opgeslagen ✓';
-      e.target.value='';
-      await v19LoadPhotos();
-    }catch(err){
-      console.error('Camera/upload fout:',err);
-      if(status)status.innerHTML=`<div class="v19-error"><strong>Foto kon niet worden opgeslagen.</strong><span>${esc(err?.message||err)}</span></div>`;
-    }
-  }
-
-
-  document.addEventListener('click',e=>{
-    const normal=e.target.closest?.('.sidebar-nav [data-page]');
-    if(normal){
-      document.querySelector('[data-v19-page="photos"]')?.classList.remove('active');
-    }
-  },true);
-
-  // Wanneer een normale Vappie-menuknop wordt gekozen, vervalt de foto-weergave vanzelf
-  // doordat app.js de workspace opnieuw rendert. Observer voegt de Foto's-knop daarna terug.
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
   window.addEventListener('load',refresh);
-  setTimeout(refresh,50);
-  setTimeout(refresh,300);
-  setTimeout(refresh,900);
+  setTimeout(refresh,250);
   setInterval(()=>{
     if(document.querySelector('.workspace-main.home-main')){
       document.querySelector('.v6-dashboard-extra')?.remove();
       injectDashboard();
     }
-    v19EnsurePhotoNav();
-    v16OrderNavigation();
-    v20RepairHomeDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
+    v16OrderNavigation();
     v18ColorDayparts();
   },5000);
 })();
