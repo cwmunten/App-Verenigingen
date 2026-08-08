@@ -231,3 +231,48 @@ body.v6-admin-active .table-scroll{
   .workspace-main table{font-size:13px!important}
   .workspace-main table tbody td{padding-top:12px!important;padding-bottom:12px!important}
 }
+
+
+/* ===== v12 Administratie acties ===== */
+/* Laptop: alleen Toevoegen + Meer zichtbaar. Mail, Import en Export zitten in Meer. */
+@media (min-width:900px){
+  .workspace-main .header-actions{
+    align-items:center!important;
+  }
+  .workspace-main .header-actions [data-action="add-assoc"]{
+    order:1!important;
+  }
+  .v12-more-wrap{
+    order:2!important;
+  }
+  .v12-more-wrap .v11-more-menu .v10-mail-all,
+  .v12-more-wrap .v11-more-menu [data-action="import-excel"],
+  .v12-more-wrap .v11-more-menu [data-action="export-report"]{
+    display:flex!important;
+    align-items:center!important;
+    width:100%!important;
+  }
+  .v12-more-wrap .v11-more-menu .v10-mail-all span{
+    margin-left:auto;
+  }
+}
+
+/* Smartphone: geen mail/import/export en ook geen Meer-menu. Alleen Toevoegen. */
+@media (max-width:899px){
+  .workspace-main .header-actions .v10-mail-all,
+  .workspace-main .header-actions [data-action="import-excel"],
+  .workspace-main .header-actions [data-action="export-report"],
+  .workspace-main .header-actions .v11-more-wrap,
+  .workspace-main .header-actions .v12-more-wrap,
+  .workspace-main .header-actions .v12-desktop-source-action{
+    display:none!important;
+  }
+  .workspace-main .header-actions{
+    display:block!important;
+  }
+  .workspace-main .header-actions [data-action="add-assoc"]{
+    display:block!important;
+    width:100%!important;
+    min-height:46px!important;
+  }
+}

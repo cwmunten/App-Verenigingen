@@ -459,32 +459,36 @@
     const active=!!document.querySelector('.sidebar-nav [data-page="admin"].active');
     if(!active)return;
     const actions=document.querySelector('.workspace-main .header-actions');
-    if(!actions||actions.querySelector('.v11-more-wrap'))return;
+    if(!actions||actions.querySelector('.v12-more-wrap'))return;
 
-    const exportBtn=actions.querySelector('[data-action="export-report"]');
+    const mailBtn=actions.querySelector('[data-v10-mail-all]');
     const importBtn=actions.querySelector('[data-action="import-excel"]');
-    if(!exportBtn&&!importBtn)return;
+    const exportBtn=actions.querySelector('[data-action="export-report"]');
+    if(!mailBtn&&!importBtn&&!exportBtn)return;
 
     const wrap=document.createElement('div');
-    wrap.className='v11-more-wrap';
+    wrap.className='v11-more-wrap v12-more-wrap';
     const toggle=document.createElement('button');
-    toggle.type='button';toggle.className='secondary v11-more-button';
+    toggle.type='button';
+    toggle.className='secondary v11-more-button';
     toggle.textContent='Meer ▾';
     const menu=document.createElement('div');
     menu.className='v11-more-menu';
 
-    [importBtn,exportBtn].filter(Boolean).forEach(original=>{
+    [mailBtn,importBtn,exportBtn].filter(Boolean).forEach(original=>{
       const clone=original.cloneNode(true);
+      clone.classList.remove('v11-secondary-hidden');
       clone.removeAttribute('data-v11-bound');
       clone.addEventListener('click',()=>{
         original.click();
         wrap.classList.remove('open');
       });
       menu.appendChild(clone);
-      original.classList.add('v11-secondary-hidden');
+      original.classList.add('v11-secondary-hidden','v12-desktop-source-action');
     });
+
     wrap.append(toggle,menu);
-    actions.insertBefore(wrap,actions.lastElementChild);
+    actions.appendChild(wrap);
     toggle.onclick=e=>{e.stopPropagation();wrap.classList.toggle('open')};
   }
 

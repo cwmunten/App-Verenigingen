@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v11
+VAPPIE DASHBOARD UPDATE v12
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -80,3 +80,9 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
      verenigingen@zomerparkfeest.nl daar als verzendaccount/afzender beschikbaar is.
 
 10. Layout v11: desktop uitgebreider en rustiger; Administratie compactere hiërarchie, Meer-menu, sticky tabelkop en subtielere spacing. Smartphone behoudt grote functionele knoppen en compacte inhoud.
+
+11. Administratie acties v12:
+    - Laptop: alleen '+ Vereniging toevoegen' en 'Meer ▾' zichtbaar.
+    - Meer bevat: Mail alle verenigingen, Excel importeren, Rapport exporteren.
+    - Smartphone: mail, import, export en Meer zijn volledig verborgen.
+    - Smartphone toont alleen de functionele knop '+ Vereniging toevoegen'.
