@@ -12,18 +12,18 @@
   <title>Vappie | Team Verenigingen</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
-  <link rel="stylesheet" href="./styles.css?v=18" />
-  <link rel="stylesheet" href="./enhancements.css?v=18" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=18">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=18">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=18">
+  <link rel="stylesheet" href="./styles.css?v=19" />
+  <link rel="stylesheet" href="./enhancements.css?v=19" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=19">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=19">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=19">
 </head>
 <body>
   <div id="app"></div>
   <noscript>Vappie heeft JavaScript nodig om te werken.</noscript>
 
   <script>
-    // SYNC FIX v18: Supabase is leidend bij een nieuwe app-start.
+    // SYNC FIX v19: Supabase is leidend bij een nieuwe app-start.
     try { localStorage.removeItem('vappie-supabase-dirty-v1'); } catch (_) {}
 
     let vappieHiddenAt = 0;
@@ -36,16 +36,16 @@
     });
   </script>
 
-  <script src="./seedData.js?v=18"></script>
+  <script src="./seedData.js?v=19"></script>
   <script async src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="./app.js?v=18"></script>
-  <script src="./enhancements.js?v=18"></script>
+  <script src="./app.js?v=19"></script>
+  <script src="./enhancements.js?v=19"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
-          const reg = await navigator.serviceWorker.register('/service-worker.js?v=18', { updateViaCache: 'none' });
+          const reg = await navigator.serviceWorker.register('/service-worker.js?v=19', { updateViaCache: 'none' });
           await reg.update();
         } catch (err) {
           console.warn('PWA service worker niet actief:', err);

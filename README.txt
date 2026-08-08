@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v18
+VAPPIE DASHBOARD UPDATE v19
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -102,3 +102,12 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
     - originele navigatiehandlers uit app.js blijven leidend.
 
 17. Dagdeelkleuren v18: Avond geel, Middag lichtgroen. Geldt voor de dagdeelbadges in Planning/overzichten.
+
+18. Fotoalbum v19
+    - Nieuw hoofdmenu-item 'Foto's'.
+    - Smartphone: Camera + Album.
+    - Laptop: alleen Album.
+    - Foto's worden vóór upload verkleind naar maximaal 1600 px en als JPEG kwaliteit 0,78 opgeslagen.
+    - Opslag gebeurt centraal in Supabase Storage bucket 'vappie-photos'.
+    - Album gebruikt signed URLs; de bucket blijft privé.
+    - Voer éénmalig SUPABASE_PHOTOS_SETUP.sql uit in de Supabase SQL Editor.
