@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v16
+VAPPIE DASHBOARD UPDATE v17
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -94,3 +94,9 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
 14. Administratie v15: tekst met aantal verenigingen en festivaljaar onder de paginatitel verwijderd op laptop en smartphone.
 
 15. Menuvolgorde v16: Home, Planning, Administratie, Financieel, Bezettingsoverzicht.
+
+16. Navigatiefix v17:
+    - menuvolgorde blijft Home, Planning, Administratie, Financieel, Bezettingsoverzicht;
+    - herschikken gebeurt alleen nog wanneer de volgorde daadwerkelijk fout staat;
+    - voorkomt een MutationObserver-lus die klikken op menu-items kon blokkeren;
+    - originele navigatiehandlers uit app.js blijven leidend.

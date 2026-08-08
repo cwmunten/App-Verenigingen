@@ -498,13 +498,25 @@
     const nav=document.querySelector('.sidebar-nav');
     if(!nav)return;
     const order=['home','planning','admin','financial','occupancy'];
-    const items=[...nav.querySelectorAll('[data-page]')];
+    const items=[...nav.querySelectorAll(':scope > [data-page]')];
+
+    // Alleen herschikken wanneer de volgorde echt afwijkt.
+    // Dit voorkomt een MutationObserver-lus die de navigatie kon blokkeren.
+    const current=items.map(el=>el.dataset.page).join('|');
+    const desired=order.filter(page=>items.some(el=>el.dataset.page===page)).join('|');
+    if(current===desired)return;
+
+    const frag=document.createDocumentFragment();
     order.forEach(page=>{
       const item=items.find(el=>el.dataset.page===page);
-      if(item)nav.appendChild(item);
+      if(item)frag.appendChild(item);
     });
+    nav.appendChild(frag);
   }
 
+
+  // v17: extra veiligheid - navigatieknoppen krijgen geen eigen click-handler hier.
+  // De originele app.js onclick-handlers blijven volledig leidend.
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
