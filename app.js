@@ -191,16 +191,25 @@
   const assoc=id=>yd().associations.find(a=>a.id===id);
   const sortedYears=()=>Object.keys(db.years).sort((a,b)=>Number(b)-Number(a));
 
+  function userDisplayName(){
+    const m=supabaseUser?.user_metadata||{};
+    return m.display_name||m.full_name||m.name||supabaseUser?.email?.split('@')[0]||'Vappie gebruiker';
+  }
+  function userInitial(){
+    const n=String(userDisplayName()||'V').trim();
+    return (n.match(/[A-Za-zÀ-ÖØ-öø-ÿ0-9]/)?.[0]||'V').toUpperCase();
+  }
+
   function render(){
     const userEmail=supabaseUser?.email||'Vappie gebruiker';
+    const profileInitial=userInitial();
     app.innerHTML=`
       <div class="dashboard-shell">
         <aside class="sidebar" id="nav">
           <div class="sidebar-brand" data-page="home"><span class="brand-mark">Z</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></div>
           <button class="nav-close" data-action="mobile-menu" aria-label="Menu sluiten">×</button>
           <nav class="sidebar-nav">
-            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}<button class="install-app-btn" data-action="install-app"><b>⇩</b><span>Installeer Vappie</span></button>
-            <button data-action="data"><b>⇧</b><span>Data / back-up</span></button>
+            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}
           </nav>
           <div class="sidebar-foot">
             <div><strong>Vappie</strong> · ${esc(db.activeYear)}</div>
@@ -213,9 +222,11 @@
             <button class="mobile-menu" data-action="mobile-menu" aria-label="Menu openen">☰</button>
             <button class="sync-chip ${syncClass()}" id="syncChip" data-action="data" title="Supabase synchronisatiestatus"><span></span><b>${esc(syncLabel())}</b></button>
             <div class="topbar-spacer"></div>
+            <button class="topbar-action install-app-btn" data-action="install-app" title="Installeer Vappie"><b>⇩</b><span>Installeer</span></button>
+            <button class="topbar-action" data-action="data" title="Data en back-up"><b>⇧</b><span>Data / back-up</span></button>
             <div class="year-select compact">▦ <select id="yearSelect">${sortedYears().map(y=>`<option ${y===db.activeYear?'selected':''}>${esc(y)}</option>`).join('')}</select></div>
             <button class="icon-btn" data-action="new-year" title="Nieuw jaar">＋</button>
-            <button class="user-chip" data-action="data" title="Account en synchronisatie"><span class="user-avatar">●</span><span>${esc(userEmail)}</span></button>
+            <button class="user-chip" data-action="data" title="Account en synchronisatie"><span class="user-avatar">${esc(profileInitial)}</span><span>${esc(userEmail)}</span></button>
           </header>
           <main class="workspace-main ${page==='home'?'home-main':'main'}">${renderPage()}</main>
         </section>
@@ -306,9 +317,9 @@
         <th>Aanwezig Barchefmeeting 1</th><th>Aanwezig Barchefmeeting 2</th><th>Certificaten aanwezig</th><th>Polsbandjes ontvangen</th>
         <th>Maten kleding ingeleverd</th><th>Eetbonnen nodig</th><th>Opmerkingen</th><th></th>
       </tr></thead><tbody>${list.map(a=>`<tr>
-        <td><strong>${esc(a.name)}</strong></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
+        <td><div class="admin-name-cell"><button class="admin-mobile-edit" title="Wijzigen" aria-label="${attr(a.name)} wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><strong>${esc(a.name)}</strong></div></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
         <td>${status(a.meeting1)}</td><td>${status(a.meeting2)}</td><td>${status(a.certificates)}</td><td>${status(a.wristbands)}</td><td>${status(a.shirts)}</td>
-        <td>${esc(a.mealVouchers||'—')}</td><td class="admin-notes">${esc(a.notes||'—')}</td><td class="actions sticky-actions"><button title="Wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><button title="Verwijderen" data-delete-assoc="${attr(a.id)}">⌫</button></td>
+        <td>${esc(a.mealVouchers||'—')}</td><td class="admin-notes">${esc(a.notes||'—')}</td><td class="actions sticky-actions"><button class="admin-desktop-edit" title="Wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><button class="admin-delete-btn" title="Verwijderen" data-delete-assoc="${attr(a.id)}">⌫</button></td>
       </tr>`).join('')}</tbody></table></div></div>`;
   }
   function status(v){return `<span class="status ${String(v).toLowerCase()==='ja'?'good':'neutral'}">${esc(v||'Onbekend')}</span>`}
