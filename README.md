@@ -24,3 +24,10 @@ Als je bestaande Vercel-project nog op Next.js staat: ga naar **Settings → Bui
 
 ## Opslag
 Wijzigingen worden lokaal opgeslagen in `localStorage` van de browser. Gebruik **Data & back-up** in Vappie om een JSON-back-up te downloaden en later te importeren.
+
+
+## Excel import en rapport-export
+- In **Administratie** staan nu de knoppen **Excel importeren** en **Rapport exporteren**.
+- De Excel-import leest `Verenigingen & Administratie` en `Werkschema` uit het ZPF-werkboek en kan administratie en/of planning vervangen voor het actieve festivaljaar.
+- Het rapport toont de diensten per dag in aparte kolommen (woensdag t/m zondag) en kan als PDF/print of CSV voor Excel worden geëxporteerd.
+- Voor Excel-import gebruikt Vappie SheetJS 0.20.3 via de officiële SheetJS CDN.
