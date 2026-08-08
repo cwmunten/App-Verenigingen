@@ -113,3 +113,5 @@ v26
 - De Supabase SQL bevat nu ook een DELETE-policy.
 
 v27: Lokaal logboek / Recente wijzigingen verwijderd van Home. Overige v26 functies behouden.
+
+v28: Het blok 'Snelle acties' is verwijderd van de Homepagina. Overige functies uit v27 blijven behouden.

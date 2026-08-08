@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v27-no-local-log';
+const CACHE = 'vappie-cache-v28-clean-home';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
