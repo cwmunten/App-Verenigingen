@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v10-mail-bcc';
+const CACHE = 'vappie-cache-v11-layout';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

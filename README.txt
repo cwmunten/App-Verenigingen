@@ -1,4 +1,4 @@
-VAPPIE DASHBOARD UPDATE v10
+VAPPIE DASHBOARD UPDATE v11
 ===========================
 
 Deze ZIP is een updatepakket voor de bestaande repository:
@@ -78,3 +78,5 @@ Het is dus geen centraal Supabase-auditlog en pretendeert dat ook niet.
    - Lege en dubbele adressen worden automatisch overgeslagen.
    - De afzender wordt door het standaard mailprogramma bepaald. Zorg dat
      verenigingen@zomerparkfeest.nl daar als verzendaccount/afzender beschikbaar is.
+
+10. Layout v11: desktop uitgebreider en rustiger; Administratie compactere hiërarchie, Meer-menu, sticky tabelkop en subtielere spacing. Smartphone behoudt grote functionele knoppen en compacte inhoud.

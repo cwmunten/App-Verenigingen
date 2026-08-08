@@ -283,6 +283,7 @@
     injectDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
+    v11Polish();
   }
 
 
@@ -435,6 +436,66 @@
     actions.prepend(btn);
   }
 
+
+  // ===== v11: rustigere, consistente pagina-opbouw =====
+  function v11AdminMeta(){
+    const active=!!document.querySelector('.sidebar-nav [data-page="admin"].active');
+    if(!active)return;
+    const main=document.querySelector('.workspace-main');
+    if(!main||main.querySelector('.v11-admin-meta'))return;
+    const h1=main.querySelector('h1');
+    if(!h1)return;
+    try{
+      const db=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      const count=db?.years?.[db.activeYear]?.associations?.length||0;
+      const meta=document.createElement('div');
+      meta.className='v11-admin-meta';
+      meta.textContent=`${count} verenigingen · Festivaljaar ${db?.activeYear||''}`;
+      h1.insertAdjacentElement('afterend',meta);
+    }catch{}
+  }
+
+  function v11GroupAdminActions(){
+    const active=!!document.querySelector('.sidebar-nav [data-page="admin"].active');
+    if(!active)return;
+    const actions=document.querySelector('.workspace-main .header-actions');
+    if(!actions||actions.querySelector('.v11-more-wrap'))return;
+
+    const exportBtn=actions.querySelector('[data-action="export-report"]');
+    const importBtn=actions.querySelector('[data-action="import-excel"]');
+    if(!exportBtn&&!importBtn)return;
+
+    const wrap=document.createElement('div');
+    wrap.className='v11-more-wrap';
+    const toggle=document.createElement('button');
+    toggle.type='button';toggle.className='secondary v11-more-button';
+    toggle.textContent='Meer ▾';
+    const menu=document.createElement('div');
+    menu.className='v11-more-menu';
+
+    [importBtn,exportBtn].filter(Boolean).forEach(original=>{
+      const clone=original.cloneNode(true);
+      clone.removeAttribute('data-v11-bound');
+      clone.addEventListener('click',()=>{
+        original.click();
+        wrap.classList.remove('open');
+      });
+      menu.appendChild(clone);
+      original.classList.add('v11-secondary-hidden');
+    });
+    wrap.append(toggle,menu);
+    actions.insertBefore(wrap,actions.lastElementChild);
+    toggle.onclick=e=>{e.stopPropagation();wrap.classList.toggle('open')};
+  }
+
+  document.addEventListener('click',e=>{
+    if(!e.target.closest?.('.v11-more-wrap'))document.querySelectorAll('.v11-more-wrap.open').forEach(x=>x.classList.remove('open'));
+  });
+
+  function v11Polish(){
+    v11AdminMeta();
+    v11GroupAdminActions();
+  }
   const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
@@ -447,5 +508,6 @@
     }
     setupAdminBar();
     v10InjectAdminMailButton();
+    v11Polish();
   },5000);
 })();
