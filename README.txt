@@ -115,3 +115,14 @@ v26
 v27: Lokaal logboek / Recente wijzigingen verwijderd van Home. Overige v26 functies behouden.
 
 v28: Het blok 'Snelle acties' is verwijderd van de Homepagina. Overige functies uit v27 blijven behouden.
+
+v29:
+- Oorzaak van knipperende Home-foto's opgelost.
+- Dashboard wordt niet meer iedere 5 seconden verwijderd en opnieuw opgebouwd.
+- Mutaties binnen het fotoblok starten geen algemene refresh meer.
+- Foto's laden één keer per Home-opbouw; upload/verwijderen kan ze nog bewust verversen.
+
+v30:
+- Home controleert iedere 90 seconden stil of de twee nieuwste foto's in Supabase veranderd zijn.
+- Alleen bij een daadwerkelijk nieuwe/verwijderde foto worden de Home-afbeeldingen vervangen.
+- Geen periodiek knipperen of onnodig opnieuw laden.

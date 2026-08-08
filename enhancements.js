@@ -730,6 +730,47 @@
     return block;
   }
 
+
+  let v30LastHomePhotoSignature='';
+
+  async function v30CheckForNewHomePhotos(){
+    if(window.matchMedia('(max-width: 899px)').matches)return;
+    const home=!!document.querySelector('.sidebar-nav [data-page="home"].active');
+    const block=document.querySelector('.v26-home-photos');
+    if(!home||!block)return;
+
+    try{
+      const client=await v25Client();
+      const {data:{session}}=await client.auth.getSession();
+      if(!session)return;
+
+      const {data,error}=await client.storage.from(V25_PHOTO_BUCKET).list('',{
+        limit:2,
+        sortBy:{column:'created_at',order:'desc'}
+      });
+      if(error)return;
+
+      const photos=(data||[]).filter(f=>f?.name&&!f.name.startsWith('.')).slice(0,2);
+      const signature=photos.map(f=>f.name).join('|');
+
+      // Eerste controle onthoudt alleen de huidige situatie.
+      if(!v30LastHomePhotoSignature){
+        v30LastHomePhotoSignature=signature;
+        return;
+      }
+
+      // Alleen bij een echte wijziging de afbeeldingen opnieuw laden.
+      if(signature!==v30LastHomePhotoSignature){
+        v30LastHomePhotoSignature=signature;
+        const grid=block.querySelector('[data-v26-home-grid]');
+        if(grid)grid.dataset.loaded='0';
+        await v26RefreshHomePhotos(true);
+      }
+    }catch(err){
+      console.warn('Controle op nieuwe foto overgeslagen:',err);
+    }
+  }
+
   async function v26RefreshHomePhotos(force=false){
     const block=v26EnsureHomePhotos();
     if(!block||v26HomeLoading)return;
@@ -737,6 +778,7 @@
     if(!grid)return;
     if(!force&&grid.dataset.loaded==='1')return;
 
+    grid.dataset.loaded='1';
     v26HomeLoading=true;
     try{
       const client=await v25Client();
@@ -746,6 +788,7 @@
       const {data,error}=await client.storage.from(V25_PHOTO_BUCKET).list('',{limit:2,sortBy:{column:'created_at',order:'desc'}});
       if(error)throw error;
       const photos=(data||[]).filter(f=>f?.name&&!f.name.startsWith('.')).slice(0,2);
+      v30LastHomePhotoSignature=photos.map(f=>f.name).join('|');
 
       if(!photos.length){
         grid.innerHTML=`<div class="v26-home-photo-empty">Nog geen foto's in het album.</div>`;
@@ -774,16 +817,23 @@
     }
   }
 
-  const obs=new MutationObserver(()=>{ clearTimeout(window.__v6Refresh); window.__v6Refresh=setTimeout(refresh,30); });
+  const obs=new MutationObserver(mutations=>{
+    const onlyPhotoChanges=mutations.every(m=>{
+      const target=m.target?.nodeType===1 ? m.target : m.target?.parentElement;
+      return !!target?.closest?.('.v26-home-photos, .v25-album-page, .v25-lightbox');
+    });
+    if(onlyPhotoChanges)return;
+    clearTimeout(window.__v6Refresh);
+    window.__v6Refresh=setTimeout(refresh,30);
+  });
   obs.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('resize',refresh);
   window.addEventListener('load',refresh);
   setTimeout(refresh,250);
   setInterval(()=>{
-    if(document.querySelector('.workspace-main.home-main')){
-      document.querySelector('.v6-dashboard-extra')?.remove();
-      injectDashboard();
-    }
+    // v29: dashboard niet meer periodiek verwijderen/opnieuw opbouwen.
+    // Hierdoor blijven de twee Home-foto's rustig staan.
+    injectDashboard();
     setupAdminBar();
     v10InjectAdminMailButton();
     v11Polish();
@@ -792,4 +842,9 @@
     v25EnsurePhotoAlbumNav();
     v25OrderPhotoNav();
   },5000);
+
+  // v30: stille controle iedere 90 seconden.
+  // Alleen wanneer de twee nieuwste bestanden veranderen wordt Home opnieuw bijgewerkt.
+  setInterval(v30CheckForNewHomePhotos,90000);
+
 })();
