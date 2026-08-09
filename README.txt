@@ -135,3 +135,9 @@ v33 SAFE Meldingen
 - Menu-item Meldingen staat boven Fotoalbum.
 - Home toont het Meldingenblok direct onder de zoekfunctie.
 - SUPABASE_MELDINGEN_SETUP.sql éénmalig uitvoeren.
+
+v34
+- Meldingen-knop gebruikt nu een rechtstreekse click-handler op de knop zelf.
+- De document-level delegated Meldingen-click is verwijderd om conflicten met andere listeners te voorkomen.
+- Extra fallback: window.VappieOpenMeldingen() en #meldingen hash.
+- Bestaande v30 kernfunctionaliteit blijft ongewijzigd.

@@ -39,7 +39,19 @@
       btn = document.createElement('button');
       btn.type = 'button';
       btn.setAttribute('data-meldingen-page','1');
+      btn.setAttribute('aria-label','Meldingen openen');
       btn.innerHTML = '<b>!</b><span>Meldingen</span><em class="meldingen-badge" hidden>0</em>';
+    }
+
+    // v34: klikhandler rechtstreeks op de knop zelf.
+    // Geen afhankelijkheid meer van bubbling/delegation.
+    if(btn.dataset.meldingenBound !== '1'){
+      btn.dataset.meldingenBound = '1';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        openPage();
+      });
     }
 
     const photo = nav.querySelector('[data-v25-page="photoalbum"]');
@@ -294,13 +306,6 @@
   }
 
   document.addEventListener('click',e => {
-    if(e.target.closest?.('[data-meldingen-page]')){
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      openPage();
-      return;
-    }
-
     if(e.target.closest?.('.sidebar-nav [data-page], [data-v25-page="photoalbum"], .sidebar-brand[data-page="home"]')){
       active = false;
       delete document.body.dataset.meldingenActive;
@@ -321,6 +326,13 @@
     }
   });
   observer.observe(document.documentElement,{childList:true,subtree:true});
+
+
+  // Extra fallback: ook extern/hashmatig kan de pagina geopend worden.
+  window.VappieOpenMeldingen = openPage;
+  window.addEventListener('hashchange',()=>{
+    if(location.hash==='#meldingen')openPage();
+  });
 
   window.addEventListener('load',() => {
     ensureNav();

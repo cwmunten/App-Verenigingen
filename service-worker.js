@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v33-safe-meldingen';
+const CACHE = 'vappie-cache-v34-meldingen-click-fix';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

@@ -36,3 +36,5 @@
   .meld-item-head{display:block}.meld-item-head small{display:block;margin-top:5px}
   .meld-home-card{grid-template-columns:34px 1fr}.meld-home-card>b{display:none}
 }
+
+.sidebar-nav [data-meldingen-page]{cursor:pointer!important;pointer-events:auto!important;position:relative;z-index:1}
