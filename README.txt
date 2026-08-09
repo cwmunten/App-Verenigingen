@@ -171,3 +171,9 @@ v38
 - Bij bewerken kunnen extra foto's worden toegevoegd zolang totaal max. 5 blijft.
 - Foto's van de laatste OPEN melding worden ook op Home getoond.
 - Afgehandelde meldingen verdwijnen van Home.
+
+v39
+- Badge bij menu-item Meldingen toont nu het aantal meldingen dat nog OPEN staat.
+- Zodra een melding op Afgehandeld wordt gezet, daalt de badge direct.
+- Bij 0 open meldingen verdwijnt de badge.
+- PWA/app-badge volgt eveneens het aantal open meldingen.

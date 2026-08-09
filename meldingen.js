@@ -591,18 +591,21 @@
 
     try{
       const notices=await fetchNotices();
-      const reads=await readIds();
-      const unread=notices.filter(n=>!reads.has(String(n.id))).length;
+      const openCount=notices.filter(n=>!n.handled).length;
 
+      // Menu-badge toont het aantal meldingen dat nog OPEN staat.
       const badge=ensureNav()?.querySelector('.meldingen-badge');
       if(badge){
-        badge.hidden=unread===0;
-        badge.textContent=String(unread);
+        badge.hidden=openCount===0;
+        badge.textContent=String(openCount);
+        badge.setAttribute('aria-label',`${openCount} open melding${openCount===1?'':'en'}`);
+        badge.title=`${openCount} open melding${openCount===1?'':'en'}`;
       }
 
+      // Ook de PWA/app-badge volgt voortaan het aantal open meldingen.
       try{
-        if(unread>0&&navigator.setAppBadge)await navigator.setAppBadge(unread);
-        else if(unread===0&&navigator.clearAppBadge)await navigator.clearAppBadge();
+        if(openCount>0&&navigator.setAppBadge)await navigator.setAppBadge(openCount);
+        else if(openCount===0&&navigator.clearAppBadge)await navigator.clearAppBadge();
       }catch{}
 
       if(!active)await renderLatest();

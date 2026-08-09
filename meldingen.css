@@ -90,3 +90,22 @@
   .meld-item-actions{justify-content:flex-start;margin-top:5px}
   .meld-home-photos{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* v39: badge met aantal open meldingen */
+.sidebar-nav [data-meldingen-page]{display:flex;align-items:center}
+.sidebar-nav [data-meldingen-page] .meldingen-badge{
+  margin-left:auto;
+  min-width:24px;
+  height:24px;
+  padding:0 7px;
+  border-radius:999px;
+  background:#e53935;
+  color:#fff;
+  font-style:normal;
+  font-size:12px;
+  font-weight:900;
+  line-height:24px;
+  text-align:center;
+}
+.sidebar-nav [data-meldingen-page] .meldingen-badge[hidden]{display:none!important}

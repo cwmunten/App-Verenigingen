@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v38-meldingen-edit-homephotos';
+const CACHE = 'vappie-cache-v39-open-meldingen-badge';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

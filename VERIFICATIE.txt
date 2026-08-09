@@ -1,13 +1,9 @@
-VAPPIE v38 VERIFICATIE
+VAPPIE v39 VERIFICATIE
 ======================
-OK - enhancements.js
 OK - meldingen.js
 OK - service-worker.js
-OK - menu order
-OK - edit button
-OK - update logic
-OK - home photos
-OK - home only open
-OK - max 5 retained
-OK - reactions retained
-OK - handled retained
+OK - open count logic
+OK - badge uses open count
+OK - badge hides at zero
+OK - app badge uses open count
+OK - handled updates badge
