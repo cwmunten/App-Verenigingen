@@ -1,14 +1,13 @@
-VAPPIE v36 VERIFICATIE
+VAPPIE v37 VERIFICATIE
 ======================
-OK - meldingen.js
 OK - enhancements.js
+OK - meldingen.js
 OK - service-worker.js
-OK - pointerdown capture route
-OK - button direct pointerdown
-OK - global opener
-OK - page render
-OK - home only open
-OK - handled support
-OK - reaction support
-OK - runtime openPage
-  RUNTIME_OK
+OK - Fotoalbum verwijderd
+OK - max 5 foto-input
+OK - foto upload bucket
+OK - foto weergave
+OK - Meldingen route behouden
+OK - Reacties behouden
+OK - Afgehandeld behouden
+OK - SQL bucket

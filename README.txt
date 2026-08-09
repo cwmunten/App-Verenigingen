@@ -155,3 +155,12 @@ v36 HARD FIX
 - Home toont alleen de laatste OPEN melding.
 - Zodra die melding Afgehandeld wordt en er geen andere open melding is, verdwijnt het Meldingenblok van Home.
 - Reacties en tabs Open/Afgehandeld uit v35 blijven behouden.
+
+v37
+- Fotoalbum verwijderd uit menu en als pagina.
+- Fotoalbum- en Home-foto-code verwijderd uit enhancements.js.
+- Bij een melding kunnen maximaal 5 foto's worden toegevoegd.
+- Foto's worden verkleind naar max. 1600 px en opgeslagen in private Supabase Storage bucket vappie-melding-fotos.
+- Foto's worden bij de melding als miniaturen getoond en klikbaar vergroot.
+- Reacties en Open/Afgehandeld blijven behouden.
+- SUPABASE_MELDINGEN_SETUP.sql opnieuw uitvoeren voor de nieuwe Storage bucket/policies.

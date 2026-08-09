@@ -62,3 +62,19 @@
   .meld-reaction-add{grid-template-columns:1fr}
   .meld-handled-check{width:100%;box-sizing:border-box}
 }
+
+
+/* v37: maximaal 5 foto's per melding */
+.meld-photo-field small{font-weight:500;color:#777}
+.meld-photo-field input[type=file]{padding:9px;background:#fafafa}
+.meld-photo-preview{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:8px}
+.meld-photo-preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:9px;border:1px solid #e2e2e5}
+.meld-attached-photos{display:grid;grid-template-columns:repeat(5,minmax(0,120px));gap:8px;margin-top:12px}
+.meld-photo-thumb{border:0;padding:0;background:transparent;cursor:pointer;border-radius:9px;overflow:hidden}
+.meld-photo-thumb img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.meld-photo-lightbox{position:fixed;inset:0;z-index:14000;background:rgba(0,0,0,.92);display:grid;place-items:center;padding:20px}
+.meld-photo-lightbox img{max-width:95vw;max-height:86vh;border-radius:10px}
+.meld-photo-close{position:fixed;right:18px;top:15px;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#111;font-size:28px;cursor:pointer}
+@media(max-width:899px){
+  .meld-photo-preview,.meld-attached-photos{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

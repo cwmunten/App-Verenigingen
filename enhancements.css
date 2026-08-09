@@ -358,17 +358,3 @@ body.v6-admin-active .table-scroll{
 .v25-album-page{max-width:1500px;margin:0 auto}.v25-album-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}.v25-album-head h1{margin:3px 0 5px}.v25-album-head p{margin:0;color:#6d6d72}.v25-album-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.v25-album-status{margin-bottom:12px;color:#6c6c71;font-size:13px}.v25-photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.v25-photo-card{background:#fff;border:1px solid #e2e2e5;border-radius:14px;overflow:hidden}.v25-photo-button{display:block;width:100%;border:0;background:#fff;padding:0;cursor:pointer;text-align:left}.v25-photo-button img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee}.v25-photo-button small{display:block;padding:9px 11px;color:#68686d}.v25-album-empty,.v25-album-error{padding:30px;border:1px dashed #d6d6da;border-radius:14px;background:#fafafa;text-align:center;display:grid;gap:6px}.v25-lightbox{position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.91);display:grid;place-items:center;padding:30px}.v25-lightbox img{max-width:min(1200px,96vw);max-height:84vh;border-radius:10px}.v25-lightbox small{position:fixed;bottom:18px;color:#fff}.v25-lightbox-close{position:fixed;right:18px;top:15px;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#111;font-size:28px}@media(max-width:899px){.v25-album-head{display:block}.v25-upload-btn{width:100%!important;margin-top:14px!important}.v25-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.v25-lightbox{padding:12px}.v25-lightbox img{max-width:97vw;max-height:80vh}}
 
 
-/* v26: laatste twee foto's op Home + foto verwijderen */
-.v25-photo-card{position:relative}
-.v26-photo-delete{position:absolute;right:8px;top:8px;z-index:4;width:34px;height:34px;border:0;border-radius:10px;background:rgba(17,17,17,.88);color:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-.v26-photo-delete:hover{background:#111;transform:translateY(-1px)}
-.v26-home-photos{margin-top:16px;background:#fff;border:1px solid #e8e8ec;border-radius:16px;padding:18px 20px;box-shadow:0 3px 14px rgba(0,0,0,.035)}
-.v26-home-photos-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
-.v26-home-photos-head span{font-size:11px;letter-spacing:.08em;font-weight:900;color:#777}
-.v26-home-photos-head h3{margin:2px 0 0;font-size:18px}
-.v26-home-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.v26-home-photo{border:0;background:#f7f7f8;border-radius:13px;overflow:hidden;padding:0;text-align:left;cursor:pointer}
-.v26-home-photo img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
-.v26-home-photo span{display:block;padding:8px 10px;color:#68686d;font-size:12px}
-.v26-home-photo-empty{grid-column:1/-1;padding:18px;background:#f7f7f8;border-radius:11px;color:#6e6e73}
-@media(max-width:899px){.v26-home-photos{display:none!important}.v26-photo-delete{right:6px;top:6px;width:32px;height:32px}}

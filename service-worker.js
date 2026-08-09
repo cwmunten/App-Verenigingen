@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v36-hard-meldingen-route';
+const CACHE = 'vappie-cache-v37-melding-fotos';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

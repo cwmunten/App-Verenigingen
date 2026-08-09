@@ -4,6 +4,7 @@
   const TABLE='vappie_meldingen';
   const READ_TABLE='vappie_melding_reads';
   const REACTION_TABLE='vappie_melding_reacties';
+  const MELD_PHOTO_BUCKET='vappie-melding-fotos';
   const SB_URL='https://ngijjzcizhwoeieaelgz.supabase.co';
   const SB_KEY='sb_publishable_fQFpxmC6XeNeJ0yOv52S7g_VIbs2jLg';
 
@@ -81,6 +82,11 @@
           <label><span>Tijd</span><input id="meldTime" type="time" value="${now.toTimeString().slice(0,5)}"></label>
           <label><span>Betreft</span><input id="meldSubject" placeholder="Waar gaat de melding over?"></label>
           <label class="full"><span>Melding</span><textarea id="meldMessage" rows="5" placeholder="Omschrijf de calamiteit zo duidelijk mogelijk..."></textarea></label>
+          <label class="full meld-photo-field">
+            <span>Foto's <small>(maximaal 5)</small></span>
+            <input id="meldPhotos" type="file" accept="image/*" multiple>
+            <div id="meldPhotoPreview" class="meld-photo-preview"></div>
+          </label>
         </div>
         <div class="meld-actions">
           <button type="button" class="secondary" id="meldCancel">Annuleren</button>
@@ -158,6 +164,105 @@
     return map;
   }
 
+
+  async function resizeMeldPhoto(file){
+    const bitmap=await createImageBitmap(file);
+    const max=1600;
+    const factor=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const w=Math.max(1,Math.round(bitmap.width*factor));
+    const h=Math.max(1,Math.round(bitmap.height*factor));
+    const canvas=document.createElement('canvas');
+    canvas.width=w; canvas.height=h;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.drawImage(bitmap,0,0,w,h);
+    bitmap.close?.();
+    return await new Promise((resolve,reject)=>{
+      canvas.toBlob(
+        blob=>blob?resolve(blob):reject(new Error('Foto kon niet worden verwerkt.')),
+        'image/jpeg',
+        0.80
+      );
+    });
+  }
+
+  function selectedMeldPhotos(){
+    return [...(document.getElementById('meldPhotos')?.files||[])];
+  }
+
+  function renderMeldPhotoPreview(){
+    const preview=document.getElementById('meldPhotoPreview');
+    const input=document.getElementById('meldPhotos');
+    if(!preview||!input)return;
+
+    const files=[...(input.files||[])];
+    if(files.length>5){
+      alert("Je kunt maximaal 5 foto's aan een melding toevoegen.");
+      input.value='';
+      preview.innerHTML='';
+      return;
+    }
+
+    preview.innerHTML='';
+    files.forEach(file=>{
+      const url=URL.createObjectURL(file);
+      const img=document.createElement('img');
+      img.src=url;
+      img.alt='Voorbeeld foto';
+      img.onload=()=>URL.revokeObjectURL(url);
+      preview.appendChild(img);
+    });
+  }
+
+  async function uploadMeldPhotos(meldingId){
+    const files=selectedMeldPhotos();
+    if(files.length>5)throw new Error("Je kunt maximaal 5 foto's toevoegen.");
+    if(!files.length)return;
+
+    const {c}=await session();
+    for(let i=0;i<files.length;i++){
+      const blob=await resizeMeldPhoto(files[i]);
+      const filename=`${meldingId}/${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}.jpg`;
+      const {error}=await c.storage.from(MELD_PHOTO_BUCKET).upload(filename,blob,{
+        contentType:'image/jpeg',
+        cacheControl:'3600',
+        upsert:false
+      });
+      if(error)throw error;
+    }
+  }
+
+  async function fetchMeldPhotos(meldingId){
+    const {c}=await session();
+    const {data,error}=await c.storage.from(MELD_PHOTO_BUCKET).list(String(meldingId),{
+      limit:5,
+      sortBy:{column:'created_at',order:'asc'}
+    });
+    if(error)return [];
+
+    const urls=[];
+    for(const f of (data||[]).filter(x=>x?.name&&!x.name.startsWith('.')).slice(0,5)){
+      const path=`${meldingId}/${f.name}`;
+      const {data:signed}=await c.storage.from(MELD_PHOTO_BUCKET).createSignedUrl(path,3600);
+      if(signed?.signedUrl)urls.push(signed.signedUrl);
+    }
+    return urls;
+  }
+
+  function meldPhotosHtml(urls){
+    if(!urls?.length)return '';
+    return `<div class="meld-attached-photos">${urls.map(u=>`<button type="button" class="meld-photo-thumb"><img src="${u}" alt="Foto bij melding"></button>`).join('')}</div>`;
+  }
+
+  function openMeldPhoto(url){
+    const box=document.createElement('div');
+    box.className='meld-photo-lightbox';
+    box.innerHTML=`<button type="button" class="meld-photo-close">×</button><img src="${url}" alt="Vergrote foto">`;
+    box.addEventListener('click',e=>{
+      if(e.target===box||e.target.closest('.meld-photo-close'))box.remove();
+    });
+    document.body.appendChild(box);
+  }
+
   async function saveNotice(){
     const row={
       name:document.getElementById('meldName')?.value.trim(),
@@ -182,6 +287,7 @@
       const {data,error}=await c.from(TABLE).insert(row).select().single();
       if(error)throw error;
       await markRead([data.id]);
+      await uploadMeldPhotos(data.id);
 
       document.getElementById('meldForm').hidden=true;
       tab='open';
@@ -261,6 +367,10 @@
       const reads=await readIds();
       const shown=notices.filter(n=>tab==='handled'?!!n.handled:!n.handled);
       const reactions=await fetchReactions(shown.map(n=>n.id));
+      const photosById=new Map();
+      for(const n of shown){
+        photosById.set(String(n.id),await fetchMeldPhotos(n.id));
+      }
 
       status.textContent=`${shown.length} melding${shown.length===1?'':'en'}`;
       const title=document.getElementById('meldListTitle');
@@ -280,6 +390,7 @@
             <small>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</small>
           </div>
           <p class="meld-message">${esc(n.message)}</p>
+          ${meldPhotosHtml(photosById.get(String(n.id)))}
 
           <label class="meld-handled-check">
             <input type="checkbox" data-handled ${n.handled?'checked':''}>
@@ -302,6 +413,11 @@
             e.preventDefault();
             addReaction(n.id,card);
           }
+        });
+
+        card.querySelectorAll('.meld-photo-thumb').forEach((btn,i)=>{
+          const urls=photosById.get(String(n.id))||[];
+          btn.addEventListener('click',()=>openMeldPhoto(urls[i]));
         });
 
         list.appendChild(card);
@@ -335,6 +451,7 @@
     document.getElementById('meldCancel').onclick=()=>form.hidden=true;
     document.getElementById('meldSave').onclick=saveNotice;
     document.getElementById('meldRefresh').onclick=()=>loadList(false);
+    document.getElementById('meldPhotos')?.addEventListener('change',renderMeldPhotoPreview);
 
     document.querySelectorAll('[data-meld-tab]').forEach(btn=>{
       btn.onclick=()=>{
