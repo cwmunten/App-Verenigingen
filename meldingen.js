@@ -12,6 +12,7 @@
   let active=false;
   let restoring=false;
   let tab='open';
+  let editingId=null;
 
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
@@ -53,9 +54,9 @@
       btn.addEventListener('click',openFromButton);
     }
 
-    const photo=nav.querySelector('[data-v25-page="photoalbum"]');
-    if(photo){
-      if(photo.previousElementSibling!==btn)photo.insertAdjacentElement('beforebegin',btn);
+    const occupancy=nav.querySelector('[data-page="occupancy"]');
+    if(occupancy){
+      if(occupancy.nextElementSibling!==btn)occupancy.insertAdjacentElement('afterend',btn);
     }else if(!btn.isConnected){
       nav.appendChild(btn);
     }
@@ -75,7 +76,7 @@
       </div>
 
       <section class="meldingen-form" id="meldForm" hidden>
-        <div class="meld-form-head"><h3>Nieuwe melding</h3><button type="button" id="meldClose">×</button></div>
+        <div class="meld-form-head"><h3 id="meldFormTitle">Nieuwe melding</h3><button type="button" id="meldClose">×</button></div>
         <div class="meld-grid">
           <label><span>Naam</span><input id="meldName" placeholder="Naam melder"></label>
           <label><span>Datum</span><input id="meldDate" type="date" value="${now.toISOString().slice(0,10)}"></label>
@@ -263,14 +264,55 @@
     document.body.appendChild(box);
   }
 
+
+  function resetMeldForm(){
+    editingId=null;
+    const form=document.getElementById('meldForm');
+    if(!form)return;
+
+    const now=new Date();
+    document.getElementById('meldFormTitle').textContent='Nieuwe melding';
+    document.getElementById('meldSave').textContent='✓ Melding opslaan';
+    document.getElementById('meldName').value='';
+    document.getElementById('meldDate').value=now.toISOString().slice(0,10);
+    document.getElementById('meldTime').value=now.toTimeString().slice(0,5);
+    document.getElementById('meldSubject').value='';
+    document.getElementById('meldMessage').value='';
+    const photoInput=document.getElementById('meldPhotos');
+    if(photoInput)photoInput.value='';
+    const preview=document.getElementById('meldPhotoPreview');
+    if(preview)preview.innerHTML='';
+  }
+
+  function editNotice(n){
+    editingId=n.id;
+    const form=document.getElementById('meldForm');
+    if(!form)return;
+    form.hidden=false;
+
+    document.getElementById('meldFormTitle').textContent='Melding bewerken';
+    document.getElementById('meldSave').textContent='✓ Wijzigingen opslaan';
+    document.getElementById('meldName').value=n.name||'';
+    document.getElementById('meldDate').value=n.notice_date||'';
+    document.getElementById('meldTime').value=String(n.notice_time||'').slice(0,5);
+    document.getElementById('meldSubject').value=n.subject||'';
+    document.getElementById('meldMessage').value=n.message||'';
+
+    const photoInput=document.getElementById('meldPhotos');
+    if(photoInput)photoInput.value='';
+    const preview=document.getElementById('meldPhotoPreview');
+    if(preview)preview.innerHTML="<small>Bestaande foto's blijven behouden. Kies alleen nieuwe foto's als je extra foto's wilt toevoegen.</small>";
+
+    form.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
   async function saveNotice(){
     const row={
       name:document.getElementById('meldName')?.value.trim(),
       notice_date:document.getElementById('meldDate')?.value,
       notice_time:document.getElementById('meldTime')?.value,
       subject:document.getElementById('meldSubject')?.value.trim(),
-      message:document.getElementById('meldMessage')?.value.trim(),
-      handled:false
+      message:document.getElementById('meldMessage')?.value.trim()
     };
 
     if(!row.name||!row.notice_date||!row.notice_time||!row.subject||!row.message){
@@ -279,17 +321,34 @@
     }
 
     const btn=document.getElementById('meldSave');
-    if(btn){btn.disabled=true;btn.textContent='Opslaan…';}
+    if(btn){btn.disabled=true;btn.textContent=editingId?'Wijzigingen opslaan…':'Opslaan…';}
 
     try{
       const {c,session:s}=await session();
-      row.created_by=s.user.id;
-      const {data,error}=await c.from(TABLE).insert(row).select().single();
-      if(error)throw error;
-      await markRead([data.id]);
-      await uploadMeldPhotos(data.id);
+
+      if(editingId){
+        const {error}=await c.from(TABLE).update(row).eq('id',editingId);
+        if(error)throw error;
+
+        const newFiles=selectedMeldPhotos();
+        if(newFiles.length){
+          const existing=await fetchMeldPhotos(editingId);
+          if(existing.length+newFiles.length>5){
+            throw new Error(`Deze melding heeft al ${existing.length} foto('s). Maximaal 5 foto's per melding.`);
+          }
+          await uploadMeldPhotos(editingId);
+        }
+      }else{
+        row.handled=false;
+        row.created_by=s.user.id;
+        const {data,error}=await c.from(TABLE).insert(row).select().single();
+        if(error)throw error;
+        await markRead([data.id]);
+        await uploadMeldPhotos(data.id);
+      }
 
       document.getElementById('meldForm').hidden=true;
+      resetMeldForm();
       tab='open';
       syncTabs();
       await loadList(true);
@@ -297,7 +356,10 @@
     }catch(err){
       alert(`Melding opslaan mislukt: ${err?.message||err}`);
     }finally{
-      if(btn){btn.disabled=false;btn.textContent='✓ Melding opslaan';}
+      if(btn){
+        btn.disabled=false;
+        btn.textContent=editingId?'✓ Wijzigingen opslaan':'✓ Melding opslaan';
+      }
     }
   }
 
@@ -387,7 +449,10 @@
         card.innerHTML=`
           <div class="meld-item-head">
             <div><strong>${esc(n.subject)}</strong>${unread?'<span class="meld-new">Nieuw</span>':''}</div>
-            <small>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</small>
+            <div class="meld-item-actions">
+              <small>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</small>
+              <button type="button" class="meld-edit-btn" data-edit-notice>✎ Bewerken</button>
+            </div>
           </div>
           <p class="meld-message">${esc(n.message)}</p>
           ${meldPhotosHtml(photosById.get(String(n.id)))}
@@ -406,6 +471,7 @@
             </div>
           </section>`;
 
+        card.querySelector('[data-edit-notice]').addEventListener('click',()=>editNotice(n));
         card.querySelector('[data-handled]').addEventListener('change',e=>setHandled(n.id,e.target.checked));
         card.querySelector('[data-reaction-send]').addEventListener('click',()=>addReaction(n.id,card));
         card.querySelector('[data-reaction-input]').addEventListener('keydown',e=>{
@@ -444,11 +510,12 @@
     if(!form)return;
 
     document.getElementById('meldNew').onclick=()=>{
+      resetMeldForm();
       form.hidden=false;
       document.getElementById('meldName')?.focus();
     };
-    document.getElementById('meldClose').onclick=()=>form.hidden=true;
-    document.getElementById('meldCancel').onclick=()=>form.hidden=true;
+    document.getElementById('meldClose').onclick=()=>{form.hidden=true;resetMeldForm();};
+    document.getElementById('meldCancel').onclick=()=>{form.hidden=true;resetMeldForm();};
     document.getElementById('meldSave').onclick=saveNotice;
     document.getElementById('meldRefresh').onclick=()=>loadList(false);
     document.getElementById('meldPhotos')?.addEventListener('change',renderMeldPhotoPreview);
@@ -490,14 +557,17 @@
       const notices=await fetchNotices();
       const n=notices.find(x=>!x.handled);
 
-      // Home toont uitsluitend de laatste OPEN melding.
-      // Zodra alles is afgehandeld verdwijnt het blok volledig.
       if(!n){
         block.remove();
         return;
       }
 
-      block.innerHTML=`<button type="button" class="meld-home-card"><span>!</span><div><small>LAATSTE OPEN MELDING</small><strong>${esc(n.subject)}</strong><em>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</em><p>${esc(n.message)}</p></div><b>Bekijk →</b></button>`;
+      const photos=await fetchMeldPhotos(n.id);
+      const homePhotos=photos.length
+        ? `<div class="meld-home-photos">${photos.map(u=>`<img src="${u}" alt="Foto bij melding">`).join('')}</div>`
+        : '';
+
+      block.innerHTML=`<button type="button" class="meld-home-card"><span>!</span><div><small>LAATSTE OPEN MELDING</small><strong>${esc(n.subject)}</strong><em>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</em><p>${esc(n.message)}</p>${homePhotos}</div><b>Bekijk →</b></button>`;
 
       const homeButton=block.querySelector('button');
       if(homeButton){

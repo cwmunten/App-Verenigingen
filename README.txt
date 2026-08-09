@@ -164,3 +164,10 @@ v37
 - Foto's worden bij de melding als miniaturen getoond en klikbaar vergroot.
 - Reacties en Open/Afgehandeld blijven behouden.
 - SUPABASE_MELDINGEN_SETUP.sql opnieuw uitvoeren voor de nieuwe Storage bucket/policies.
+
+v38
+- Menuvolgorde: Home, Planning, Administratie, Financieel, Bezettingsoverzicht, Meldingen.
+- Eerdere meldingen kunnen via 'Bewerken' worden aangepast.
+- Bij bewerken kunnen extra foto's worden toegevoegd zolang totaal max. 5 blijft.
+- Foto's van de laatste OPEN melding worden ook op Home getoond.
+- Afgehandelde meldingen verdwijnen van Home.

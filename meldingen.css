@@ -78,3 +78,15 @@
 @media(max-width:899px){
   .meld-photo-preview,.meld-attached-photos{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* v38: menuvolgorde, bewerken en foto's op Home */
+.meld-item-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.meld-edit-btn{border:1px solid #d8d8dc;background:#fff;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:800;cursor:pointer}
+.meld-edit-btn:hover{background:#f4f4f5}
+.meld-home-photos{display:grid;grid-template-columns:repeat(5,minmax(0,82px));gap:6px;margin-top:10px}
+.meld-home-photos img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:7px}
+@media(max-width:899px){
+  .meld-item-actions{justify-content:flex-start;margin-top:5px}
+  .meld-home-photos{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

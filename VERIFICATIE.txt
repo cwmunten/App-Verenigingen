@@ -1,13 +1,13 @@
-VAPPIE v37 VERIFICATIE
+VAPPIE v38 VERIFICATIE
 ======================
 OK - enhancements.js
 OK - meldingen.js
 OK - service-worker.js
-OK - Fotoalbum verwijderd
-OK - max 5 foto-input
-OK - foto upload bucket
-OK - foto weergave
-OK - Meldingen route behouden
-OK - Reacties behouden
-OK - Afgehandeld behouden
-OK - SQL bucket
+OK - menu order
+OK - edit button
+OK - update logic
+OK - home photos
+OK - home only open
+OK - max 5 retained
+OK - reactions retained
+OK - handled retained
