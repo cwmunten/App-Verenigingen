@@ -109,3 +109,13 @@
   text-align:center;
 }
 .sidebar-nav [data-meldingen-page] .meldingen-badge[hidden]{display:none!important}
+
+
+/* v40: smartphone app-badge activatie */
+.meld-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.meld-badge-permission{font-size:12px;white-space:nowrap}
+.meld-badge-permission:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:899px){
+  .meld-head-actions{display:grid;grid-template-columns:1fr;width:100%;margin-top:12px}
+  .meld-head-actions button{width:100%!important}
+}

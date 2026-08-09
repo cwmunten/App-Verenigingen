@@ -1,9 +1,10 @@
-VAPPIE v39 VERIFICATIE
+VAPPIE v40 VERIFICATIE
 ======================
 OK - meldingen.js
 OK - service-worker.js
-OK - open count logic
+OK - permission button
+OK - request permission
 OK - badge uses open count
-OK - badge hides at zero
-OK - app badge uses open count
-OK - handled updates badge
+OK - permission guarded
+OK - resync on visibility
+OK - clear badge zero

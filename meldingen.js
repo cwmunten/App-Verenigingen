@@ -72,7 +72,10 @@
           <h1>Meldingen</h1>
           <p>Leg calamiteiten vast, reageer erop en rond ze af.</p>
         </div>
-        <button type="button" class="primary" id="meldNew">＋ Nieuwe melding</button>
+        <div class="meld-head-actions">
+          <button type="button" class="secondary meld-badge-permission" id="meldBadgePermission" hidden>● App-badge activeren</button>
+          <button type="button" class="primary" id="meldNew">＋ Nieuwe melding</button>
+        </div>
       </div>
 
       <section class="meldingen-form" id="meldForm" hidden>
@@ -505,6 +508,64 @@
     });
   }
 
+
+  function isStandaloneApp(){
+    return window.matchMedia?.('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+  }
+
+  function updateBadgePermissionButton(){
+    const btn=document.getElementById('meldBadgePermission');
+    if(!btn)return;
+
+    const supportsBadge=('setAppBadge' in navigator);
+    const supportsNotifications=('Notification' in window);
+    const smartphone=window.matchMedia?.('(max-width: 899px)').matches;
+
+    // Alleen tonen waar het relevant is: smartphone/PWA + Badging API.
+    if(!supportsBadge || !supportsNotifications || !smartphone){
+      btn.hidden=true;
+      return;
+    }
+
+    if(Notification.permission==='granted'){
+      btn.hidden=true;
+      return;
+    }
+
+    btn.hidden=false;
+    btn.textContent=Notification.permission==='denied'
+      ? 'Badge-toestemming geblokkeerd'
+      : '● App-badge activeren';
+    btn.disabled=Notification.permission==='denied';
+    btn.title=Notification.permission==='denied'
+      ? 'Sta meldingen/badges toe via de instellingen van je telefoon.'
+      : 'Eenmalig toestemming geven zodat het rode cijfer op het app-icoon zichtbaar kan worden.';
+  }
+
+  async function requestBadgePermission(){
+    const btn=document.getElementById('meldBadgePermission');
+    if(!('Notification' in window)){
+      alert('Deze telefoon/browser ondersteunt app-badges niet.');
+      return;
+    }
+
+    try{
+      const permission=await Notification.requestPermission();
+      updateBadgePermissionButton();
+
+      if(permission==='granted'){
+        await refreshState();
+        alert('App-badge is geactiveerd. Het aantal open meldingen kan nu als rood cijfer op het Vappie-icoon worden getoond.');
+      }else if(permission==='denied'){
+        alert('Toestemming is geweigerd. Je kunt badges later inschakelen via Instellingen > Meldingen > Vappie.');
+      }
+    }catch(err){
+      console.warn('Badge-toestemming:',err);
+      if(btn)btn.hidden=false;
+    }
+  }
+
   function bindPage(){
     const form=document.getElementById('meldForm');
     if(!form)return;
@@ -518,6 +579,8 @@
     document.getElementById('meldCancel').onclick=()=>{form.hidden=true;resetMeldForm();};
     document.getElementById('meldSave').onclick=saveNotice;
     document.getElementById('meldRefresh').onclick=()=>loadList(false);
+    document.getElementById('meldBadgePermission')?.addEventListener('click',requestBadgePermission);
+    updateBadgePermissionButton();
     document.getElementById('meldPhotos')?.addEventListener('change',renderMeldPhotoPreview);
 
     document.querySelectorAll('[data-meld-tab]').forEach(btn=>{
@@ -602,12 +665,19 @@
         badge.title=`${openCount} open melding${openCount===1?'':'en'}`;
       }
 
-      // Ook de PWA/app-badge volgt voortaan het aantal open meldingen.
+      // PWA/app-badge: op iPhone/iPad verschijnt deze pas nadat de gebruiker
+      // meldingen/badges heeft toegestaan voor de Home Screen web app.
       try{
-        if(openCount>0&&navigator.setAppBadge)await navigator.setAppBadge(openCount);
-        else if(openCount===0&&navigator.clearAppBadge)await navigator.clearAppBadge();
-      }catch{}
+        const permissionOk=!('Notification' in window) || Notification.permission==='granted';
+        if(permissionOk){
+          if(openCount>0&&navigator.setAppBadge)await navigator.setAppBadge(openCount);
+          else if(openCount===0&&navigator.clearAppBadge)await navigator.clearAppBadge();
+        }
+      }catch(err){
+        console.warn('App-badge bijwerken:',err);
+      }
 
+      updateBadgePermissionButton();
       if(!active)await renderLatest();
     }catch(err){
       console.warn('Meldingenstatus:',err);
@@ -664,6 +734,13 @@
     ensureHome();
     refreshState();
   },350);
+
+
+  // Bij terugkeer naar Vappie direct het badgecijfer synchroniseren.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')refreshState();
+  });
+  window.addEventListener('pageshow',()=>refreshState());
 
   setInterval(refreshState,60000);
 })();

@@ -177,3 +177,11 @@ v39
 - Zodra een melding op Afgehandeld wordt gezet, daalt de badge direct.
 - Bij 0 open meldingen verdwijnt de badge.
 - PWA/app-badge volgt eveneens het aantal open meldingen.
+
+v40
+- Smartphone/PWA: eenmalige knop 'App-badge activeren' toegevoegd op pagina Meldingen.
+- Op iPhone/iPad vereist Apple toestemming voor Meldingen voordat het rode badgecijfer op het Home Screen-icoon zichtbaar is.
+- Na toestemming gebruikt Vappie het aantal OPEN meldingen voor navigator.setAppBadge().
+- Bij terugkeer naar de app (pageshow/visibilitychange) wordt het badgecijfer direct opnieuw gesynchroniseerd.
+- Bij 0 open meldingen wordt de app-badge verwijderd.
+- Let op: zonder Web Push kan het badgecijfer niet worden vernieuwd terwijl Vappie volledig gesloten is; het wordt gesynchroniseerd zodra Vappie weer actief wordt.
