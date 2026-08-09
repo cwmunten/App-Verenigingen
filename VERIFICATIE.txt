@@ -1,10 +1,14 @@
-VAPPIE v34 VERIFICATIE
+VAPPIE v35 VERIFICATIE
 ======================
 OK - meldingen.js
 OK - enhancements.js
 OK - service-worker.js
-OK - direct click handler
-OK - delegated handler removed
-OK - page rendering
-OK - five fields
-OK - fallback callable
+OK - inline menu route
+OK - global open function
+OK - capture fallback
+OK - page render
+OK - all 5 fields
+OK - reactions
+OK - handled folder
+OK - handled checkbox
+OK - SQL migration

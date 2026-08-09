@@ -141,3 +141,10 @@ v34
 - De document-level delegated Meldingen-click is verwijderd om conflicten met andere listeners te voorkomen.
 - Extra fallback: window.VappieOpenMeldingen() en #meldingen hash.
 - Bestaande v30 kernfunctionaliteit blijft ongewijzigd.
+
+v35
+- Meldingenknop heeft nu drie onafhankelijke routes: inline onclick, globale functie en capture fallback.
+- Reacties per melding toegevoegd.
+- Checkbox Afgehandeld toegevoegd.
+- Tabs/mappen Open en Afgehandeld toegevoegd.
+- SUPABASE_MELDINGEN_SETUP.sql opnieuw uitvoeren voor nieuwe kolommen/tabel/policies.
