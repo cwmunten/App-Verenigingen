@@ -1,7 +1,7 @@
-const CACHE = 'vappie-cache-v31-meldingen';
+const CACHE = 'vappie-cache-v32-meldingen';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
-  '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
+  '/enhancements.css', '/enhancements.js', '/meldingen.css', '/meldingen.js', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png',
   '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'
 ];
@@ -41,7 +41,7 @@ self.addEventListener('fetch', event => {
 
   const sameOrigin = url.origin === self.location.origin;
   const liveCode = sameOrigin && [
-    '/app.js','/styles.css','/seedData.js','/enhancements.js','/enhancements.css','/manifest.webmanifest'
+    '/app.js','/styles.css','/seedData.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/manifest.webmanifest'
   ].includes(url.pathname);
 
   if (liveCode) {

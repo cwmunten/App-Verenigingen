@@ -1,9 +1,10 @@
-VAPPIE v31 VERIFICATIE
+VAPPIE v32 VERIFICATIE
 ======================
+OK - meldingen.js
 OK - enhancements.js
 OK - service-worker.js
-OK - Meldingen menu
-OK - Home laatste melding
-OK - Velden
-OK - App badge
-OK - Read receipts
+OK - menu
+OK - home insertion
+OK - page render
+OK - fields
+OK - read badge

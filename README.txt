@@ -127,10 +127,10 @@ v30:
 - Alleen bij een daadwerkelijk nieuwe/verwijderde foto worden de Home-afbeeldingen vervangen.
 - Geen periodiek knipperen of onnodig opnieuw laden.
 
-v31 Meldingen:
-- Nieuw menu-item Meldingen boven Fotoalbum.
-- Velden: Naam, Datum, Tijd, Betreft, Melding.
-- Laatste melding op Home direct onder zoekfunctie.
-- Ongelezen teller in menu + PWA app badge waar ondersteund.
-- Openen van Meldingen markeert ongelezen meldingen als gelezen.
+v32 Meldingen:
+- Nieuw zelfstandig meldingen.js/meldingen.css om conflicten met enhancements.js te voorkomen.
+- Meldingen staat boven Fotoalbum.
+- Home toont altijd Meldingen direct onder de zoekfunctie.
+- De Meldingenpagina bevat Naam, Datum, Tijd, Betreft en Melding.
+- Ongelezen teller + app-badge waar ondersteund.
 - SUPABASE_MELDINGEN_SETUP.sql éénmalig uitvoeren.

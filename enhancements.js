@@ -275,9 +275,7 @@
     v18ColorDayparts();
     v25EnsurePhotoAlbumNav();
     v25OrderPhotoNav();
-    v31EnsureNav();
     v26RefreshHomePhotos();
-    v31RenderHomeLatest();
   }
 
 
@@ -819,171 +817,6 @@
     }
   }
 
-
-  // ===== v31 Meldingen =====
-  const V31_NOTICE_TABLE='vappie_meldingen';
-  const V31_READ_TABLE='vappie_melding_reads';
-  let v31ClientRef=null;
-
-  async function v31Client(){
-    if(v31ClientRef)return v31ClientRef;
-    if(!window.supabase?.createClient){
-      await new Promise((resolve,reject)=>{
-        const s=document.createElement('script');
-        s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-        s.onload=resolve;s.onerror=()=>reject(new Error('Supabase-module kon niet worden geladen.'));
-        document.head.appendChild(s);
-      });
-    }
-    v31ClientRef=window.supabase.createClient(V25_SB_URL,V25_SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-    return v31ClientRef;
-  }
-
-  async function v31Session(){
-    const client=await v31Client();
-    const {data:{session}}=await client.auth.getSession();
-    if(!session)throw new Error('Je bent niet aangemeld bij Supabase.');
-    return {client,session};
-  }
-
-  function v31EnsureNav(){
-    const nav=document.querySelector('.sidebar-nav'); if(!nav)return;
-    let btn=nav.querySelector('[data-v31-page="meldingen"]');
-    if(!btn){
-      btn=document.createElement('button');
-      btn.type='button';btn.dataset.v31Page='meldingen';
-      btn.innerHTML='<b>!</b><span>Meldingen</span><em class="v31-nav-badge" hidden>0</em>';
-      btn.onclick=()=>{document.querySelectorAll('.sidebar-nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById('nav')?.classList.remove('open');v31RenderPage()};
-      nav.appendChild(btn);
-    }
-    const photo=nav.querySelector('[data-v25-page="photoalbum"]');
-    if(photo && photo.previousElementSibling!==btn)photo.insertAdjacentElement('beforebegin',btn);
-  }
-
-  function v31PageHtml(){
-    const now=new Date(), d=now.toISOString().slice(0,10), t=now.toTimeString().slice(0,5);
-    return `<section class="v31-page">
-      <div class="v31-head"><div><span class="eyebrow">TEAM VERENIGINGEN</span><h1>Meldingen</h1><p>Leg calamiteiten en bijzonderheden direct vast.</p></div><button class="primary" id="v31New">＋ Nieuwe melding</button></div>
-      <div class="v31-form" id="v31Form" hidden>
-        <div class="v31-form-head"><h3>Nieuwe melding</h3><button id="v31Close">×</button></div>
-        <div class="v31-grid">
-          <label><span>Naam</span><input id="v31Name" placeholder="Naam melder"></label>
-          <label><span>Datum</span><input id="v31Date" type="date" value="${d}"></label>
-          <label><span>Tijd</span><input id="v31Time" type="time" value="${t}"></label>
-          <label><span>Betreft</span><input id="v31Subject" placeholder="Waar gaat de melding over?"></label>
-          <label class="full"><span>Melding</span><textarea id="v31Message" rows="5" placeholder="Omschrijf de calamiteit..."></textarea></label>
-        </div>
-        <div class="v31-actions"><button class="secondary" id="v31Cancel">Annuleren</button><button class="primary" id="v31Save">✓ Opslaan</button></div>
-      </div>
-      <div class="v31-list-head"><div><span>MELDINGENLOGBOEK</span><h3>Alle meldingen</h3></div><button class="secondary" id="v31Refresh">↻ Vernieuwen</button></div>
-      <div id="v31Status" class="v31-status">Laden…</div><div id="v31List" class="v31-list"></div>
-    </section>`;
-  }
-
-  async function v31RenderPage(){
-    const main=document.querySelector('.workspace-main'); if(!main)return;
-    main.className='workspace-main main';main.innerHTML=v31PageHtml();
-    const show=()=>document.getElementById('v31Form').hidden=false, hide=()=>document.getElementById('v31Form').hidden=true;
-    document.getElementById('v31New').onclick=show;document.getElementById('v31Close').onclick=hide;document.getElementById('v31Cancel').onclick=hide;
-    document.getElementById('v31Save').onclick=v31Save;document.getElementById('v31Refresh').onclick=()=>v31Load(true);
-    await v31Load(true);
-  }
-
-  async function v31Save(){
-    const row={
-      name:document.getElementById('v31Name').value.trim(),
-      notice_date:document.getElementById('v31Date').value,
-      notice_time:document.getElementById('v31Time').value,
-      subject:document.getElementById('v31Subject').value.trim(),
-      message:document.getElementById('v31Message').value.trim()
-    };
-    if(Object.values(row).some(v=>!v))return alert('Vul alle velden volledig in.');
-    try{
-      const {client,session}=await v31Session();row.created_by=session.user.id;
-      const {data,error}=await client.from(V31_NOTICE_TABLE).insert(row).select().single();if(error)throw error;
-      await v31MarkRead([data.id]);
-      document.getElementById('v31Form').hidden=true;
-      await v31Load(true);await v31RefreshState(true);
-    }catch(err){alert(`Melding opslaan mislukt: ${err?.message||err}`)}
-  }
-
-  async function v31Fetch(limit=100){
-    const {client}=await v31Session();
-    const {data,error}=await client.from(V31_NOTICE_TABLE).select('*').order('created_at',{ascending:false}).limit(limit);
-    if(error)throw error;return data||[];
-  }
-
-  async function v31ReadIds(){
-    const {client,session}=await v31Session();
-    const {data,error}=await client.from(V31_READ_TABLE).select('melding_id').eq('user_id',session.user.id);
-    if(error)throw error;return new Set((data||[]).map(x=>String(x.melding_id)));
-  }
-
-  async function v31MarkRead(ids){
-    const {client,session}=await v31Session();
-    const rows=[...new Set(ids.map(String))].map(id=>({user_id:session.user.id,melding_id:id,read_at:new Date().toISOString()}));
-    if(!rows.length)return;
-    const {error}=await client.from(V31_READ_TABLE).upsert(rows,{onConflict:'user_id,melding_id'});if(error)throw error;
-  }
-
-  async function v31Load(markRead=false){
-    const status=document.getElementById('v31Status'), list=document.getElementById('v31List');if(!status||!list)return;
-    try{
-      const notices=await v31Fetch(), read=await v31ReadIds();
-      status.textContent=`${notices.length} melding${notices.length===1?'':'en'}`;list.innerHTML='';
-      for(const n of notices){
-        const unread=!read.has(String(n.id)), el=document.createElement('article');
-        el.className=`v31-item${unread?' unread':''}`;
-        el.innerHTML=`<div><strong>${esc(n.subject)}</strong>${unread?'<span class="v31-new">Nieuw</span>':''}<small>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</small></div><p>${esc(n.message)}</p>`;
-        list.appendChild(el);
-      }
-      if(markRead){
-        const ids=notices.filter(n=>!read.has(String(n.id))).map(n=>n.id);
-        if(ids.length)await v31MarkRead(ids);
-        await v31RefreshState(true);
-      }
-    }catch(err){status.textContent=`Meldingen niet beschikbaar: ${err?.message||err}`}
-  }
-
-  function v31HomeBlock(){
-    const main=document.querySelector('.workspace-main'), search=main?.querySelector('.search-hero');
-    const home=!!document.querySelector('.sidebar-nav [data-page="home"].active');
-    if(!main||!search||!home)return null;
-    let block=main.querySelector('.v31-home-latest');
-    if(!block){block=document.createElement('section');block.className='v31-home-latest';search.insertAdjacentElement('afterend',block)}
-    return block;
-  }
-
-  async function v31RenderHomeLatest(notices){
-    const block=v31HomeBlock();if(!block)return;
-    const n=(notices||await v31Fetch(1))[0];
-    if(!n){block.hidden=true;block.innerHTML='';return}
-    block.hidden=false;
-    block.innerHTML=`<button class="v31-home-card"><span>!</span><div><small>LAATSTE MELDING</small><strong>${esc(n.subject)}</strong><em>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</em><p>${esc(n.message)}</p></div><b>Bekijk →</b></button>`;
-    block.querySelector('button').onclick=()=>document.querySelector('[data-v31-page="meldingen"]')?.click();
-  }
-
-  async function v31Badge(count){
-    const n=Math.max(0,Number(count)||0), badge=document.querySelector('.v31-nav-badge');
-    if(badge){badge.hidden=n===0;badge.textContent=String(n)}
-    try{
-      if(n&&navigator.setAppBadge)await navigator.setAppBadge(n);
-      else if(!n&&navigator.clearAppBadge)await navigator.clearAppBadge();
-    }catch{}
-  }
-
-  async function v31RefreshState(forceHome=false){
-    try{
-      const notices=await v31Fetch(), read=await v31ReadIds();
-      const unread=notices.filter(n=>!read.has(String(n.id))).length;
-      await v31Badge(unread);
-      if(forceHome||document.querySelector('.sidebar-nav [data-page="home"].active'))await v31RenderHomeLatest(notices.slice(0,1));
-    }catch(err){console.warn('Meldingenstatus:',err)}
-  }
-
-  setInterval(v31RefreshState,60000);
-  setTimeout(v31RefreshState,700);
-
   const obs=new MutationObserver(mutations=>{
     const onlyPhotoChanges=mutations.every(m=>{
       const target=m.target?.nodeType===1 ? m.target : m.target?.parentElement;
@@ -1008,7 +841,6 @@
     v18ColorDayparts();
     v25EnsurePhotoAlbumNav();
     v25OrderPhotoNav();
-    v31EnsureNav();
   },5000);
 
   // v30: stille controle iedere 90 seconden.
