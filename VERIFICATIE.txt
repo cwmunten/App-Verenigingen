@@ -1,14 +1,14 @@
-VAPPIE v35 VERIFICATIE
+VAPPIE v36 VERIFICATIE
 ======================
 OK - meldingen.js
 OK - enhancements.js
 OK - service-worker.js
-OK - inline menu route
-OK - global open function
-OK - capture fallback
+OK - pointerdown capture route
+OK - button direct pointerdown
+OK - global opener
 OK - page render
-OK - all 5 fields
-OK - reactions
-OK - handled folder
-OK - handled checkbox
-OK - SQL migration
+OK - home only open
+OK - handled support
+OK - reaction support
+OK - runtime openPage
+  RUNTIME_OK

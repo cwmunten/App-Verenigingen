@@ -38,9 +38,18 @@
       btn.type='button';
       btn.setAttribute('data-meldingen-page','1');
       btn.setAttribute('aria-label','Meldingen openen');
-      // Inline onclick is deliberate: it survives DOM movement/reordering and does not depend on listener binding.
-      btn.setAttribute('onclick',"window.VappieOpenMeldingen(); return false;");
       btn.innerHTML='<b>!</b><span>Meldingen</span><em class="meldingen-badge" hidden>0</em>';
+    }
+
+    if(btn.dataset.v36Bound!=='1'){
+      btn.dataset.v36Bound='1';
+      const openFromButton=(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        window.VappieOpenMeldingen();
+      };
+      btn.addEventListener('pointerdown',openFromButton);
+      btn.addEventListener('click',openFromButton);
     }
 
     const photo=nav.querySelector('[data-v25-page="photoalbum"]');
@@ -362,16 +371,30 @@
 
     try{
       const notices=await fetchNotices();
-      const n=notices.find(x=>!x.handled) || notices[0];
+      const n=notices.find(x=>!x.handled);
 
+      // Home toont uitsluitend de laatste OPEN melding.
+      // Zodra alles is afgehandeld verdwijnt het blok volledig.
       if(!n){
-        block.innerHTML='<button type="button" class="meld-home-card empty"><span>!</span><div><small>MELDINGEN</small><strong>Nog geen meldingen</strong><em>Nieuwe calamiteitenmeldingen verschijnen hier.</em></div><b>Open →</b></button>';
-      }else{
-        block.innerHTML=`<button type="button" class="meld-home-card"><span>!</span><div><small>${n.handled?'LAATSTE MELDING':'LAATSTE OPEN MELDING'}</small><strong>${esc(n.subject)}</strong><em>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</em><p>${esc(n.message)}</p></div><b>Bekijk →</b></button>`;
+        block.remove();
+        return;
       }
 
-      // Same global function as the menu button, so Home and menu follow identical routing.
-      block.querySelector('button').setAttribute('onclick',"window.VappieOpenMeldingen(); return false;");
+      block.innerHTML=`<button type="button" class="meld-home-card"><span>!</span><div><small>LAATSTE OPEN MELDING</small><strong>${esc(n.subject)}</strong><em>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</em><p>${esc(n.message)}</p></div><b>Bekijk →</b></button>`;
+
+      const homeButton=block.querySelector('button');
+      if(homeButton){
+        homeButton.addEventListener('pointerdown',e=>{
+          e.preventDefault();
+          e.stopPropagation();
+          window.VappieOpenMeldingen();
+        });
+        homeButton.addEventListener('click',e=>{
+          e.preventDefault();
+          e.stopPropagation();
+          window.VappieOpenMeldingen();
+        });
+      }
     }catch{}
   }
 
@@ -407,16 +430,23 @@
     return false;
   };
 
-  // Capture fallback. Zelfs als een andere module de button-listener vervangt,
-  // wordt een klik op data-meldingen-page hier nog afgehandeld.
-  document.addEventListener('click',e=>{
+  // v36: harde route op POINTERDOWN in capture-fase.
+  // Deze draait vóór onclick/click-handlers van app.js en enhancements.js.
+  const interceptMeldingen=(e)=>{
     const meld=e.target.closest?.('[data-meldingen-page]');
-    if(meld){
-      e.preventDefault();
-      e.stopPropagation();
-      window.VappieOpenMeldingen();
-      return;
-    }
+    if(!meld)return false;
+    e.preventDefault();
+    e.stopPropagation();
+    window.VappieOpenMeldingen();
+    return true;
+  };
+
+  document.addEventListener('pointerdown',e=>{
+    interceptMeldingen(e);
+  },true);
+
+  document.addEventListener('click',e=>{
+    if(interceptMeldingen(e))return;
 
     if(e.target.closest?.('.sidebar-nav [data-page], [data-v25-page="photoalbum"], .sidebar-brand[data-page="home"]')){
       active=false;

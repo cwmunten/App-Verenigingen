@@ -148,3 +148,10 @@ v35
 - Checkbox Afgehandeld toegevoegd.
 - Tabs/mappen Open en Afgehandeld toegevoegd.
 - SUPABASE_MELDINGEN_SETUP.sql opnieuw uitvoeren voor nieuwe kolommen/tabel/policies.
+
+v36 HARD FIX
+- Meldingen opent nu al op pointerdown in capture-fase, dus vóór andere Vappie click-handlers.
+- De knop zelf heeft daarnaast pointerdown én click listeners.
+- Home toont alleen de laatste OPEN melding.
+- Zodra die melding Afgehandeld wordt en er geen andere open melding is, verdwijnt het Meldingenblok van Home.
+- Reacties en tabs Open/Afgehandeld uit v35 blijven behouden.
