@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v30-photo-check-90s';
+const CACHE = 'vappie-cache-v31-meldingen';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

@@ -1,7 +1,9 @@
-VAPPIE v26 VERIFICATIE
+VAPPIE v31 VERIFICATIE
 ======================
 OK - enhancements.js
 OK - service-worker.js
-OK - Home laatste 2 foto's
-OK - Foto verwijderen
-OK - Delete policy
+OK - Meldingen menu
+OK - Home laatste melding
+OK - Velden
+OK - App badge
+OK - Read receipts
