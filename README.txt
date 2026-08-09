@@ -127,10 +127,11 @@ v30:
 - Alleen bij een daadwerkelijk nieuwe/verwijderde foto worden de Home-afbeeldingen vervangen.
 - Geen periodiek knipperen of onnodig opnieuw laden.
 
-v32 Meldingen:
-- Nieuw zelfstandig meldingen.js/meldingen.css om conflicten met enhancements.js te voorkomen.
-- Meldingen staat boven Fotoalbum.
-- Home toont altijd Meldingen direct onder de zoekfunctie.
-- De Meldingenpagina bevat Naam, Datum, Tijd, Betreft en Melding.
-- Ongelezen teller + app-badge waar ondersteund.
+v33 SAFE Meldingen
+- Teruggebouwd vanaf de bekende werkende v30-basis.
+- Core bestanden app.js, seedData.js, styles.css en enhancements.js blijven op v30 en zijn inhoudelijk NIET gewijzigd.
+- Meldingen is volledig geïsoleerd in meldingen.js en meldingen.css.
+- Een fout in Meldingen kan daardoor de basisapp niet meer wit maken.
+- Menu-item Meldingen staat boven Fotoalbum.
+- Home toont het Meldingenblok direct onder de zoekfunctie.
 - SUPABASE_MELDINGEN_SETUP.sql éénmalig uitvoeren.

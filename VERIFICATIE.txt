@@ -1,10 +1,11 @@
-VAPPIE v32 VERIFICATIE
+VAPPIE v33 VERIFICATIE
 ======================
 OK - meldingen.js
 OK - enhancements.js
 OK - service-worker.js
-OK - menu
-OK - home insertion
-OK - page render
-OK - fields
-OK - read badge
+OK - core app remains v30
+OK - meldingen assets linked
+OK - home block code
+OK - meldingen page
+OK - 5 input fields
+OK - badge support
