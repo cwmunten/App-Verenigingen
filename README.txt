@@ -192,3 +192,12 @@ v42
 - Beheerder kan switchen via Externe weergave / Terug naar beheer.
 - Externe portal bevat melding, max 5 foto's, eigen meldingen, status en reacties.
 - Extra RLS voor eigen meldingen/reacties en blokkade van vappie_state.
+
+v43
+- Autorisatierol external_reporter verplaatst naar app_metadata.
+- Tekst onder Meldingen verwijderd.
+- Knop App-badge activeren verborgen/verwijderd.
+- Afgehandelde meldingen kunnen door beheer definitief verwijderd worden.
+- Externe gebruikers kunnen alleen melden, eigen meldingen bekijken en reageren.
+- Automatische centrale synchronisatie bij opstart van beheeraccount.
+- SQL/RLS aangepast voor app_metadata en admin-only verwijderen van uitsluitend afgehandelde meldingen.

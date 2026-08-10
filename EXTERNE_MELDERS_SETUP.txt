@@ -1,17 +1,52 @@
-VAPPIE v42 - EXTERNE MELDERS
-================================
+VAPPIE v43 - EXTERNE MELDERS / APP_METADATA
+================================================
 
+BELANGRIJK
+De rol van een gebruiker wordt nu uitsluitend uit app_metadata gelezen.
+Dit is veiliger dan user_metadata, omdat de gebruiker zijn autorisatierol niet zelf kan aanpassen.
+
+EXTERNE GEBRUIKER AANMAKEN
 1. Maak in Supabase > Authentication > Users een gebruiker aan.
-2. Open die gebruiker en zet bij Raw user metadata bijvoorbeeld:
+2. Ga naar SQL Editor > New query.
+3. Gebruik onderstaande SQL en pas e-mail/naam aan:
 
-{
-  "role": "external_reporter",
-  "display_name": "Naam externe melder"
-}
+update auth.users
+set
+  raw_app_meta_data =
+    coalesce(raw_app_meta_data, '{}'::jsonb) ||
+    '{"role":"external_reporter"}'::jsonb,
+  raw_user_meta_data =
+    coalesce(raw_user_meta_data, '{}'::jsonb) ||
+    '{"display_name":"Naam externe melder"}'::jsonb
+where email = 'extern@vereniging.nl';
 
-3. Voer SUPABASE_MELDINGEN_SETUP.sql opnieuw uit.
-4. Externe gebruiker logt in via de normale Vappie-login.
-5. Daarna ziet die gebruiker ALLEEN de externe Meldingenportal.
-6. Een beheerder krijgt rechtsboven 'Externe weergave' en kan met 'Terug naar beheer' terug.
+4. Klik Run.
+5. Laat de gebruiker daarna opnieuw inloggen.
 
-Bestaande beheeraccounts hoeven geen rol te krijgen.
+CONTROLE
+select
+  email,
+  raw_app_meta_data,
+  raw_user_meta_data
+from auth.users
+where email = 'extern@vereniging.nl';
+
+Je moet bij raw_app_meta_data zien:
+{"role":"external_reporter"}
+
+BEHEERDERS
+Bestaande beheeraccounts hoeven geen external_reporter-rol te krijgen.
+Zij blijven volledige Vappie zien en kunnen via 'Externe weergave' testen.
+
+RECHTEN
+- Extern: melding maken, max. 5 foto's toevoegen, eigen meldingen bekijken en reageren.
+- Extern: NIET afhandelen, NIET bewerken, NIET verwijderen.
+- Beheer: volledige meldingenfunctie.
+- Verwijderen kan uitsluitend bij een melding die al op Afgehandeld staat.
+
+AUTOMATISCHE SYNCHRONISATIE
+Een beheeraccount haalt bij het opstarten automatisch de centrale vappie_state uit Supabase op.
+Als de centrale data afwijkt van lokaal, herlaadt Vappie éénmalig met de actuele centrale gegevens.
+
+SQL
+Voer SUPABASE_MELDINGEN_SETUP.sql uit om de aangepaste RLS-regels te activeren.

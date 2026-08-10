@@ -96,15 +96,14 @@ with check (bucket_id='vappie-melding-fotos');
 
 
 -- ===== v42 Externe melders =====
--- Zet bij een externe gebruiker in Supabase Authentication Raw user metadata:
--- {"role":"external_reporter","display_name":"Naam"}
+-- Zet de rol external_reporter in raw_app_meta_data (app_metadata).
 
 drop policy if exists "vappie meldingen lezen" on public.vappie_meldingen;
 create policy "vappie meldingen lezen"
 on public.vappie_meldingen for select
 to authenticated
 using (
-  coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+  coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter'
   or created_by = auth.uid()
 );
 
@@ -112,15 +111,15 @@ drop policy if exists "vappie meldingen bijwerken" on public.vappie_meldingen;
 create policy "vappie meldingen bijwerken"
 on public.vappie_meldingen for update
 to authenticated
-using (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter')
-with check (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter');
+using (coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter')
+with check (coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter');
 
 drop policy if exists "vappie reacties lezen" on public.vappie_melding_reacties;
 create policy "vappie reacties lezen"
 on public.vappie_melding_reacties for select
 to authenticated
 using (
-  coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+  coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter'
   or exists (
     select 1 from public.vappie_meldingen m
     where m.id = melding_id and m.created_by = auth.uid()
@@ -134,7 +133,7 @@ to authenticated
 with check (
   user_id = auth.uid()
   and (
-    coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+    coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter'
     or exists (
       select 1 from public.vappie_meldingen m
       where m.id = melding_id and m.created_by = auth.uid()
@@ -148,5 +147,17 @@ on public.vappie_state
 as restrictive
 for all
 to authenticated
-using (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter')
-with check (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter');
+using (coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter')
+with check (coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter');
+
+
+-- Alleen interne/beheeraccounts mogen een melding verwijderen,
+-- en uitsluitend wanneer de melding al Afgehandeld is.
+drop policy if exists "vappie meldingen verwijderen" on public.vappie_meldingen;
+create policy "vappie meldingen verwijderen"
+on public.vappie_meldingen for delete
+to authenticated
+using (
+  coalesce(auth.jwt()->'app_metadata'->>'role','internal') <> 'external_reporter'
+  and handled = true
+);

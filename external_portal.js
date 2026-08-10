@@ -7,6 +7,7 @@
   const REACTION_TABLE='vappie_melding_reacties';
   const PHOTO_BUCKET='vappie-melding-fotos';
   const PREVIEW_KEY='vappie-external-preview-v1';
+  const AUTO_SYNC_KEY='vappie-auto-sync-v43';
 
   let client=null;
   let currentUser=null;
@@ -16,7 +17,9 @@
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
   function userRole(user){
-    return user?.app_metadata?.role || user?.user_metadata?.role || '';
+    // Rollen/rechten komen uitsluitend uit app_metadata.
+    // user_metadata wordt bewust NIET voor autorisatie gebruikt.
+    return user?.app_metadata?.role || '';
   }
 
   function isExternalRole(user){
@@ -59,6 +62,44 @@
   function initials(user){
     const name=displayName(user).trim();
     return (name[0]||'E').toUpperCase();
+  }
+
+
+  async function autoSyncAdminOnce(){
+    try{
+      if(sessionStorage.getItem(AUTO_SYNC_KEY)==='1')return false;
+
+      const c=await getClient();
+      const {data,error}=await c
+        .from('vappie_state')
+        .select('data,updated_at')
+        .eq('id','main')
+        .maybeSingle();
+
+      if(error)throw error;
+
+      sessionStorage.setItem(AUTO_SYNC_KEY,'1');
+
+      if(!data?.data?.years)return false;
+
+      const remoteJson=JSON.stringify(data.data);
+      const localJson=localStorage.getItem('vappie-data-v2')||'';
+
+      // Altijd de centrale versie als uitgangspunt nemen bij opstart.
+      localStorage.setItem('vappie-data-v2',remoteJson);
+      localStorage.removeItem('vappie-supabase-dirty-v1');
+
+      // app.js heeft zijn lokale data al ingelezen. Alleen bij verschil één keer
+      // herladen zodat ook de UI met de opgehaalde centrale data start.
+      if(remoteJson!==localJson){
+        location.reload();
+        return true;
+      }
+      return false;
+    }catch(err){
+      console.warn('Automatische startsynchronisatie overgeslagen:',err);
+      return false;
+    }
   }
 
   function injectAdminSwitch(){
@@ -386,6 +427,10 @@
         return;
       }
 
+      // Beheerders synchroniseren bij opstart automatisch met de centrale state.
+      const reloading=await autoSyncAdminOnce();
+      if(reloading)return;
+
       document.documentElement.classList.remove('vappie-role-check');
       injectAdminSwitch();
     }catch(err){
@@ -422,6 +467,7 @@
     injectAdminSwitch,
     isExternalRole,
     portalHtml,
+    autoSyncAdminOnce,
     _setTestUser:(u)=>{currentUser=u;}
   };
 })();
