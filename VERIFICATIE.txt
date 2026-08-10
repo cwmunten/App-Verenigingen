@@ -1,10 +1,8 @@
-VAPPIE v40 VERIFICATIE
-======================
+VAPPIE v40.1 VERIFICATIE
+========================
 OK - meldingen.js
 OK - service-worker.js
-OK - permission button
-OK - request permission
-OK - badge uses open count
-OK - permission guarded
-OK - resync on visibility
-OK - clear badge zero
+OK - geen setAppBadge
+OK - geen clearAppBadge
+OK - menu badge behouden
+OK - app-badge knop verborgen

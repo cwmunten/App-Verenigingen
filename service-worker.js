@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-smartphone-appbadge';
+const CACHE = 'vappie-cache-v40-1-no-app-icon-badge';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

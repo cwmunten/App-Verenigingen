@@ -185,3 +185,9 @@ v40
 - Bij terugkeer naar de app (pageshow/visibilitychange) wordt het badgecijfer direct opnieuw gesynchroniseerd.
 - Bij 0 open meldingen wordt de app-badge verwijderd.
 - Let op: zonder Web Push kan het badgecijfer niet worden vernieuwd terwijl Vappie volledig gesloten is; het wordt gesynchroniseerd zodra Vappie weer actief wordt.
+
+v40.1
+- Rode badge/getal op het smartphone app-icoon verwijderd.
+- navigator.setAppBadge() en navigator.clearAppBadge() worden niet meer gebruikt.
+- De rode badge bij menu-item Meldingen blijft wel bestaan en toont het aantal open meldingen.
+- App-badge activatieknop wordt verborgen.
