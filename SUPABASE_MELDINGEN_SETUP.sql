@@ -93,3 +93,11 @@ drop policy if exists "vappie melding fotos uploaden" on storage.objects;
 create policy "vappie melding fotos uploaden"
 on storage.objects for insert to authenticated
 with check (bucket_id='vappie-melding-fotos');
+
+
+-- v40.3: verwijderen uitsluitend wanneer de melding afgehandeld is.
+drop policy if exists "vappie meldingen verwijderen" on public.vappie_meldingen;
+create policy "vappie meldingen verwijderen"
+on public.vappie_meldingen for delete
+to authenticated
+using (handled = true);

@@ -196,3 +196,10 @@ v40.2
 - Bestaande/stale badge op het Windows/Edge/PWA app-icoon wordt bij eerste start éénmalig gewist.
 - Daarna wordt de app-icoonbadge niet meer gebruikt.
 - De teller bij menu-item Meldingen blijft behouden.
+
+v40.3
+- Tekst 'Leg calamiteiten vast, reageer erop en rond ze af.' verwijderd.
+- Knop 'App-badge activeren' verwijderd/verborgen.
+- Bij afgehandelde meldingen verschijnt knop 'Verwijderen'.
+- Verwijderen vraagt om bevestiging, verwijdert gekoppelde foto's en daarna de melding.
+- SQL-policy toegevoegd: alleen meldingen met handled=true mogen worden verwijderd.

@@ -70,10 +70,8 @@
         <div>
           <span class="eyebrow">TEAM VERENIGINGEN</span>
           <h1>Meldingen</h1>
-          <p>Leg calamiteiten vast, reageer erop en rond ze af.</p>
         </div>
         <div class="meld-head-actions">
-          <button type="button" class="secondary meld-badge-permission" id="meldBadgePermission" hidden>● App-badge activeren</button>
           <button type="button" class="primary" id="meldNew">＋ Nieuwe melding</button>
         </div>
       </div>
@@ -383,6 +381,41 @@
     }
   }
 
+
+  async function deleteHandledNotice(id){
+    if(!confirm('Deze afgehandelde melding definitief verwijderen? Dit kan niet ongedaan worden gemaakt.'))return;
+
+    try{
+      const {c}=await session();
+
+      // Extra controle: alleen afgehandelde meldingen mogen worden verwijderd.
+      const {data:row,error:checkError}=await c.from(TABLE).select('id,handled').eq('id',id).single();
+      if(checkError)throw checkError;
+      if(!row?.handled)throw new Error('Alleen afgehandelde meldingen kunnen worden verwijderd.');
+
+      // Eerst gekoppelde foto's verwijderen.
+      const {data:files,error:listError}=await c.storage.from(MELD_PHOTO_BUCKET).list(String(id),{limit:20});
+      if(!listError && files?.length){
+        const paths=files
+          .filter(f=>f?.name&&!f.name.startsWith('.'))
+          .map(f=>`${id}/${f.name}`);
+
+        if(paths.length){
+          const {error:photoError}=await c.storage.from(MELD_PHOTO_BUCKET).remove(paths);
+          if(photoError)console.warn('Foto verwijderen:',photoError);
+        }
+      }
+
+      const {error}=await c.from(TABLE).delete().eq('id',id);
+      if(error)throw error;
+
+      await loadList(false);
+      await refreshState();
+    }catch(err){
+      alert(`Melding verwijderen mislukt: ${err?.message||err}`);
+    }
+  }
+
   async function addReaction(id,card){
     const input=card.querySelector('[data-reaction-input]');
     const message=input?.value.trim();
@@ -455,6 +488,7 @@
             <div class="meld-item-actions">
               <small>${esc(n.notice_date)} · ${esc(String(n.notice_time).slice(0,5))} · ${esc(n.name)}</small>
               <button type="button" class="meld-edit-btn" data-edit-notice>✎ Bewerken</button>
+              ${n.handled?'<button type="button" class="meld-delete-btn" data-delete-notice>🗑 Verwijderen</button>':''}
             </div>
           </div>
           <p class="meld-message">${esc(n.message)}</p>
@@ -475,6 +509,7 @@
           </section>`;
 
         card.querySelector('[data-edit-notice]').addEventListener('click',()=>editNotice(n));
+        card.querySelector('[data-delete-notice]')?.addEventListener('click',()=>deleteHandledNotice(n.id));
         card.querySelector('[data-handled]').addEventListener('change',e=>setHandled(n.id,e.target.checked));
         card.querySelector('[data-reaction-send]').addEventListener('click',()=>addReaction(n.id,card));
         card.querySelector('[data-reaction-input]').addEventListener('keydown',e=>{

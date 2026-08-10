@@ -1,7 +1,11 @@
-VAPPIE v40.2 VERIFICATIE
+VAPPIE v40.3 VERIFICATIE
 ========================
 OK - meldingen.js
 OK - service-worker.js
-OK - eenmalige clearAppBadge
-OK - geen setAppBadge
-OK - menu-badge behouden
+OK - subtitle removed
+OK - badge activation hidden
+OK - delete function
+OK - delete only handled UI
+OK - handled safety check
+OK - photos removed first
+OK - SQL delete policy

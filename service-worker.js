@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-2-clear-stale-appbadge';
+const CACHE = 'vappie-cache-v40-3-meldingen-delete';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
