@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-smartphone-appbadge';
+const CACHE = 'vappie-cache-v42-external-portal';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
@@ -41,7 +41,7 @@ self.addEventListener('fetch', event => {
 
   const sameOrigin = url.origin === self.location.origin;
   const liveCode = sameOrigin && [
-    '/app.js','/styles.css','/seedData.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/manifest.webmanifest'
+    '/app.js','/styles.css','/seedData.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/external_portal.js','/external_portal.css','/manifest.webmanifest'
   ].includes(url.pathname);
 
   if (liveCode) {

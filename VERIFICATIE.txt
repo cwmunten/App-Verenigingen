@@ -1,10 +1,17 @@
-VAPPIE v40 VERIFICATIE
+VAPPIE v42 VERIFICATIE
 ======================
+OK - external_portal.js
 OK - meldingen.js
+OK - enhancements.js
 OK - service-worker.js
-OK - permission button
-OK - request permission
-OK - badge uses open count
-OK - permission guarded
-OK - resync on visibility
-OK - clear badge zero
+OK - role external_reporter
+OK - admin switch
+OK - external replaces app
+OK - only own reports query
+OK - max 5 photos
+OK - own reactions
+OK - loaded in index
+OK - RLS state blocked
+OK - functional role/portal test: FUNCTIONAL_OK
+OK - visual beheer gegenereerd
+OK - visual externe melder gegenereerd

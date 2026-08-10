@@ -93,3 +93,60 @@ drop policy if exists "vappie melding fotos uploaden" on storage.objects;
 create policy "vappie melding fotos uploaden"
 on storage.objects for insert to authenticated
 with check (bucket_id='vappie-melding-fotos');
+
+
+-- ===== v42 Externe melders =====
+-- Zet bij een externe gebruiker in Supabase Authentication Raw user metadata:
+-- {"role":"external_reporter","display_name":"Naam"}
+
+drop policy if exists "vappie meldingen lezen" on public.vappie_meldingen;
+create policy "vappie meldingen lezen"
+on public.vappie_meldingen for select
+to authenticated
+using (
+  coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+  or created_by = auth.uid()
+);
+
+drop policy if exists "vappie meldingen bijwerken" on public.vappie_meldingen;
+create policy "vappie meldingen bijwerken"
+on public.vappie_meldingen for update
+to authenticated
+using (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter')
+with check (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter');
+
+drop policy if exists "vappie reacties lezen" on public.vappie_melding_reacties;
+create policy "vappie reacties lezen"
+on public.vappie_melding_reacties for select
+to authenticated
+using (
+  coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+  or exists (
+    select 1 from public.vappie_meldingen m
+    where m.id = melding_id and m.created_by = auth.uid()
+  )
+);
+
+drop policy if exists "vappie reacties toevoegen" on public.vappie_melding_reacties;
+create policy "vappie reacties toevoegen"
+on public.vappie_melding_reacties for insert
+to authenticated
+with check (
+  user_id = auth.uid()
+  and (
+    coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter'
+    or exists (
+      select 1 from public.vappie_meldingen m
+      where m.id = melding_id and m.created_by = auth.uid()
+    )
+  )
+);
+
+drop policy if exists "externalen geen vappie state" on public.vappie_state;
+create policy "externalen geen vappie state"
+on public.vappie_state
+as restrictive
+for all
+to authenticated
+using (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter')
+with check (coalesce(auth.jwt()->'user_metadata'->>'role','internal') <> 'external_reporter');

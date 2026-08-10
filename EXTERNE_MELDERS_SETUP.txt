@@ -1,0 +1,17 @@
+VAPPIE v42 - EXTERNE MELDERS
+================================
+
+1. Maak in Supabase > Authentication > Users een gebruiker aan.
+2. Open die gebruiker en zet bij Raw user metadata bijvoorbeeld:
+
+{
+  "role": "external_reporter",
+  "display_name": "Naam externe melder"
+}
+
+3. Voer SUPABASE_MELDINGEN_SETUP.sql opnieuw uit.
+4. Externe gebruiker logt in via de normale Vappie-login.
+5. Daarna ziet die gebruiker ALLEEN de externe Meldingenportal.
+6. Een beheerder krijgt rechtsboven 'Externe weergave' en kan met 'Terug naar beheer' terug.
+
+Bestaande beheeraccounts hoeven geen rol te krijgen.

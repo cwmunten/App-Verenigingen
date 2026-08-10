@@ -185,3 +185,10 @@ v40
 - Bij terugkeer naar de app (pageshow/visibilitychange) wordt het badgecijfer direct opnieuw gesynchroniseerd.
 - Bij 0 open meldingen wordt de app-badge verwijderd.
 - Let op: zonder Web Push kan het badgecijfer niet worden vernieuwd terwijl Vappie volledig gesloten is; het wordt gesynchroniseerd zodra Vappie weer actief wordt.
+
+v42
+- Rol external_reporter via Supabase user_metadata.
+- Externe melder ziet alleen eigen Meldingenportal.
+- Beheerder kan switchen via Externe weergave / Terug naar beheer.
+- Externe portal bevat melding, max 5 foto's, eigen meldingen, status en reacties.
+- Extra RLS voor eigen meldingen/reacties en blokkade van vappie_state.
