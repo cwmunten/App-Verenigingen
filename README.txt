@@ -191,3 +191,8 @@ v40.1
 - navigator.setAppBadge() en navigator.clearAppBadge() worden niet meer gebruikt.
 - De rode badge bij menu-item Meldingen blijft wel bestaan en toont het aantal open meldingen.
 - App-badge activatieknop wordt verborgen.
+
+v40.2
+- Bestaande/stale badge op het Windows/Edge/PWA app-icoon wordt bij eerste start éénmalig gewist.
+- Daarna wordt de app-icoonbadge niet meer gebruikt.
+- De teller bij menu-item Meldingen blijft behouden.

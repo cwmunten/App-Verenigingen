@@ -1,8 +1,7 @@
-VAPPIE v40.1 VERIFICATIE
+VAPPIE v40.2 VERIFICATIE
 ========================
 OK - meldingen.js
 OK - service-worker.js
+OK - eenmalige clearAppBadge
 OK - geen setAppBadge
-OK - geen clearAppBadge
-OK - menu badge behouden
-OK - app-badge knop verborgen
+OK - menu-badge behouden

@@ -688,5 +688,19 @@
   });
   window.addEventListener('pageshow',()=>refreshState());
 
+
+  // v40.2: ruim een eerder ingestelde OS/PWA badge éénmalig op.
+  // Daarna wordt de app-icoonbadge nergens meer gebruikt.
+  (async()=>{
+    try{
+      const key='vappie-appbadge-cleared-v40-2';
+      if(localStorage.getItem(key)==='1')return;
+      if(navigator.clearAppBadge)await navigator.clearAppBadge();
+      localStorage.setItem(key,'1');
+    }catch(err){
+      console.warn('Oude app-badge kon niet worden gewist:',err);
+    }
+  })();
+
   setInterval(refreshState,60000);
 })();
