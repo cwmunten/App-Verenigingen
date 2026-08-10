@@ -119,18 +119,3 @@
   .meld-head-actions{display:grid;grid-template-columns:1fr;width:100%;margin-top:12px}
   .meld-head-actions button{width:100%!important}
 }
-
-
-/* v43: verwijderen afgehandelde melding */
-.meld-delete-btn{
-  border:1px solid #f0caca;
-  background:#fff7f7;
-  color:#a12727;
-  border-radius:8px;
-  padding:6px 9px;
-  font-size:12px;
-  font-weight:800;
-  cursor:pointer;
-}
-.meld-delete-btn:hover{background:#ffeded}
-.meld-badge-permission{display:none!important}

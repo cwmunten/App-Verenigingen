@@ -1,23 +1,10 @@
-VAPPIE v43 VERIFICATIE
+VAPPIE v40 VERIFICATIE
 ======================
-OK - syntax meldingen.js
-OK - syntax external_portal.js
-OK - syntax enhancements.js
-OK - syntax service-worker.js
-OK - role only app_metadata
-OK - subtitle removed
-OK - badge activation removed
-OK - delete function present
-OK - delete only handled UI
-OK - delete role defense
-OK - auto sync present
-OK - auto sync before admin display
-OK - RLS app_metadata
-OK - RLS delete handled admin
-OK - v43 assets linked
-OK - functional app_metadata + auto-sync: FUNCTIONAL_AUTOSYNC_OK
-OK - checks external role before delete
-OK - checks handled before delete
-OK - removes photos before row
-OK - visual beheer
-OK - visual externe rechten
+OK - meldingen.js
+OK - service-worker.js
+OK - permission button
+OK - request permission
+OK - badge uses open count
+OK - permission guarded
+OK - resync on visibility
+OK - clear badge zero
