@@ -1,0 +1,13 @@
+VAPPIE v45 VERIFICATIE
+=======================
+OK - syntax external_portal.js
+OK - syntax meldingen.js
+OK - syntax enhancements.js
+OK - syntax service-worker.js
+OK - external module before app.js
+OK - self loads Supabase
+OK - dashboard recheck
+OK - app_metadata only
+OK - hard visual lock
+OK - existing external startup: EXISTING_EXTERNAL_OK
+OK - late login external gate: LATE_LOGIN_EXTERNAL_OK

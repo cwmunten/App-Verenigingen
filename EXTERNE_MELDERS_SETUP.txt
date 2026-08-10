@@ -64,3 +64,15 @@ where email = 'HIER-HET-EXTERNE-EMAILADRES';
 
 Daarna de externe gebruiker volledig UITLOGGEN en opnieuw INLOGGEN.
 De nieuwe app_metadata wordt dan in de Supabase sessie/JWT geladen.
+
+
+v45 - EXTERNE LOGIN
+-------------------
+De externe rol-gate wordt nu vóór app.js geladen.
+Na het inloggen via de normale Vappie-login wordt de Supabase sessie
+opnieuw gecontroleerd zodra app.js een dashboard probeert te tonen.
+
+Voor dit account moet raw_app_meta_data bevatten:
+{"role":"external_reporter"}
+
+Na een rolwijziging: volledig uitloggen en opnieuw inloggen.

@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v44-external-direct-gate';
+const CACHE = 'vappie-cache-v45-external-hard-gate';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

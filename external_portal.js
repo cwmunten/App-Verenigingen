@@ -37,15 +37,32 @@
     if(window.__VAPPIE_EXTERNAL_TEST_CLIENT)return window.__VAPPIE_EXTERNAL_TEST_CLIENT;
     if(client)return client;
 
+    // v45: deze rol-gate laadt Supabase zelf. Daardoor kan de rol worden
+    // gecontroleerd VOORDAT app.js de beheeromgeving rendert.
     if(!window.supabase?.createClient){
-      for(let i=0;i<40&&!window.supabase?.createClient;i++){
-        await new Promise(r=>setTimeout(r,100));
-      }
+      await new Promise((resolve,reject)=>{
+        let script=document.querySelector('script[data-vappie-supabase]');
+        if(script){
+          if(window.supabase?.createClient){resolve();return;}
+          script.addEventListener('load',resolve,{once:true});
+          script.addEventListener('error',()=>reject(new Error('Supabase-module kon niet worden geladen.')),{once:true});
+          return;
+        }
+        script=document.createElement('script');
+        script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.async=true;
+        script.dataset.vappieSupabase='1';
+        const timer=setTimeout(()=>reject(new Error('Supabase-module laden duurde te lang.')),10000);
+        script.onload=()=>{clearTimeout(timer);resolve();};
+        script.onerror=()=>{clearTimeout(timer);reject(new Error('Supabase-module kon niet worden geladen.'));};
+        document.head.appendChild(script);
+      });
     }
+
     if(!window.supabase?.createClient)throw new Error('Supabase is nog niet geladen.');
 
     client=window.supabase.createClient(SB_URL,SB_KEY,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
     });
     return client;
   }
@@ -383,6 +400,7 @@
       app.innerHTML=portalHtml(preview);
       document.body.classList.toggle('external-preview-mode',preview);
       document.body.classList.toggle('external-user-mode',!preview);
+      document.body.dataset.externalRole=preview?'preview':'external';
 
       document.getElementById('extPhotos')?.addEventListener('change',previewSelectedPhotos);
       document.getElementById('extSubmit')?.addEventListener('click',submitReport);
@@ -429,6 +447,18 @@
     }
   }
 
+  let roleGuardBusy=false;
+  async function guardInternalDashboard(){
+    if(roleGuardBusy||trueExternal||isPreview())return;
+    if(!document.querySelector('.dashboard-shell'))return;
+    roleGuardBusy=true;
+    try{
+      await enforceRole();
+    }finally{
+      roleGuardBusy=false;
+    }
+  }
+
   async function enforceRole(){
     try{
       currentUser=await getUser();
@@ -467,11 +497,21 @@
 
   const obs=new MutationObserver(()=>{
     if(trueExternal){
+      // Mocht app.js de beheer-HTML alsnog schrijven, dan is deze via CSS
+      // onzichtbaar en wordt de externe portal direct teruggezet.
       if(!document.querySelector('.external-shell'))renderExternalPortal(false);
       return;
     }
     if(isPreview()){
       if(!document.querySelector('.external-shell'))renderExternalPortal(true);
+      return;
+    }
+
+    // Cruciale v45-fix: app.js logt zelf in. Zodra app.js daarna zijn
+    // dashboard rendert, lezen we de gedeelde Supabase-sessie opnieuw.
+    // Een external_reporter wordt dan direct vervangen door de meldportal.
+    if(document.querySelector('.dashboard-shell')){
+      guardInternalDashboard();
       return;
     }
     injectAdminSwitch();
@@ -489,6 +529,7 @@
           trueExternal=isExternalRole(currentUser);
           if(trueExternal){
             document.documentElement.classList.add('vappie-role-check');
+            document.body?.classList.add('external-user-mode');
             renderExternalPortal(false);
             return;
           }
@@ -505,6 +546,7 @@
     isExternalRole,
     portalHtml,
     bootstrapRoleGate,
+    guardInternalDashboard,
     autoSyncAdminOnce,
     _setTestUser:(u)=>{currentUser=u;}
   };

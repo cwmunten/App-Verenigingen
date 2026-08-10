@@ -201,3 +201,9 @@ v43
 - Externe gebruikers kunnen alleen melden, eigen meldingen bekijken en reageren.
 - Automatische centrale synchronisatie bij opstart van beheeraccount.
 - SQL/RLS aangepast voor app_metadata en admin-only verwijderen van uitsluitend afgehandelde meldingen.
+
+v45
+- External role gate wordt vóór app.js geladen.
+- external_portal.js laadt Supabase zelfstandig en controleert bestaande sessie vóór beheerweergave.
+- Na login via app.js wordt bij verschijnen van .dashboard-shell de sessie opnieuw gecontroleerd.
+- external_reporter krijgt dan direct Melding doorgeven; intern dashboard wordt via CSS hard verborgen.
