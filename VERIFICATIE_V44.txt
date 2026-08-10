@@ -1,0 +1,12 @@
+VAPPIE v44 VERIFICATIE
+=======================
+OK - syntax external_portal.js
+OK - syntax meldingen.js
+OK - syntax enhancements.js
+OK - syntax service-worker.js
+OK - app_metadata only
+OK - early gate
+OK - external direct render
+OK - auth change direct render
+OK - v44 linked
+OK - DIRECT_EXTERNAL_GATE_OK

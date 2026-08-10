@@ -50,3 +50,17 @@ Als de centrale data afwijkt van lokaal, herlaadt Vappie éénmalig met de actue
 
 SQL
 Voer SUPABASE_MELDINGEN_SETUP.sql uit om de aangepaste RLS-regels te activeren.
+
+
+v44 - BELANGRIJK BIJ BESTAAND EXTERN ACCOUNT
+---------------------------------------------
+Controleer/zet de rol met:
+
+update auth.users
+set raw_app_meta_data =
+  coalesce(raw_app_meta_data, '{}'::jsonb) ||
+  '{"role":"external_reporter"}'::jsonb
+where email = 'HIER-HET-EXTERNE-EMAILADRES';
+
+Daarna de externe gebruiker volledig UITLOGGEN en opnieuw INLOGGEN.
+De nieuwe app_metadata wordt dan in de Supabase sessie/JWT geladen.

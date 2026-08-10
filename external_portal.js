@@ -17,9 +17,12 @@
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
   function userRole(user){
-    // Rollen/rechten komen uitsluitend uit app_metadata.
-    // user_metadata wordt bewust NIET voor autorisatie gebruikt.
-    return user?.app_metadata?.role || '';
+    // Autorisatie uitsluitend via app_metadata.
+    const meta=user?.app_metadata||{};
+    if(meta.role)return String(meta.role);
+    if(Array.isArray(meta.roles)&&meta.roles.length)return String(meta.roles[0]);
+    if(meta.user_role)return String(meta.user_role);
+    return '';
   }
 
   function isExternalRole(user){
@@ -403,6 +406,29 @@
     }
   }
 
+  async function bootstrapRoleGate(){
+    try{
+      currentUser=await getUser();
+      trueExternal=isExternalRole(currentUser);
+
+      if(trueExternal){
+        document.documentElement.classList.add('vappie-role-check');
+        await renderExternalPortal(false);
+        return 'external';
+      }
+      if(isPreview()){
+        await renderExternalPortal(true);
+        return 'preview';
+      }
+      document.documentElement.classList.remove('vappie-role-check');
+      return 'internal';
+    }catch(err){
+      console.warn('Vroege rolcontrole:',err);
+      document.documentElement.classList.remove('vappie-role-check');
+      return 'error';
+    }
+  }
+
   async function enforceRole(){
     try{
       currentUser=await getUser();
@@ -452,12 +478,23 @@
   });
   obs.observe(document.documentElement,{childList:true,subtree:true});
 
-  setTimeout(enforceRole,150);
+  bootstrapRoleGate().then(()=>enforceRole());
 
   (async()=>{
     try{
       const c=await getClient();
-      c.auth.onAuthStateChange(()=>setTimeout(enforceRole,80));
+      c.auth.onAuthStateChange((_event,session)=>{
+        if(session?.user){
+          currentUser=session.user;
+          trueExternal=isExternalRole(currentUser);
+          if(trueExternal){
+            document.documentElement.classList.add('vappie-role-check');
+            renderExternalPortal(false);
+            return;
+          }
+        }
+        setTimeout(enforceRole,20);
+      });
     }catch{}
   })();
 
@@ -467,6 +504,7 @@
     injectAdminSwitch,
     isExternalRole,
     portalHtml,
+    bootstrapRoleGate,
     autoSyncAdminOnce,
     _setTestUser:(u)=>{currentUser=u;}
   };

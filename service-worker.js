@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v43-appmetadata-delete-autosync';
+const CACHE = 'vappie-cache-v44-external-direct-gate';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
