@@ -1,0 +1,25 @@
+VAPPIE v40.6 - VERIFICATIE JUISTE PLANNING
+===============================================
+Bron: correcte afbeelding aangeleverd op 12-08-2026
+
+OK - 101 diensten
+OK - Bar 2 (Vrijwilligersbar) teruggezet: 7 diensten
+OK - Donderdag filterbaar en bevat 13 diensten
+OK - Vrijdag bevat 28 diensten
+OK - Zaterdag bevat 29 diensten
+OK - Zondag bevat 30 diensten
+OK - Wijnbar 2 bevat 7 diensten
+OK - Bar 7 donderdag: Civitas 18p
+OK - Sp Bier bar 2 donderdag: Rock in Rooy 15p
+OK - Bar 5 zaterdagavond: De Wien 11p + Actie JHB 8p
+OK - Bar 6 zaterdagavond: Fam Stevens 18p
+OK - Sidera donderdag: Wijnbar 2, 4p
+OK - JavaScript syntax van alle kernbestanden
+OK - definitieve planning blijft leidend na Supabase-sync
+
+Diensten per dag:
+Woensdag: 1
+Donderdag: 13
+Vrijdag: 28
+Zaterdag: 29
+Zondag: 30

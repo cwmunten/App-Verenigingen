@@ -1,6 +1,6 @@
-const CACHE = 'vappie-cache-v40-3-meldingen-delete';
+const CACHE = 'vappie-cache-v40-6-correcte-planning';
 const CORE = [
-  '/', '/index.html', '/styles.css', '/app.js', '/seedData.js',
+  '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/planning2026.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png',
   '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'

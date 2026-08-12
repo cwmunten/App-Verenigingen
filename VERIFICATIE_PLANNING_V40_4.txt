@@ -1,0 +1,17 @@
+VAPPIE v40.4 - CONTROLE DEFINITIEVE PLANNING
+================================================
+OK - JavaScript syntax gecontroleerd
+OK - 101 diensten aanwezig
+OK - Dagfilter: Woensdag / Donderdag / Vrijdag / Zaterdag / Zondag
+OK - Donderdag bevat 13 diensten
+OK - Wijnbar 2 bevat 7 diensten
+OK - Sidera: donderdagavond, Wijnbar 2, 4 personen
+OK - Correctie wordt ook na Supabase-sync opnieuw toegepast
+OK - Gecorrigeerde planning wordt naar Supabase teruggeschreven
+
+Diensten per dag:
+Woensdag: 1
+Donderdag: 13
+Vrijdag: 28
+Zaterdag: 29
+Zondag: 30

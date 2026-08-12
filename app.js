@@ -26,6 +26,19 @@
   function amount(shift,a,rate){ return durationHours(shift.from,shift.to)*Number(shift.people||0)*Number(a?.rateOverride ?? rate ?? 0); }
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
   let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
+
+  function applyAuthoritativePlanning2026(){
+    const source=window.VAPPIE_PLANNING_2026;
+    const y=db?.years?.['2026'];
+    if(!source?.shifts||!y)return false;
+    const changed=y.planningVersion!==source.version || JSON.stringify(y.shifts)!==JSON.stringify(source.shifts);
+    if(!changed)return false;
+    y.shifts=clone(source.shifts);
+    y.planningVersion=source.version;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+    return true;
+  }
+  applyAuthoritativePlanning2026();
   const app=document.getElementById('app');
 
   let supabaseClient=null, supabaseUser=null, supabaseStatus='local', supabasePushTimer=null;
@@ -86,8 +99,12 @@
     const localYear=db.activeYear;
     db=clone(data.data);
     if(localYear&&db.years[localYear])db.activeYear=localYear;
+    const planningCorrected=applyAuthoritativePlanning2026();
     localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
     setSupabaseDirty(false); supabaseStatus='connected'; lastSyncAt=new Date(); updateSyncChip();
+    if(planningCorrected){
+      try{await pushRemote()}catch(err){console.warn('Definitieve planning kon nog niet naar Supabase worden teruggeschreven.',err);}
+    }
     if(renderAfter)render();
     return true;
   }

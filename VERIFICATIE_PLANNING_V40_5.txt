@@ -1,0 +1,22 @@
+VAPPIE v40.5 - CONTROLE ACTUELE PLANNING
+============================================
+Bron: aangeleverde actuele planningsafbeelding 12-08-2026
+
+OK - JavaScript syntax
+OK - Actuele planning centraal in seedData.js en planning2026.js
+OK - Donderdag aanwezig en filterbaar
+OK - Donderdag: 12 diensten
+OK - Bar 7 donderdag: Civitas 18p
+OK - Sp Bier bar 2 donderdag: Rock in Rooy 15p
+OK - Bar 5 zaterdagavond: De Wien 11p + Actie JHB 8p
+OK - Bar 6 zaterdagavond: Fam Stevens 18p
+OK - Wijnbar 2: 7 diensten
+OK - Bar 2 verwijderd uit actieve planning, omdat deze niet voorkomt in de aangeleverde actuele planning
+
+Diensten:
+Woensdag 1
+Donderdag 12
+Vrijdag 26
+Zaterdag 27
+Zondag 28
+Totaal 94

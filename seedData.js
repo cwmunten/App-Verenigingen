@@ -807,974 +807,1014 @@ window.VAPPIE_SEED = {
       ],
       "shifts": [
         {
-          "id": "s001",
-          "associationId": "a003",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Wijnbar 1",
-          "people": 4
-        },
-        {
-          "id": "s002",
-          "associationId": "a004",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier bar 2",
-          "people": 18
-        },
-        {
-          "id": "s003",
-          "associationId": "a014",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 8",
-          "people": 12
-        },
-        {
-          "id": "s004",
-          "associationId": "a025",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s005",
-          "associationId": "a027",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 7",
-          "people": 15
-        },
-        {
-          "id": "s006",
-          "associationId": "a031",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s007",
-          "associationId": "a036",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s008",
-          "associationId": "a037",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s009",
-          "associationId": "a043",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 2",
-          "people": 8
-        },
-        {
-          "id": "s010",
-          "associationId": "a044",
-          "day": "Donderdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
           "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s011",
-          "associationId": "a048",
           "day": "Donderdag",
           "daypart": "Avond",
           "from": "18:00",
           "to": "01:00",
-          "bar": "Bar 6",
-          "people": 18
+          "people": 15,
+          "associationId": "a044",
+          "id": "s001"
         },
         {
-          "id": "s012",
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s002"
+        },
+        {
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s003"
+        },
+        {
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s004"
+        },
+        {
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s005"
+        },
+        {
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s006"
+        },
+        {
+          "bar": "Bar 2 (Vrijwilligersbar)",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 15,
+          "associationId": "a044",
+          "id": "s007"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
           "associationId": "a049",
+          "id": "s008"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a006",
+          "id": "s009"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a039",
+          "id": "s010"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a049",
+          "id": "s011"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a010",
+          "id": "s012"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a041",
+          "id": "s013"
+        },
+        {
+          "bar": "Bar 3 (Borrelbar)",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 13,
+          "associationId": "a029",
+          "id": "s014"
+        },
+        {
+          "bar": "Bar 4",
           "day": "Donderdag",
           "daypart": "Avond",
           "from": "18:00",
           "to": "01:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 15
-        },
-        {
-          "id": "s013",
-          "associationId": "a004",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier bar 2",
-          "people": 18
-        },
-        {
-          "id": "s014",
-          "associationId": "a009",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s015",
-          "associationId": "a012",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Wijnbar 1",
-          "people": 4
-        },
-        {
-          "id": "s016",
-          "associationId": "a021",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 6",
-          "people": 10
-        },
-        {
-          "id": "s017",
-          "associationId": "a042",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 6",
-          "people": 7
-        },
-        {
-          "id": "s018",
-          "associationId": "a025",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s019",
+          "people": 40,
           "associationId": "a031",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
+          "id": "s015"
+        },
+        {
           "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s020",
-          "associationId": "a034",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 7",
-          "people": 15
-        },
-        {
-          "id": "s021",
-          "associationId": "a035",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 8",
-          "people": 12
-        },
-        {
-          "id": "s022",
-          "associationId": "a037",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s023",
-          "associationId": "a039",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 15
-        },
-        {
-          "id": "s024",
-          "associationId": "a040",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 2",
-          "people": 6
-        },
-        {
-          "id": "s025",
-          "associationId": "a044",
-          "day": "Vrijdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s026",
-          "associationId": "a004",
           "day": "Vrijdag",
           "daypart": "Middag",
           "from": "14:30",
           "to": "18:00",
-          "bar": "Sp Bier bar 2",
-          "people": 18
+          "people": 40,
+          "associationId": "a031",
+          "id": "s016"
         },
         {
-          "id": "s027",
-          "associationId": "a006",
+          "bar": "Bar 4",
           "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 15
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 40,
+          "associationId": "a031",
+          "id": "s017"
         },
         {
-          "id": "s028",
-          "associationId": "a009",
+          "bar": "Bar 4",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 40,
+          "associationId": "a031",
+          "id": "s018"
+        },
+        {
+          "bar": "Bar 4",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 40,
+          "associationId": "a031",
+          "id": "s019"
+        },
+        {
+          "bar": "Bar 4",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 40,
+          "associationId": "a031",
+          "id": "s020"
+        },
+        {
+          "bar": "Bar 4",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 40,
+          "associationId": "a031",
+          "id": "s021"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a036",
+          "id": "s022"
+        },
+        {
+          "bar": "Bar 5",
           "day": "Vrijdag",
           "daypart": "Middag",
           "from": "13:30",
           "to": "18:00",
+          "people": 15,
+          "associationId": "a009",
+          "id": "s023"
+        },
+        {
           "bar": "Bar 5",
-          "people": 15
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a009",
+          "id": "s024"
         },
         {
-          "id": "s029",
-          "associationId": "a012",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Wijnbar 1",
-          "people": 4
-        },
-        {
-          "id": "s030",
-          "associationId": "a013",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Cocktail 2",
-          "people": 6
-        },
-        {
-          "id": "s031",
-          "associationId": "a018",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Bar 8",
-          "people": 6
-        },
-        {
-          "id": "s032",
-          "associationId": "a023",
-          "day": "Vrijdag",
+          "bar": "Bar 5",
+          "day": "Zaterdag",
           "daypart": "Middag",
           "from": "13:00",
           "to": "18:00",
+          "people": 10,
+          "associationId": "a022",
+          "id": "s025"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 8,
+          "associationId": "a045",
+          "id": "s026"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 8,
+          "associationId": "a001",
+          "id": "s027"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 11,
+          "associationId": "a009",
+          "id": "s028"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a002",
+          "id": "s029"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 18,
+          "associationId": "a011",
+          "id": "s030"
+        },
+        {
           "bar": "Bar 6",
-          "people": 15
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a048",
+          "id": "s031"
         },
         {
-          "id": "s033",
-          "associationId": "a025",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s034",
-          "associationId": "a031",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s035",
-          "associationId": "a035",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Bar 8",
-          "people": 4
-        },
-        {
-          "id": "s036",
-          "associationId": "a037",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "14:30",
-          "to": "18:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s037",
-          "associationId": "a039",
+          "bar": "Bar 6",
           "day": "Vrijdag",
           "daypart": "Middag",
           "from": "13:00",
           "to": "18:00",
+          "people": 15,
+          "associationId": "a023",
+          "id": "s032"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 10,
+          "associationId": "a021",
+          "id": "s033"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 7,
+          "associationId": "a042",
+          "id": "s034"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a007",
+          "id": "s035"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a015",
+          "id": "s036"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a001",
+          "id": "s037"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a028",
+          "id": "s038"
+        },
+        {
+          "bar": "Bar 6",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 15,
+          "associationId": "a026",
+          "id": "s039"
+        },
+        {
           "bar": "Bar 7",
-          "people": 9
-        },
-        {
-          "id": "s038",
-          "associationId": "a044",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s039",
-          "associationId": "a047",
-          "day": "Vrijdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 7",
-          "people": 5
-        },
-        {
-          "id": "s041",
-          "associationId": "a004",
           "day": "Woensdag",
           "daypart": "Avond",
           "from": "19:00",
           "to": "00:00",
-          "bar": "Bar 6",
-          "people": 18
+          "people": 18,
+          "associationId": "a004",
+          "id": "s040"
         },
         {
-          "id": "s042",
-          "associationId": "a005",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier bar 2",
-          "people": 6
-        },
-        {
-          "id": "s043",
-          "associationId": "a006",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Wijnbar 1",
-          "people": 5
-        },
-        {
-          "id": "s044",
-          "associationId": "a008",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s045",
-          "associationId": "a008",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 2",
-          "people": 6
-        },
-        {
-          "id": "s046",
-          "associationId": "a009",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 6",
-          "people": 11
-        },
-        {
-          "id": "s047",
-          "associationId": "a010",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 15
-        },
-        {
-          "id": "s048",
-          "associationId": "a015",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier bar 2",
-          "people": 12
-        },
-        {
-          "id": "s049",
-          "associationId": "a017",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 8",
-          "people": 8
-        },
-        {
-          "id": "s050",
-          "associationId": "a001",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 6",
-          "people": 6
-        },
-        {
-          "id": "s051",
-          "associationId": "a025",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s052",
-          "associationId": "a030",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
           "bar": "Bar 7",
-          "people": 18
-        },
-        {
-          "id": "s053",
-          "associationId": "a030",
-          "day": "Zaterdag",
+          "day": "Donderdag",
           "daypart": "Avond",
           "from": "18:00",
           "to": "01:00",
-          "bar": "Bar 8",
-          "people": 4
+          "people": 18,
+          "associationId": "a004",
+          "id": "s041"
         },
         {
-          "id": "s054",
-          "associationId": "a031",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s055",
-          "associationId": "a032",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s056",
-          "associationId": "a044",
-          "day": "Zaterdag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "01:00",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s057",
-          "associationId": "a007",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 6",
-          "people": 18
-        },
-        {
-          "id": "s058",
-          "associationId": "a008",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s059",
-          "associationId": "a008",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Wijnbar 1",
-          "people": 5
-        },
-        {
-          "id": "s060",
-          "associationId": "a021",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 8",
-          "people": 6
-        },
-        {
-          "id": "s061",
-          "associationId": "a022",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Sp Bier bar 2",
-          "people": 10
-        },
-        {
-          "id": "s062",
-          "associationId": "a024",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Cocktail 2",
-          "people": 6
-        },
-        {
-          "id": "s063",
-          "associationId": "a025",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 13
-        },
-        {
-          "id": "s064",
-          "associationId": "a030",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
           "bar": "Bar 7",
-          "people": 18
-        },
-        {
-          "id": "s065",
-          "associationId": "a030",
-          "day": "Zaterdag",
+          "day": "Vrijdag",
           "daypart": "Middag",
-          "from": "13:00",
+          "from": "14:30",
           "to": "18:00",
-          "bar": "Bar 8",
-          "people": 4
+          "people": 18,
+          "associationId": "a004",
+          "id": "s042"
         },
         {
-          "id": "s066",
-          "associationId": "a031",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s067",
-          "associationId": "a044",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s068",
-          "associationId": "a045",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Sp Bier bar 2",
-          "people": 8
-        },
-        {
-          "id": "s069",
-          "associationId": "a046",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s070",
-          "associationId": "a049",
-          "day": "Zaterdag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 15
-        },
-        {
-          "id": "s071",
-          "associationId": "a019",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "23:30",
-          "bar": "Bar 8",
-          "people": 6
-        },
-        {
-          "id": "s072",
-          "associationId": "a011",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s073",
-          "associationId": "a013",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Sp Bier bar 2",
-          "people": 2
-        },
-        {
-          "id": "s074",
-          "associationId": "a016",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
           "bar": "Bar 7",
-          "people": 18
-        },
-        {
-          "id": "s075",
-          "associationId": "a017",
-          "day": "Zondag",
+          "day": "Vrijdag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "00:30",
-          "bar": "Cocktail 1",
-          "people": 6
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a004",
+          "id": "s043"
         },
         {
-          "id": "s076",
-          "associationId": "a020",
-          "day": "Zondag",
+          "bar": "Bar 7",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a030",
+          "id": "s044"
+        },
+        {
+          "bar": "Bar 7",
+          "day": "Zaterdag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "00:30",
-          "bar": "Cocktail 2",
-          "people": 6
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a030",
+          "id": "s045"
         },
         {
-          "id": "s077",
-          "associationId": "a024",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Sp Bier bar 2",
-          "people": 12
-        },
-        {
-          "id": "s078",
-          "associationId": "a025",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s079",
-          "associationId": "a026",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Bar 6",
-          "people": 15
-        },
-        {
-          "id": "s080",
-          "associationId": "a029",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 13
-        },
-        {
-          "id": "s081",
-          "associationId": "a031",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s082",
-          "associationId": "a039",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Wijnbar 1",
-          "people": 4
-        },
-        {
-          "id": "s083",
-          "associationId": "a044",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s084",
-          "associationId": "a046",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "23:30",
-          "bar": "Bar 8",
-          "people": 6
-        },
-        {
-          "id": "s085",
-          "associationId": "a002",
+          "bar": "Bar 7",
           "day": "Zondag",
           "daypart": "Middag",
           "from": "13:00",
           "to": "18:00",
-          "bar": "Bar 5",
-          "people": 18
-        },
-        {
-          "id": "s086",
-          "associationId": "a007",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Sp Bier bar 2",
-          "people": 18
-        },
-        {
-          "id": "s087",
-          "associationId": "a013",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 8",
-          "people": 6
-        },
-        {
-          "id": "s088",
-          "associationId": "a018",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Cocktail 2",
-          "people": 6
-        },
-        {
-          "id": "s089",
-          "associationId": "a001",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 6",
-          "people": 4
-        },
-        {
-          "id": "s090",
-          "associationId": "a025",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Sp Bier Bar 1",
-          "people": 15
-        },
-        {
-          "id": "s091",
-          "associationId": "a028",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 6",
-          "people": 15
-        },
-        {
-          "id": "s092",
-          "associationId": "a031",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 4",
-          "people": 40
-        },
-        {
-          "id": "s093",
-          "associationId": "a038",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Cocktail 1",
-          "people": 6
-        },
-        {
-          "id": "s094",
-          "associationId": "a041",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 3 (Borrelbar)",
-          "people": 18
-        },
-        {
-          "id": "s095",
-          "associationId": "a044",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 2 (Vrijwilligersbar)",
-          "people": 15
-        },
-        {
-          "id": "s096",
-          "associationId": "a045",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Wijnbar 1",
-          "people": 5
-        },
-        {
-          "id": "s097",
-          "associationId": "a046",
-          "day": "Zondag",
-          "daypart": "Middag",
-          "from": "13:00",
-          "to": "18:00",
-          "bar": "Bar 8",
-          "people": 8
-        },
-        {
-          "id": "s098",
+          "people": 18,
           "associationId": "a048",
+          "id": "s046"
+        },
+        {
+          "bar": "Bar 7",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 18,
+          "associationId": "a016",
+          "id": "s047"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 12,
+          "associationId": "a014",
+          "id": "s048"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a018",
+          "id": "s049"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 12,
+          "associationId": "a035",
+          "id": "s050"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a021",
+          "id": "s051"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a005",
+          "id": "s052"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 8,
+          "associationId": "a017",
+          "id": "s053"
+        },
+        {
+          "bar": "Bar 8",
           "day": "Zondag",
           "daypart": "Middag",
           "from": "13:00",
           "to": "18:00",
-          "bar": "Bar 7",
-          "people": 18
+          "people": 6,
+          "associationId": "a013",
+          "id": "s054"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 8,
+          "associationId": "a046",
+          "id": "s055"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "23:30",
+          "people": 6,
+          "associationId": "a019",
+          "id": "s056"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "23:30",
+          "people": 6,
+          "associationId": "a046",
+          "id": "s057"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s058"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s059"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s060"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 13,
+          "associationId": "a025",
+          "id": "s061"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s062"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s063"
+        },
+        {
+          "bar": "Sp Bier Bar 1",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 15,
+          "associationId": "a025",
+          "id": "s064"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a027",
+          "id": "s065"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 9,
+          "associationId": "a039",
+          "id": "s066"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 5,
+          "associationId": "a047",
+          "id": "s067"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 15,
+          "associationId": "a034",
+          "id": "s068"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a008",
+          "id": "s069"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 18,
+          "associationId": "a008",
+          "id": "s070"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 18,
+          "associationId": "a007",
+          "id": "s071"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 2,
+          "associationId": "a013",
+          "id": "s072"
+        },
+        {
+          "bar": "Sp Bier bar 2",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 12,
+          "associationId": "a024",
+          "id": "s073"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a037",
+          "id": "s074"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a037",
+          "id": "s075"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a037",
+          "id": "s076"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a046",
+          "id": "s077"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a032",
+          "id": "s078"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a038",
+          "id": "s079"
+        },
+        {
+          "bar": "Cocktail 1",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 8,
+          "associationId": "a017",
+          "id": "s080"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 8,
+          "associationId": "a043",
+          "id": "s081"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a013",
+          "id": "s082"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a040",
+          "id": "s083"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a024",
+          "id": "s084"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 6,
+          "associationId": "a008",
+          "id": "s085"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 6,
+          "associationId": "a018",
+          "id": "s086"
+        },
+        {
+          "bar": "Cocktail 2",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 6,
+          "associationId": "a020",
+          "id": "s087"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 4,
+          "associationId": "a003",
+          "id": "s088"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a012",
+          "id": "s089"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 4,
+          "associationId": "a012",
+          "id": "s090"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a008",
+          "id": "s091"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 5,
+          "associationId": "a006",
+          "id": "s092"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 5,
+          "associationId": "a045",
+          "id": "s093"
+        },
+        {
+          "bar": "Wijnbar 1",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 4,
+          "associationId": "a039",
+          "id": "s094"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Donderdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 4,
+          "associationId": "a033",
+          "id": "s095"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Vrijdag",
+          "daypart": "Middag",
+          "from": "14:30",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a033",
+          "id": "s096"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Vrijdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 4,
+          "associationId": "a033",
+          "id": "s097"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Zaterdag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a033",
+          "id": "s098"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Zaterdag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "01:00",
+          "people": 5,
+          "associationId": "a006",
+          "id": "s099"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Zondag",
+          "daypart": "Middag",
+          "from": "13:00",
+          "to": "18:00",
+          "people": 4,
+          "associationId": "a033",
+          "id": "s100"
+        },
+        {
+          "bar": "Wijnbar 2",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 4,
+          "associationId": "a039",
+          "id": "s101"
         }
       ],
       "barCaps": {
@@ -1791,7 +1831,8 @@ window.VAPPIE_SEED = {
         "Cocktail 2": 6,
         "Wijnbar 1": 4,
         "Wijnbar 2": 4
-      }
+      },
+      "planningVersion": "ZPF2026-actueel-correct-2026-08-12-v2"
     }
   }
 };
