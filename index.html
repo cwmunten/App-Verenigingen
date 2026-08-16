@@ -37,10 +37,10 @@
     });
   </script>
 
-  <script src="./seedData.js?v=40.6"></script>
-  <script src="./planning2026.js?v=40.6"></script>
+  <script src="./seedData.js?v=40.7"></script>
+  <script src="./planning2026.js?v=40.7"></script>
   <script async src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="./app.js?v=40.6"></script>
+  <script src="./app.js?v=40.7"></script>
   <script src="./enhancements.js?v=30"></script>
   <script src="./meldingen.js?v=40.3"></script>
 
@@ -48,7 +48,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
-          const reg = await navigator.serviceWorker.register('/service-worker.js?v=40.6', { updateViaCache: 'none' });
+          const reg = await navigator.serviceWorker.register('/service-worker.js?v=40.7', { updateViaCache: 'none' });
           await reg.update();
         } catch (err) {
           console.warn('PWA service worker niet actief:', err);

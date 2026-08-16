@@ -1101,10 +1101,20 @@ window.VAPPIE_SEED = {
           "day": "Zondag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "00:30",
-          "people": 18,
-          "associationId": "a011",
+          "to": "23:30",
+          "people": 6,
+          "associationId": "a019",
           "id": "s030"
+        },
+        {
+          "bar": "Bar 5",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "23:30",
+          "people": 6,
+          "associationId": "a046",
+          "id": "s031"
         },
         {
           "bar": "Bar 6",
@@ -1114,7 +1124,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a048",
-          "id": "s031"
+          "id": "s032"
         },
         {
           "bar": "Bar 6",
@@ -1124,7 +1134,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 15,
           "associationId": "a023",
-          "id": "s032"
+          "id": "s033"
         },
         {
           "bar": "Bar 6",
@@ -1134,7 +1144,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 10,
           "associationId": "a021",
-          "id": "s033"
+          "id": "s034"
         },
         {
           "bar": "Bar 6",
@@ -1144,7 +1154,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 7,
           "associationId": "a042",
-          "id": "s034"
+          "id": "s035"
         },
         {
           "bar": "Bar 6",
@@ -1154,7 +1164,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a007",
-          "id": "s035"
+          "id": "s036"
         },
         {
           "bar": "Bar 6",
@@ -1164,7 +1174,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a015",
-          "id": "s036"
+          "id": "s037"
         },
         {
           "bar": "Bar 6",
@@ -1174,7 +1184,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 4,
           "associationId": "a001",
-          "id": "s037"
+          "id": "s038"
         },
         {
           "bar": "Bar 6",
@@ -1184,7 +1194,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 15,
           "associationId": "a028",
-          "id": "s038"
+          "id": "s039"
         },
         {
           "bar": "Bar 6",
@@ -1194,7 +1204,7 @@ window.VAPPIE_SEED = {
           "to": "00:30",
           "people": 15,
           "associationId": "a026",
-          "id": "s039"
+          "id": "s040"
         },
         {
           "bar": "Bar 7",
@@ -1204,7 +1214,7 @@ window.VAPPIE_SEED = {
           "to": "00:00",
           "people": 18,
           "associationId": "a004",
-          "id": "s040"
+          "id": "s041"
         },
         {
           "bar": "Bar 7",
@@ -1214,7 +1224,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a004",
-          "id": "s041"
+          "id": "s042"
         },
         {
           "bar": "Bar 7",
@@ -1224,7 +1234,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a004",
-          "id": "s042"
+          "id": "s043"
         },
         {
           "bar": "Bar 7",
@@ -1234,7 +1244,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a004",
-          "id": "s043"
+          "id": "s044"
         },
         {
           "bar": "Bar 7",
@@ -1244,7 +1254,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a030",
-          "id": "s044"
+          "id": "s045"
         },
         {
           "bar": "Bar 7",
@@ -1254,7 +1264,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a030",
-          "id": "s045"
+          "id": "s046"
         },
         {
           "bar": "Bar 7",
@@ -1264,7 +1274,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a048",
-          "id": "s046"
+          "id": "s047"
         },
         {
           "bar": "Bar 7",
@@ -1274,7 +1284,7 @@ window.VAPPIE_SEED = {
           "to": "00:30",
           "people": 18,
           "associationId": "a016",
-          "id": "s047"
+          "id": "s048"
         },
         {
           "bar": "Bar 8",
@@ -1284,7 +1294,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 12,
           "associationId": "a014",
-          "id": "s048"
+          "id": "s049"
         },
         {
           "bar": "Bar 8",
@@ -1294,7 +1304,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 6,
           "associationId": "a018",
-          "id": "s049"
+          "id": "s050"
         },
         {
           "bar": "Bar 8",
@@ -1304,7 +1314,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 12,
           "associationId": "a035",
-          "id": "s050"
+          "id": "s051"
         },
         {
           "bar": "Bar 8",
@@ -1314,7 +1324,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 6,
           "associationId": "a021",
-          "id": "s051"
+          "id": "s052"
         },
         {
           "bar": "Bar 8",
@@ -1324,7 +1334,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 6,
           "associationId": "a005",
-          "id": "s052"
+          "id": "s053"
         },
         {
           "bar": "Bar 8",
@@ -1334,7 +1344,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 8,
           "associationId": "a017",
-          "id": "s053"
+          "id": "s054"
         },
         {
           "bar": "Bar 8",
@@ -1344,7 +1354,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 6,
           "associationId": "a013",
-          "id": "s054"
+          "id": "s055"
         },
         {
           "bar": "Bar 8",
@@ -1354,16 +1364,6 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 8,
           "associationId": "a046",
-          "id": "s055"
-        },
-        {
-          "bar": "Bar 8",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "23:30",
-          "people": 6,
-          "associationId": "a019",
           "id": "s056"
         },
         {
@@ -1371,10 +1371,20 @@ window.VAPPIE_SEED = {
           "day": "Zondag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "23:30",
-          "people": 6,
-          "associationId": "a046",
+          "to": "00:30",
+          "people": 18,
+          "associationId": "a011",
           "id": "s057"
+        },
+        {
+          "bar": "Bar 8",
+          "day": "Zondag",
+          "daypart": "Avond",
+          "from": "18:00",
+          "to": "00:30",
+          "people": 2,
+          "associationId": "a013",
+          "id": "s058"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1384,7 +1394,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 15,
           "associationId": "a025",
-          "id": "s058"
+          "id": "s059"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1394,7 +1404,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 15,
           "associationId": "a025",
-          "id": "s059"
+          "id": "s060"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1404,7 +1414,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 15,
           "associationId": "a025",
-          "id": "s060"
+          "id": "s061"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1414,7 +1424,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 13,
           "associationId": "a025",
-          "id": "s061"
+          "id": "s062"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1424,7 +1434,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 15,
           "associationId": "a025",
-          "id": "s062"
+          "id": "s063"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1434,7 +1444,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 15,
           "associationId": "a025",
-          "id": "s063"
+          "id": "s064"
         },
         {
           "bar": "Sp Bier Bar 1",
@@ -1444,7 +1454,7 @@ window.VAPPIE_SEED = {
           "to": "00:30",
           "people": 15,
           "associationId": "a025",
-          "id": "s064"
+          "id": "s065"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1454,7 +1464,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 15,
           "associationId": "a027",
-          "id": "s065"
+          "id": "s066"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1464,7 +1474,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 9,
           "associationId": "a039",
-          "id": "s066"
+          "id": "s067"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1474,7 +1484,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 5,
           "associationId": "a047",
-          "id": "s067"
+          "id": "s068"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1484,7 +1494,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 15,
           "associationId": "a034",
-          "id": "s068"
+          "id": "s069"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1494,7 +1504,7 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a008",
-          "id": "s069"
+          "id": "s070"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1504,7 +1514,7 @@ window.VAPPIE_SEED = {
           "to": "01:00",
           "people": 18,
           "associationId": "a008",
-          "id": "s070"
+          "id": "s071"
         },
         {
           "bar": "Sp Bier bar 2",
@@ -1514,16 +1524,6 @@ window.VAPPIE_SEED = {
           "to": "18:00",
           "people": 18,
           "associationId": "a007",
-          "id": "s071"
-        },
-        {
-          "bar": "Sp Bier bar 2",
-          "day": "Zondag",
-          "daypart": "Avond",
-          "from": "18:00",
-          "to": "00:30",
-          "people": 2,
-          "associationId": "a013",
           "id": "s072"
         },
         {
@@ -1832,7 +1832,7 @@ window.VAPPIE_SEED = {
         "Wijnbar 1": 4,
         "Wijnbar 2": 4
       },
-      "planningVersion": "ZPF2026-actueel-correct-2026-08-12-v2"
+      "planningVersion": "ZPF2026-zondagavond-2026-08-16"
     }
   }
 };

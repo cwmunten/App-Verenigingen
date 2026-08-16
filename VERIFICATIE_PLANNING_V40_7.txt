@@ -1,0 +1,12 @@
+VAPPIE v40.7 - VERIFICATIE ZONDAGAVOND
+==========================================
+OK - Bar 5: Watervrienden 6p + Boereraod Jeugd 6p, 18:00-23:30
+OK - Bar 8: Delta HC Dames1 18p + DWAC 2p, 18:00-00:30
+OK - Sp Bier bar 2: Pro Venlo 12p, 18:00-00:30
+OK - oude bezetting van deze drie zondagavondcellen verwijderd
+OK - overige planning ongewijzigd
+OK - JavaScript kernbestanden syntactisch geldig
+OK - centrale planning/Supabase-correctielogica behouden
+
+Totaal: 101 diensten
+Wo 1 | Do 13 | Vr 28 | Za 29 | Zo 30
