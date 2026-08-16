@@ -1101,7 +1101,7 @@ window.VAPPIE_SEED = {
           "day": "Zondag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "23:30",
+          "to": "00:30",
           "people": 6,
           "associationId": "a019",
           "id": "s030"
@@ -1111,7 +1111,7 @@ window.VAPPIE_SEED = {
           "day": "Zondag",
           "daypart": "Avond",
           "from": "18:00",
-          "to": "23:30",
+          "to": "00:30",
           "people": 6,
           "associationId": "a046",
           "id": "s031"
@@ -1832,7 +1832,7 @@ window.VAPPIE_SEED = {
         "Wijnbar 1": 4,
         "Wijnbar 2": 4
       },
-      "planningVersion": "ZPF2026-zondagavond-2026-08-16"
+      "planningVersion": "ZPF2026-zondagavond-correct-2026-08-16-v2"
     }
   }
 };

@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-7-zondagavond';
+const CACHE = 'vappie-cache-v40-8-zondagavond-correct';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/planning2026.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

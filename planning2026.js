@@ -1,5 +1,5 @@
 window.VAPPIE_PLANNING_2026 = {
-  "version": "ZPF2026-zondagavond-2026-08-16",
+  "version": "ZPF2026-zondagavond-correct-2026-08-16-v2",
   "shifts": [
     {
       "bar": "Bar 2 (Vrijwilligersbar)",
@@ -296,7 +296,7 @@ window.VAPPIE_PLANNING_2026 = {
       "day": "Zondag",
       "daypart": "Avond",
       "from": "18:00",
-      "to": "23:30",
+      "to": "00:30",
       "people": 6,
       "associationId": "a019",
       "id": "s030"
@@ -306,7 +306,7 @@ window.VAPPIE_PLANNING_2026 = {
       "day": "Zondag",
       "daypart": "Avond",
       "from": "18:00",
-      "to": "23:30",
+      "to": "00:30",
       "people": 6,
       "associationId": "a046",
       "id": "s031"
