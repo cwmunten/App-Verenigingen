@@ -274,3 +274,16 @@ table{min-width:800px}th{background:#f8f8f7;color:#4f4f4f;border-bottom:1px soli
   .admin-full-table th:first-child,
   .admin-full-table td:first-child{position:static!important;left:auto!important;box-shadow:none!important}
 }
+
+
+/* v40.9 - verenigingskaart & IBAN */
+.admin-assoc-row{cursor:pointer;transition:background .15s ease}
+.admin-assoc-row:hover{background:#fffbea}
+.admin-assoc-row:focus{outline:2px solid #e0bd00;outline-offset:-2px}
+.admin-name-cell{display:flex;flex-direction:column;gap:3px}
+.admin-name-cell small{font-size:11px;color:#777;font-weight:650}
+.admin-iban{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap}
+.association-card-intro{border:1px solid #ece8d6;background:#fffbea;border-radius:12px;padding:13px 15px;margin-bottom:16px;display:grid;gap:3px}
+.association-card-intro strong{font-size:18px}
+.association-card-intro small{color:#666}
+.admin-full-table table{min-width:2240px}

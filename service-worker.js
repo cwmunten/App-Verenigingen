@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-8-zondagavond-correct';
+const CACHE = 'vappie-cache-v40-9-admin-card-iban';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/planning2026.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',

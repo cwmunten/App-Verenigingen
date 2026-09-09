@@ -275,7 +275,7 @@
     const people=shifts.reduce((n,s)=>n+Number(s.people||0),0);
     const rate=Number(a.rateOverride ?? yd().rate ?? 0);
     const adminItems=[
-      ['Naam vereniging',a.name],['Naam Barchef',a.barchef||'—'],['Telefoon Barchef',a.phone||'—'],['E-mail Barchef',a.email||'—'],
+      ['Naam vereniging',a.name],['Contactpersoon',a.barchef||'—'],['Telefoonnummer',a.phone||'—'],['E-mail',a.email||'—'],['IBAN',a.iban||'—'],
       ['Naam in planning',a.planningName||'—'],['Barchefmeeting 1',a.meeting1||'Onbekend'],['Barchefmeeting 2',a.meeting2||'Onbekend'],
       ['Certificaten aanwezig',a.certificates||'Onbekend'],['Polsbandjes ontvangen',a.wristbands||'Onbekend'],['Maten kleding ingeleverd',a.shirts||'Onbekend'],
       ['Eetbonnen nodig',a.mealVouchers||'—'],['Extra info / opmerkingen',a.notes||'—']
@@ -326,15 +326,15 @@
   }
 
   function adminHtml(){
-    const q=norm(adminQuery), list=yd().associations.filter(a=>!q||[a.name,a.barchef,a.email,a.phone,a.planningName,a.notes].some(v=>norm(v||'').includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
-    return `${pageHeader('ADMINISTRATIE','Volledig administratief overzicht','Alle gegevens uit het Excel-tabblad “Verenigingen & Administratie”. Wijzigen kan via het potloodje.',`<div class="header-actions"><button class="secondary" data-action="import-excel">⇧ Excel importeren</button><button class="secondary" data-action="export-report">⇩ Rapport exporteren</button><button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button></div>`)}
-      <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging, barchef, e-mail, telefoon of opmerking..."></div><span class="count">${list.length} verenigingen</span></div>
+    const q=norm(adminQuery), list=yd().associations.filter(a=>!q||[a.name,a.barchef,a.email,a.phone,a.iban,a.planningName,a.notes].some(v=>norm(v||'').includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    return `${pageHeader('ADMINISTRATIE','Volledig administratief overzicht','Klik op een vereniging om de verenigingskaart te openen en gegevens te wijzigen.',`<div class="header-actions"><button class="secondary" data-action="import-excel">⇧ Excel importeren</button><button class="secondary" data-action="export-report">⇩ Rapport exporteren</button><button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button></div>`)}
+      <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging, contactpersoon, e-mail, telefoon, IBAN of opmerking..."></div><span class="count">${list.length} verenigingen</span></div>
       <div class="table-card admin-full-table"><div class="table-scroll"><table><thead><tr>
-        <th>Naam vereniging</th><th>Naam Barchef 1</th><th>E-mail adres Barchef 1</th><th>Telefoonnummer Barchef 1</th><th>Naam in planning</th>
-        <th>Aanwezig Barchefmeeting 1</th><th>Aanwezig Barchefmeeting 2</th><th>Certificaten aanwezig</th><th>Polsbandjes ontvangen</th>
-        <th>Maten kleding ingeleverd</th><th>Eetbonnen nodig</th><th>Opmerkingen</th><th></th>
-      </tr></thead><tbody>${list.map(a=>`<tr>
-        <td><div class="admin-name-cell"><strong>${esc(a.name)}</strong></div></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td>${esc(a.planningName||'—')}</td>
+        <th>Naam vereniging</th><th>Contactpersoon</th><th>E-mail</th><th>Telefoonnummer</th><th>IBAN</th><th>Naam in planning</th>
+        <th>Barchefmeeting 1</th><th>Barchefmeeting 2</th><th>Certificaten</th><th>Polsbandjes</th>
+        <th>Maten kleding</th><th>Eetbonnen</th><th>Opmerkingen</th><th></th>
+      </tr></thead><tbody>${list.map(a=>`<tr class="admin-assoc-row" data-open-assoc="${attr(a.id)}" tabindex="0" title="Open verenigingskaart van ${attr(a.name)}">
+        <td><div class="admin-name-cell"><strong>${esc(a.name)}</strong><small>Open kaart →</small></div></td><td>${esc(a.barchef||'—')}</td><td>${esc(a.email||'—')}</td><td>${esc(a.phone||'—')}</td><td class="admin-iban">${esc(a.iban||'—')}</td><td>${esc(a.planningName||'—')}</td>
         <td>${status(a.meeting1)}</td><td>${status(a.meeting2)}</td><td>${status(a.certificates)}</td><td>${status(a.wristbands)}</td><td>${status(a.shirts)}</td>
         <td>${esc(a.mealVouchers||'—')}</td><td class="admin-notes">${esc(a.notes||'—')}</td><td class="actions sticky-actions"><button class="admin-desktop-edit" title="Wijzigen" data-edit-assoc="${attr(a.id)}">✎</button><button class="admin-delete-btn" title="Verwijderen" data-delete-assoc="${attr(a.id)}">⌫</button></td>
       </tr>`).join('')}</tbody></table></div></div>`;
@@ -555,8 +555,15 @@
     document.querySelector('[data-action="add-assoc"]').onclick=()=>assocModal();
     document.querySelector('[data-action="export-report"]').onclick=reportModal;
     document.querySelector('[data-action="import-excel"]').onclick=importExcelModal;
-    document.querySelectorAll('[data-edit-assoc]').forEach(b=>b.onclick=()=>assocModal(yd().associations.find(a=>a.id===b.dataset.editAssoc)));
-    document.querySelectorAll('[data-delete-assoc]').forEach(b=>b.onclick=()=>{const a=yd().associations.find(x=>x.id===b.dataset.deleteAssoc),n=yd().shifts.filter(s=>s.associationId===a.id).length;if(n)return alert(`Deze vereniging heeft nog ${n} diensten. Verwijder of wijzig die eerst in Planning.`);if(confirm(`${a.name} verwijderen?`)){yd().associations=yd().associations.filter(x=>x.id!==a.id);save();render()}});
+
+    document.querySelectorAll('[data-open-assoc]').forEach(row=>{
+      const open=()=>assocModal(yd().associations.find(a=>a.id===row.dataset.openAssoc),true);
+      row.onclick=e=>{if(e.target.closest('button,a,input,select,textarea'))return;open()};
+      row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
+    });
+
+    document.querySelectorAll('[data-edit-assoc]').forEach(b=>b.onclick=e=>{e.stopPropagation();assocModal(yd().associations.find(a=>a.id===b.dataset.editAssoc),true)});
+    document.querySelectorAll('[data-delete-assoc]').forEach(b=>b.onclick=e=>{e.stopPropagation();const a=yd().associations.find(x=>x.id===b.dataset.deleteAssoc),n=yd().shifts.filter(s=>s.associationId===a.id).length;if(n)return alert(`Deze vereniging heeft nog ${n} diensten. Verwijder of wijzig die eerst in Planning.`);if(confirm(`${a.name} verwijderen?`)){yd().associations=yd().associations.filter(x=>x.id!==a.id);save();render()}});
   }
 
   function associationDetailModal(id){
@@ -593,30 +600,37 @@
     });
   }
 
-  function assocModal(a){
-    const f=a?clone(a):{name:'',planningName:'',barchef:'',phone:'',email:'',meeting1:'Onbekend',meeting2:'Onbekend',certificates:'Nee',wristbands:'Nee',shirts:'Nee',mealVouchers:'Geen',notes:'',rateOverride:null};
+  function assocModal(a,asCard=false){
+    const f=a?clone(a):{name:'',planningName:'',barchef:'',phone:'',email:'',iban:'',meeting1:'Onbekend',meeting2:'Onbekend',certificates:'Nee',wristbands:'Nee',shirts:'Nee',mealVouchers:'Geen',notes:'',rateOverride:null};
     const tri=['Ja','Nee','Onbekend'];
-    const body=`<div class="form-grid">
+    const body=`${asCard?`<div class="association-card-intro"><span class="eyebrow">VERENIGINGSKAART</span><strong>${esc(f.name||'Nieuwe vereniging')}</strong><small>Wijzig de stam- en contactgegevens en kies daarna Opslaan.</small></div>`:''}<div class="form-grid">
       ${field('Naam vereniging',`<input id="aName" value="${attr(f.name)}">`)}${field('Naam in planning',`<input id="aPlanning" value="${attr(f.planningName)}">`)}
-      ${field('Naam barchef',`<input id="aBarchef" value="${attr(f.barchef)}">`)}${field('Telefoon',`<input id="aPhone" value="${attr(f.phone)}">`)}
-      ${field('E-mail',`<input id="aEmail" type="email" value="${attr(f.email)}">`)}${field('Tarief uitzondering',`<select id="aRate"><option value="default" ${f.rateOverride==null?'selected':''}>Standaardtarief</option><option value="0" ${f.rateOverride===0?'selected':''}>€ 0,00</option></select>`)}
+      ${field('Contactpersoon',`<input id="aBarchef" value="${attr(f.barchef)}">`)}${field('Telefoonnummer',`<input id="aPhone" inputmode="tel" value="${attr(f.phone)}">`)}
+      ${field('E-mail',`<input id="aEmail" type="email" value="${attr(f.email)}">`)}${field('IBAN',`<input id="aIban" autocomplete="off" value="${attr(f.iban||'')}" placeholder="NL00BANK0000000000">`)}
+      ${field('Tarief uitzondering',`<select id="aRate"><option value="default" ${f.rateOverride==null?'selected':''}>Standaardtarief</option><option value="0" ${f.rateOverride===0?'selected':''}>€ 0,00</option></select>`)}
       ${field('Barchefmeeting 1',`<select id="aM1">${opts(tri,f.meeting1)}</select>`)}${field('Barchefmeeting 2',`<select id="aM2">${opts(tri,f.meeting2)}</select>`)}
       ${field('Certificaten',`<select id="aCert">${opts(tri,f.certificates)}</select>`)}${field('Polsbandjes ontvangen',`<select id="aWrist">${opts(tri,f.wristbands)}</select>`)}
       ${field('Maten kleding ingeleverd',`<select id="aShirts">${opts(tri,f.shirts)}</select>`)}${field('Eetbonnen',`<input id="aMeal" value="${attr(f.mealVouchers)}">`)}
       ${field('Opmerkingen',`<textarea id="aNotes" rows="3">${esc(f.notes)}</textarea>`,true)}</div>`;
-    showModal(a?'Vereniging wijzigen':'Vereniging toevoegen',body,close=>{
-      const n={id:a?.id||uid('assoc'),name:val('aName').trim(),planningName:val('aPlanning').trim()||val('aName').trim(),barchef:val('aBarchef').trim(),phone:val('aPhone').trim(),email:val('aEmail').trim(),meeting1:val('aM1'),meeting2:val('aM2'),certificates:val('aCert'),wristbands:val('aWrist'),shirts:val('aShirts'),mealVouchers:val('aMeal').trim(),notes:val('aNotes').trim(),rateOverride:val('aRate')==='default'?null:Number(val('aRate'))};
-      if(!n.name)return alert('Vul een naam van de vereniging in.'); yd().associations=a?yd().associations.map(x=>x.id===a.id?n:x):[...yd().associations,n];save();close();render();
+    showModal(asCard?'Verenigingskaart':(a?'Vereniging wijzigen':'Vereniging toevoegen'),body,close=>{
+      const n={...f,
+        id:a?.id||f.id||uid('assoc'),
+        name:val('aName').trim(),
+        planningName:val('aPlanning').trim()||val('aName').trim(),
+        barchef:val('aBarchef').trim(),
+        phone:val('aPhone').trim(),
+        email:val('aEmail').trim(),
+        iban:val('aIban').replace(/\s+/g,'').toUpperCase(),
+        meeting1:val('aM1'),meeting2:val('aM2'),certificates:val('aCert'),wristbands:val('aWrist'),shirts:val('aShirts'),
+        mealVouchers:val('aMeal').trim(),notes:val('aNotes').trim(),
+        rateOverride:val('aRate')==='default'?null:Number(val('aRate'))
+      };
+      if(!n.name)return alert('Vul een naam van de vereniging in.');
+      yd().associations=a?yd().associations.map(x=>x.id===a.id?n:x):[...yd().associations,n];
+      save();close();render();
     });
   }
-  function val(id){return document.getElementById(id).value}
 
-  function supabaseStatusHtml(){
-    const cfg=getSupabaseConfig(), linked=isSupabaseLinked();
-    const label=!cfg?'Niet ingesteld':supabaseUser&&linked?'Synchronisatie actief':supabaseUser?'Aangemeld · nog niet gekoppeld':supabaseStatus==='error'?'Verbindingsfout':'Geconfigureerd · niet aangemeld';
-    const cls=supabaseUser&&linked?'ok':supabaseStatus==='error'?'bad':'neutral';
-    return `<div class="sync-status ${cls}"><span class="sync-dot"></span><div><strong>Supabase: ${esc(label)}</strong><small>${supabaseUser?esc(supabaseUser.email||'Aangemelde gebruiker'):'Lokale opslag blijft altijd actief.'}</small></div></div>`;
-  }
   function dataModal(){
     const cfg=getSupabaseConfig();
     const remoteBlock=!cfg?`<div class="supabase-box"><h3>Supabase koppelen</h3><p>Optioneel. Vappie blijft eerst volledig lokaal werken. Gebruik alleen je <b>Project URL</b> en <b>Publishable key</b> (of legacy anon public key). Gebruik nooit een Secret/service_role key.</p>

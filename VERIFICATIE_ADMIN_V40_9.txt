@@ -1,0 +1,12 @@
+VAPPIE v40.9 - ADMINISTRATIE / VERENIGINGSKAART
+================================================
+OK - IBAN zichtbaar als kolom in Administratie
+OK - IBAN doorzoekbaar
+OK - IBAN zichtbaar en bewerkbaar in verenigingskaart
+OK - Telefoonnummer zichtbaar en bewerkbaar
+OK - Klik op gehele verenigingsrij opent verenigingskaart
+OK - Enter/spatie op geselecteerde rij opent verenigingskaart
+OK - Opslaan bewaart IBAN, telefoon en overige bestaande stamvelden
+OK - Annuleren/sluiten blijft beschikbaar via modal
+OK - Potlood en verwijderen blijven apart werken
+OK - JavaScript kernbestanden syntactisch gecontroleerd
