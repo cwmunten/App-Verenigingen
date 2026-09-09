@@ -1,0 +1,25 @@
+VAPPIE v40.12 - ROOT CAUSE FIX + VERIFICATIE
+================================================
+OORZAAK GEVONDEN:
+De service-worker probeerde bestanden onder /icons/... te cachen die niet bestaan.
+Daardoor kon installatie van de nieuwe service-worker volledig mislukken en kon
+een oude Vappie-versie actief blijven. Dat verklaart zowel oude kolommen als
+niet reagerende topbar-knoppen.
+
+HERSTEL:
+OK - service-worker gebruikt alleen bestaande bestanden
+OK - één ontbrekend cachebestand kan installatie niet meer blokkeren
+OK - oude caches worden bij activatie verwijderd
+OK - HTML/app/styles/scripts zijn network-first met no-store
+OK - alle script- en stylesheetversies verhoogd naar 40.12
+OK - favicon verwijst nu naar bestaand bestand
+OK - 2027+ Administratie bevat exact:
+     Naam vereniging, Contactpersoon, Telefoonnummer, E-mail, IBAN, Opmerkingen
+OK - oude 2027-kolommen niet aanwezig
+OK - Data/back-up binding aanwezig
+OK - Installeer binding aanwezig
+OK - Jaarselectie binding aanwezig
+OK - Nieuw-jaar (+) binding aanwezig
+OK - bindGlobal defensiever gemaakt tegen ontbrekende elementen
+OK - JavaScript syntax van alle kernbestanden gecontroleerd
+OK - alle service-worker core-bestanden bestaan daadwerkelijk

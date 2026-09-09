@@ -1,68 +1,88 @@
-const CACHE = 'vappie-cache-v40-11-admin-datafix';
+const CACHE = 'vappie-cache-v40-12-hard-refresh-fix';
 const CORE = [
-  '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/planning2026.js',
-  '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
-  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png',
-  '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'
+  '/index.html',
+  '/styles.css',
+  '/app.js',
+  '/seedData.js',
+  '/planning2026.js',
+  '/enhancements.css',
+  '/enhancements.js',
+  '/meldingen.css',
+  '/meldingen.js',
+  '/manifest.webmanifest',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    for (const url of CORE) {
+      try {
+        const response = await fetch(url, { cache: 'reload' });
+        if (response && response.ok) await cache.put(url, response.clone());
+      } catch (_) {
+        // Eén ontbrekend bestand mag de installatie niet meer blokkeren.
+      }
+    }
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
-  const url = new URL(request.url);
 
+  const url = new URL(request.url);
   if (url.hostname.endsWith('.supabase.co')) return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request, { cache: 'no-store' })
-        .then(response => {
-          if (response && response.ok) caches.open(CACHE).then(cache => cache.put('/index.html', response.clone()));
-          return response;
-        })
-        .catch(() => caches.match('/index.html'))
-    );
-    return;
-  }
-
   const sameOrigin = url.origin === self.location.origin;
-  const liveCode = sameOrigin && [
-    '/app.js','/styles.css','/seedData.js','/planning2026.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/manifest.webmanifest'
+  if (!sameOrigin) return;
+
+  // HTML en code altijd eerst van het netwerk: voorkomt blijven hangen op oude Vappie-versies.
+  const live = request.mode === 'navigate' || [
+    '/index.html','/app.js','/styles.css','/seedData.js','/planning2026.js',
+    '/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css',
+    '/manifest.webmanifest'
   ].includes(url.pathname);
 
-  if (liveCode) {
-    event.respondWith(
-      fetch(request, { cache: 'no-store' })
-        .then(response => {
-          if (response && response.ok) caches.open(CACHE).then(cache => cache.put(request, response.clone()));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
+  if (live) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response && response.ok) {
+          const cache = await caches.open(CACHE);
+          const key = request.mode === 'navigate' ? '/index.html' : url.pathname;
+          await cache.put(key, response.clone());
+        }
+        return response;
+      } catch (_) {
+        const cache = await caches.open(CACHE);
+        return (await cache.match(request.mode === 'navigate' ? '/index.html' : url.pathname)) || Response.error();
+      }
+    })());
     return;
   }
 
-  const canCache = sameOrigin || url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'cdn.sheetjs.com';
-  if (!canCache) return;
-
-  event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response && response.ok) caches.open(CACHE).then(cache => cache.put(request, response.clone()));
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(url.pathname);
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (response && response.ok) await cache.put(url.pathname, response.clone());
       return response;
-    }))
-  );
+    } catch (_) {
+      return Response.error();
+    }
+  })());
 });

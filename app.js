@@ -383,9 +383,9 @@
 
   function bindGlobal(){
     document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page; render()});
-    document.getElementById('yearSelect').onchange=e=>{db.activeYear=e.target.value;save({sync:false});render()};
+    const yearSelect=document.getElementById('yearSelect'); if(yearSelect)yearSelect.onchange=e=>{db.activeYear=e.target.value;save({sync:false});render()};
     document.querySelectorAll('[data-action="mobile-menu"]').forEach(b=>b.onclick=()=>document.getElementById('nav')?.classList.toggle('open'));
-    document.querySelector('[data-action="new-year"]').onclick=newYear;
+    const newYearBtn=document.querySelector('[data-action="new-year"]'); if(newYearBtn)newYearBtn.onclick=newYear;
     document.querySelectorAll('[data-action="data"]').forEach(b=>{
       b.onclick=e=>{
         e?.preventDefault();
