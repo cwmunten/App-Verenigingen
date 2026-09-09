@@ -240,7 +240,7 @@
             <button class="sync-chip ${syncClass()}" id="syncChip" data-action="data" title="Supabase synchronisatiestatus"><span></span><b>${esc(syncLabel())}</b></button>
             <div class="topbar-spacer"></div>
             <button class="topbar-action install-app-btn" data-action="install-app" title="Installeer Vappie"><b>⇩</b><span>Installeer</span></button>
-            <button class="topbar-action" data-action="data" title="Data en back-up"><b>⇧</b><span>Data / back-up</span></button>
+            <button class="topbar-action" id="dataBackupButton" data-action="data" title="Data en back-up"><b>⇧</b><span>Data / back-up</span></button>
             <div class="year-select compact">▦ <select id="yearSelect">${sortedYears().map(y=>`<option ${y===db.activeYear?'selected':''}>${esc(y)}</option>`).join('')}</select></div>
             <button class="icon-btn" data-action="new-year" title="Nieuw jaar">＋</button>
             <button class="user-chip" data-action="data" title="Account en synchronisatie"><span class="user-avatar">${esc(profileInitial)}</span><span>${esc(userEmail)}</span></button>
@@ -327,6 +327,28 @@
 
   function adminHtml(){
     const q=norm(adminQuery), list=yd().associations.filter(a=>!q||[a.name,a.barchef,a.email,a.phone,a.iban,a.planningName,a.notes].some(v=>norm(v||'').includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    const is2027=Number(db.activeYear)>=2027;
+
+    if(is2027){
+      return `${pageHeader('ADMINISTRATIE','Volledig administratief overzicht','Klik op een vereniging om de verenigingskaart te openen en gegevens te wijzigen.',`<div class="header-actions"><button class="secondary" data-action="import-excel">⇧ Excel importeren</button><button class="secondary" data-action="export-report">⇩ Rapport exporteren</button><button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button></div>`)}
+        <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging, contactpersoon, e-mail, telefoon, IBAN of opmerking..."></div><span class="count">${list.length} verenigingen</span></div>
+        <div class="table-card admin-full-table admin-2027-table" data-admin-layout="compact-2027"><div class="table-scroll"><table><thead><tr>
+          <th>Naam vereniging</th>
+          <th>Contactpersoon</th>
+          <th>Telefoonnummer</th>
+          <th>E-mail</th>
+          <th>IBAN</th>
+          <th>Opmerkingen</th>
+        </tr></thead><tbody>${list.map(a=>`<tr class="admin-assoc-row" data-open-assoc="${attr(a.id)}" tabindex="0" title="Open verenigingskaart van ${attr(a.name)}">
+          <td><div class="admin-name-cell"><strong>${esc(a.name)}</strong><small>Open kaart →</small></div></td>
+          <td>${esc(a.barchef||'—')}</td>
+          <td>${esc(a.phone||'—')}</td>
+          <td>${esc(a.email||'—')}</td>
+          <td class="admin-iban">${esc(a.iban||'—')}</td>
+          <td class="admin-notes">${esc(a.notes||'—')}</td>
+        </tr>`).join('')}</tbody></table></div></div>`;
+    }
+
     return `${pageHeader('ADMINISTRATIE','Volledig administratief overzicht','Klik op een vereniging om de verenigingskaart te openen en gegevens te wijzigen.',`<div class="header-actions"><button class="secondary" data-action="import-excel">⇧ Excel importeren</button><button class="secondary" data-action="export-report">⇩ Rapport exporteren</button><button class="primary" data-action="add-assoc">＋ Vereniging toevoegen</button></div>`)}
       <div class="admin-tools"><div class="mini-search">⌕ <input id="adminSearch" value="${attr(adminQuery)}" placeholder="Zoek vereniging, contactpersoon, e-mail, telefoon, IBAN of opmerking..."></div><span class="count">${list.length} verenigingen</span></div>
       <div class="table-card admin-full-table"><div class="table-scroll"><table><thead><tr>
@@ -364,7 +386,13 @@
     document.getElementById('yearSelect').onchange=e=>{db.activeYear=e.target.value;save({sync:false});render()};
     document.querySelectorAll('[data-action="mobile-menu"]').forEach(b=>b.onclick=()=>document.getElementById('nav')?.classList.toggle('open'));
     document.querySelector('[data-action="new-year"]').onclick=newYear;
-    document.querySelectorAll('[data-action="data"]').forEach(b=>b.onclick=dataModal);
+    document.querySelectorAll('[data-action="data"]').forEach(b=>{
+      b.onclick=e=>{
+        e?.preventDefault();
+        e?.stopPropagation();
+        openDataModal();
+      };
+    });
     document.querySelectorAll('[data-action="install-app"]').forEach(b=>{b.onclick=installApp;b.hidden=isStandalone()});
   }
   function bindHome(){
@@ -603,7 +631,28 @@
   function assocModal(a,asCard=false){
     const f=a?clone(a):{name:'',planningName:'',barchef:'',phone:'',email:'',iban:'',meeting1:'Onbekend',meeting2:'Onbekend',certificates:'Nee',wristbands:'Nee',shirts:'Nee',mealVouchers:'Geen',notes:'',rateOverride:null};
     const tri=['Ja','Nee','Onbekend'];
-    const body=`${asCard?`<div class="association-card-intro"><span class="eyebrow">VERENIGINGSKAART</span><strong>${esc(f.name||'Nieuwe vereniging')}</strong><small>Wijzig de stam- en contactgegevens en kies daarna Opslaan.</small></div>`:''}<div class="form-grid">
+    const is2027=Number(db.activeYear)>=2027;
+
+    const intro=asCard?`<div class="association-card-intro"><span class="eyebrow">VERENIGINGSKAART</span><strong>${esc(f.name||'Nieuwe vereniging')}</strong><small>Wijzig de stam- en contactgegevens en kies daarna Opslaan.</small></div>`:'';
+
+    const body2027=`${intro}<div class="form-grid">
+      ${field('Naam vereniging',`<input id="aName" value="${attr(f.name)}">`)}
+      ${field('Contactpersoon',`<input id="aBarchef" value="${attr(f.barchef)}">`)}
+      ${field('Telefoonnummer',`<input id="aPhone" inputmode="tel" value="${attr(f.phone)}">`)}
+      ${field('E-mail',`<input id="aEmail" type="email" value="${attr(f.email)}">`)}
+      ${field('IBAN',`<input id="aIban" autocomplete="off" value="${attr(f.iban||'')}" placeholder="NL00BANK0000000000">`)}
+      ${field('Opmerkingen',`<textarea id="aNotes" rows="4">${esc(f.notes)}</textarea>`,true)}
+      <input type="hidden" id="aPlanning" value="${attr(f.planningName||f.name)}">
+      <input type="hidden" id="aRate" value="${f.rateOverride==null?'default':f.rateOverride}">
+      <input type="hidden" id="aM1" value="${attr(f.meeting1||'Onbekend')}">
+      <input type="hidden" id="aM2" value="${attr(f.meeting2||'Onbekend')}">
+      <input type="hidden" id="aCert" value="${attr(f.certificates||'Onbekend')}">
+      <input type="hidden" id="aWrist" value="${attr(f.wristbands||'Onbekend')}">
+      <input type="hidden" id="aShirts" value="${attr(f.shirts||'Onbekend')}">
+      <input type="hidden" id="aMeal" value="${attr(f.mealVouchers||'Geen')}">
+    </div>`;
+
+    const bodyLegacy=`${intro}<div class="form-grid">
       ${field('Naam vereniging',`<input id="aName" value="${attr(f.name)}">`)}${field('Naam in planning',`<input id="aPlanning" value="${attr(f.planningName)}">`)}
       ${field('Contactpersoon',`<input id="aBarchef" value="${attr(f.barchef)}">`)}${field('Telefoonnummer',`<input id="aPhone" inputmode="tel" value="${attr(f.phone)}">`)}
       ${field('E-mail',`<input id="aEmail" type="email" value="${attr(f.email)}">`)}${field('IBAN',`<input id="aIban" autocomplete="off" value="${attr(f.iban||'')}" placeholder="NL00BANK0000000000">`)}
@@ -612,7 +661,8 @@
       ${field('Certificaten',`<select id="aCert">${opts(tri,f.certificates)}</select>`)}${field('Polsbandjes ontvangen',`<select id="aWrist">${opts(tri,f.wristbands)}</select>`)}
       ${field('Maten kleding ingeleverd',`<select id="aShirts">${opts(tri,f.shirts)}</select>`)}${field('Eetbonnen',`<input id="aMeal" value="${attr(f.mealVouchers)}">`)}
       ${field('Opmerkingen',`<textarea id="aNotes" rows="3">${esc(f.notes)}</textarea>`,true)}</div>`;
-    showModal(asCard?'Verenigingskaart':(a?'Vereniging wijzigen':'Vereniging toevoegen'),body,close=>{
+
+    showModal(asCard?'Verenigingskaart':(a?'Vereniging wijzigen':'Vereniging toevoegen'),is2027?body2027:bodyLegacy,close=>{
       const n={...f,
         id:a?.id||f.id||uid('assoc'),
         name:val('aName').trim(),
@@ -629,6 +679,15 @@
       yd().associations=a?yd().associations.map(x=>x.id===a.id?n:x):[...yd().associations,n];
       save();close();render();
     });
+  }
+
+  function openDataModal(){
+    try{
+      dataModal();
+    }catch(err){
+      console.error('Data/back-up openen mislukt:',err);
+      alert(`Data/back-up openen mislukt: ${err?.message||err}`);
+    }
   }
 
   function dataModal(){

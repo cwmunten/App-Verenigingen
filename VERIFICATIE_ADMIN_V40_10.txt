@@ -1,0 +1,14 @@
+VAPPIE v40.10 - ADMINISTRATIE 2027
+===================================
+OK - 2027 toont alleen: Naam vereniging, Contactpersoon, Telefoonnummer, E-mail, IBAN, Opmerkingen
+OK - kolommen Barchefmeeting 1/2 verwijderd uit 2027
+OK - Certificaten verwijderd uit 2027
+OK - Polsbandjes verwijderd uit 2027
+OK - Maten kleding verwijderd uit 2027
+OK - Eetbonnen verwijderd uit 2027
+OK - kolom Acties niet aanwezig in 2027; vervangen door Opmerkingen
+OK - klik op vereniging opent nog steeds de verenigingskaart
+OK - verenigingskaart 2027 toont alleen relevante stam/contactvelden + Opmerkingen
+OK - opslaan blijft werken
+OK - 2026 behoudt de bestaande uitgebreide administratie
+OK - JavaScript kernbestanden syntactisch gecontroleerd

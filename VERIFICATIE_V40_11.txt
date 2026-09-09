@@ -1,0 +1,14 @@
+VAPPIE v40.11 - HERSTEL ADMINISTRATIE + DATA/BACK-UP
+=====================================================
+OK - Administratie 2027 en later gebruikt altijd compacte layout
+OK - Alleen: Naam vereniging, Contactpersoon, Telefoonnummer, E-mail, IBAN, Opmerkingen
+OK - Barchefmeeting 1/2 niet aanwezig in compacte layout
+OK - Certificaten niet aanwezig in compacte layout
+OK - Polsbandjes niet aanwezig in compacte layout
+OK - Maten kleding niet aanwezig in compacte layout
+OK - Eetbonnen niet aanwezig in compacte layout
+OK - Data/back-up knop opnieuw expliciet en veilig gebonden
+OK - Data/back-up heeft foutafhandeling
+OK - Service-worker cacheversie verhoogd
+OK - planning2026.js toegevoegd aan live-code cachebeleid
+OK - JavaScript kernbestanden syntactisch gecontroleerd

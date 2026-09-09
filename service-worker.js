@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-9-admin-card-iban';
+const CACHE = 'vappie-cache-v40-11-admin-datafix';
 const CORE = [
   '/', '/index.html', '/styles.css', '/app.js', '/seedData.js', '/planning2026.js',
   '/enhancements.css', '/enhancements.js', '/manifest.webmanifest',
@@ -41,7 +41,7 @@ self.addEventListener('fetch', event => {
 
   const sameOrigin = url.origin === self.location.origin;
   const liveCode = sameOrigin && [
-    '/app.js','/styles.css','/seedData.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/manifest.webmanifest'
+    '/app.js','/styles.css','/seedData.js','/planning2026.js','/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/manifest.webmanifest'
   ].includes(url.pathname);
 
   if (liveCode) {

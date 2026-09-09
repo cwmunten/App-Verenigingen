@@ -287,3 +287,25 @@ table{min-width:800px}th{background:#f8f8f7;color:#4f4f4f;border-bottom:1px soli
 .association-card-intro strong{font-size:18px}
 .association-card-intro small{color:#666}
 .admin-full-table table{min-width:2240px}
+
+
+/* v40.10 - compacte administratie 2027 */
+.admin-2027-table table{min-width:1180px}
+.admin-2027-table th:nth-child(1){min-width:240px}
+.admin-2027-table th:nth-child(2){min-width:220px}
+.admin-2027-table th:nth-child(3){min-width:170px}
+.admin-2027-table th:nth-child(4){min-width:260px}
+.admin-2027-table th:nth-child(5){min-width:220px}
+.admin-2027-table th:nth-child(6){min-width:320px}
+.admin-2027-table .admin-notes{white-space:normal;min-width:320px}
+@media (max-width:760px){
+  .admin-2027-table table{min-width:980px}
+  .admin-2027-table th,.admin-2027-table td{padding-left:12px;padding-right:12px}
+}
+
+
+/* v40.11 - harde 2027+ administratie-layout */
+.admin-full-table.admin-2027-table table{min-width:1180px!important}
+.admin-full-table.admin-2027-table th:last-child{position:static!important;right:auto!important;min-width:320px!important}
+.admin-full-table.admin-2027-table td:last-child{position:static!important;right:auto!important;box-shadow:none!important}
+.admin-full-table.admin-2027-table .sticky-actions{display:none!important}
