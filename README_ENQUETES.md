@@ -20,7 +20,7 @@
 
 ## Voorbeeld en testvereniging
 
-- Gebruik **Voorbeeld bekijken** om vóór verzending zowel de uitnodigingsmail als het invulformulier te controleren.
+- Gebruik **Voorbeeld bekijken** om vóór verzending zowel de uitnodigingsmail als het invulformulier te controleren. Met **Volledig scherm** bekijk je de preview schermvullend; dezelfde knop brengt je terug naar normaal formaat.
 - Bovenaan de ontvangerslijst staat altijd **Test-vereniging**.
 - De contactpersoon is **Chris Munten test** en het e-mailadres is `chrismunten@zomerparkfeest.nl`.
 - Deze testvereniging staat bewust los van de centrale verenigingsadministratie en verschijnt daardoor niet in planning of financiële overzichten.

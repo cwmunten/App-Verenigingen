@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v43-preview-testvereniging';
+const CACHE = 'vappie-cache-v44-overzicht-fullscreen';
 const CORE = [
   '/index.html',
   '/styles.css',
