@@ -10,13 +10,43 @@
 
 ## Werkwijze
 
-1. Open **Enquêtes** en kies **Nieuwe enquête**.
+1. Open **Enquêtes** en kies **Markdown importeren** of **Nieuwe enquête**.
 2. Voeg titel, introductie, secties en vragen toe.
 3. Zet de status op **Gepubliceerd** wanneer het formulier ingevuld mag worden.
 4. Open **Ontvangers**, selecteer de verenigingen en sla de selectie op.
 5. Bij één ontvanger opent Vappie direct een persoonlijk e-mailconcept.
 6. Bij meerdere ontvangers downloadt Vappie een mailingbestand met unieke links voor Afdruk samenvoegen in Word/Outlook.
 7. Onder **Resultaten** zie je wie heeft gereageerd en exporteer je alles naar Excel.
+
+## Markdown importeren
+
+Gebruik `#` voor de titel, `##` voor een sectie en `###` voor een vraag. Zet onder iedere vraag het vraagtype en of de vraag verplicht is. Bij keuzevragen zet je elke antwoordoptie op een eigen regel.
+
+```markdown
+# Evaluatie Barchefs 2026
+
+Korte introductietekst voor de ontvanger.
+
+## Planning
+
+### Hoe tevreden ben je over de planning?
+Vraagtype: lineaire schaal van 1 tot en met 5
+Verplicht: ja
+
+### Wat kunnen we verbeteren?
+Vraagtype: lange tekst
+Verplicht: nee
+
+### Is jouw vereniging volgend jaar weer aanwezig?
+Vraagtype: meerkeuze, één antwoord mogelijk
+Verplicht: ja
+
+- Ja, zeker!
+- Misschien
+- Nee
+```
+
+De import wordt altijd als concept opgeslagen. Controleer de vragen en zet de enquête daarna op **Gepubliceerd**.
 
 ## Beveiliging
 

@@ -5,7 +5,7 @@
   const uid=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const byId=id=>surveys.find(x=>x.id===id);
   const questions=s=>(s?.questions||[]);
-  const fmt=d=>d?new Date(d).toLocaleDateString('nl-NL'):'—';
+  const fmt=d=>d?new Date(d).toLocaleString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
   const baseUrl=()=>`${location.origin}${location.pathname}`;
   const surveyUrl=token=>`${baseUrl()}?enquete=${encodeURIComponent(token)}`;
   function modal(title,body,footer=''){
@@ -28,23 +28,63 @@
   }
   function counts(s){
     const inv=invitations.filter(x=>x.survey_id===s.id), done=inv.filter(x=>x.status==='completed').length;
-    return {inv:inv.length,sent:inv.filter(x=>x.sent_at).length,done,open:Math.max(0,inv.length-done)};
+    return {inv:inv.length,sent:inv.filter(x=>x.sent_at).length,opened:inv.filter(x=>x.opened_at).length,done,pending:Math.max(0,inv.length-done)};
   }
   function adminHtml(next){
     ctx={...ctx,...next};
     if(ctx.client&&!loading&&loadedYear!==String(ctx.year))setTimeout(()=>reload().then(ctx.refresh).catch(showSetupError),0);
-    const total=surveys.length, active=surveys.filter(s=>s.status==='published').length, sent=invitations.filter(i=>i.sent_at).length, done=invitations.filter(i=>i.status==='completed').length;
-    return `<section class="survey-page"><div class="page-header"><div><span class="eyebrow">ENQUÊTES · ${esc(ctx.year)}</span><h1>Evaluaties en enquêtes</h1><p>Maak een enquête, mail persoonlijke invullinks en verzamel alle antwoorden op één plek.</p></div><div class="header-actions"><button class="primary" data-survey-new>＋ Nieuwe enquête</button></div></div>
-      <div class="survey-kpis"><div class="survey-kpi"><span>Enquêtes</span><strong>${total}</strong></div><div class="survey-kpi"><span>Gepubliceerd</span><strong>${active}</strong></div><div class="survey-kpi"><span>Uitnodigingen</span><strong>${sent}</strong></div><div class="survey-kpi"><span>Ingevuld</span><strong>${done}</strong></div></div>
-      ${loading?'<div class="survey-empty">Enquêtes laden…</div>':surveys.length?`<div class="survey-list">${surveys.map(s=>{const n=counts(s);return `<article class="survey-card"><div><span class="survey-badge ${s.status==='published'?'live':'draft'}">${s.status==='published'?'Gepubliceerd':'Concept'}</span><span class="survey-badge">${n.done}/${n.inv} ingevuld</span><h3>${esc(s.title)}</h3><p>${esc(s.description||'Geen toelichting')} · gewijzigd ${fmt(s.updated_at)}</p></div><div class="survey-card-actions"><button class="secondary" data-survey-edit="${s.id}">Bewerken</button><button class="secondary" data-survey-send="${s.id}">Ontvangers</button><button class="secondary" data-survey-results="${s.id}">Resultaten</button><button class="secondary" data-survey-copy="${s.id}">Kopiëren</button><button class="secondary" data-survey-delete="${s.id}">Verwijderen</button></div></article>`}).join('')}</div>`:'<div class="survey-empty"><h3>Nog geen enquêtes</h3><p>Maak de eerste enquête voor deze festivaleditie.</p><button class="primary" data-survey-new>Nieuwe enquête maken</button></div>'}</section>`;
+    const total=surveys.length, active=surveys.filter(s=>s.status==='published').length, opened=invitations.filter(i=>i.opened_at).length, done=invitations.filter(i=>i.status==='completed').length;
+    return `<section class="survey-page"><div class="page-header"><div><span class="eyebrow">ENQUÊTES · ${esc(ctx.year)}</span><h1>Evaluaties en enquêtes</h1><p>Importeer een Markdown-enquête, selecteer verenigingen en volg openen en voltooien live.</p></div><div class="header-actions"><input hidden id="surveyMarkdownFile" type="file" accept=".md,.markdown,text/markdown,text/plain"><button class="secondary" data-survey-refresh>↻ Verversen</button><button class="secondary" data-survey-import>⇧ Markdown importeren</button><button class="primary" data-survey-new>＋ Nieuwe enquête</button></div></div>
+      <div class="survey-kpis"><div class="survey-kpi"><span>Enquêtes</span><strong>${total}</strong></div><div class="survey-kpi"><span>Gepubliceerd</span><strong>${active}</strong></div><div class="survey-kpi"><span>Geopend</span><strong>${opened}</strong></div><div class="survey-kpi"><span>Voltooid</span><strong>${done}</strong></div></div>
+      ${loading?'<div class="survey-empty">Enquêtes laden…</div>':surveys.length?`<div class="survey-list">${surveys.map(s=>{const n=counts(s);return `<article class="survey-card"><div><span class="survey-badge ${s.status==='published'?'live':'draft'}">${s.status==='published'?'Gepubliceerd':s.status==='closed'?'Gesloten':'Concept'}</span><span class="survey-badge opened">${n.opened} geopend</span><span class="survey-badge completed">${n.done}/${n.inv} voltooid</span><h3>${esc(s.title)}</h3><p>${esc(s.description||'Geen toelichting')} · gewijzigd ${fmt(s.updated_at)}</p></div><div class="survey-card-actions"><button class="secondary" data-survey-edit="${s.id}">Bewerken</button><button class="secondary" data-survey-send="${s.id}">Verenigingen selecteren</button><button class="secondary" data-survey-results="${s.id}">Status & resultaten</button><button class="secondary" data-survey-copy="${s.id}">Kopiëren</button><button class="secondary" data-survey-delete="${s.id}">Verwijderen</button></div></article>`}).join('')}</div>`:'<div class="survey-empty"><h3>Nog geen enquêtes</h3><p>Importeer een Markdown-bestand of maak handmatig een enquête.</p><button class="secondary" data-survey-import>Markdown importeren</button> <button class="primary" data-survey-new>Nieuwe enquête maken</button></div>'}</section>`;
   }
   function bindAdmin(){
     document.querySelectorAll('[data-survey-new]').forEach(b=>b.onclick=()=>editSurvey());
+    document.querySelectorAll('[data-survey-import]').forEach(b=>b.onclick=()=>document.getElementById('surveyMarkdownFile')?.click());
+    const markdown=document.getElementById('surveyMarkdownFile');if(markdown)markdown.onchange=importMarkdown;
+    document.querySelectorAll('[data-survey-refresh]').forEach(b=>b.onclick=async()=>{b.disabled=true;await reload().catch(showSetupError);ctx.refresh()});
     document.querySelectorAll('[data-survey-edit]').forEach(b=>b.onclick=()=>editSurvey(byId(b.dataset.surveyEdit)));
     document.querySelectorAll('[data-survey-send]').forEach(b=>b.onclick=()=>recipientModal(byId(b.dataset.surveySend)));
     document.querySelectorAll('[data-survey-results]').forEach(b=>b.onclick=()=>resultsModal(byId(b.dataset.surveyResults)));
     document.querySelectorAll('[data-survey-copy]').forEach(b=>b.onclick=()=>copySurvey(byId(b.dataset.surveyCopy)));
     document.querySelectorAll('[data-survey-delete]').forEach(b=>b.onclick=()=>deleteSurvey(byId(b.dataset.surveyDelete)));
+  }
+  function markdownType(value){
+    const v=String(value||'').toLowerCase();
+    if(v.includes('meerdere')||v.includes('multi'))return 'multi_choice';
+    if(v.includes('meerkeuze')||v.includes('één antwoord')||v.includes('een antwoord')||v.includes('single'))return 'single_choice';
+    if(v.includes('1 tot en met 10')||v.includes('1–10')||v.includes('1-10')||v.includes('rapportcijfer'))return 'scale10';
+    if(v.includes('schaal')||v.includes('waardering')||v.includes('rating'))return 'scale5';
+    if(v.includes('kort'))return 'short_text';
+    return 'long_text';
+  }
+  function parseMarkdown(text,fileName='enquete.md'){
+    const lines=String(text||'').replace(/\r/g,'').split('\n');
+    const title=(lines.find(x=>/^#\s+/.test(x))||`# ${fileName.replace(/\.(md|markdown)$/i,'')}`).replace(/^#\s+/,'').trim();
+    let section='Algemeen',current=null,description=[],seenSection=false;
+    const qs=[];
+    const finish=()=>{if(current?.title){current.options=[...new Set(current.options)];current.order=qs.length;qs.push(current)}current=null};
+    for(const raw of lines){
+      const line=raw.trim();
+      if(/^##\s+/.test(line)){finish();section=line.replace(/^##\s+/,'').replace(/^\d+[.)]?\s*/,'').trim()||'Algemeen';seenSection=true;continue}
+      if(/^###\s+/.test(line)){finish();current={id:uid(),title:line.replace(/^###\s+/,'').trim(),section,type:'long_text',required:false,options:[]};continue}
+      if(!current){if(!seenSection&&line&&!/^#|^---$/.test(line))description.push(line);continue}
+      const type=line.match(/^(vraagtype|type)\s*:\s*(.+)$/i);if(type){current.type=markdownType(type[2]);continue}
+      const required=line.match(/^verplicht\s*:\s*(.+)$/i);if(required){current.required=/^(ja|yes|true)/i.test(required[1]);continue}
+      const option=line.match(/^[-*]\s+(.+)$/);if(option)current.options.push(option[1].trim());
+    }
+    finish();
+    return {title,description:description.join('\n').trim(),questions:qs};
+  }
+  async function importMarkdown(e){
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      const parsed=parseMarkdown(await file.text(),file.name);
+      if(!parsed.questions.length)throw new Error('Geen vragen gevonden. Gebruik voor iedere vraag een regel die begint met ###.');
+      const payload={...parsed,status:'draft',festival_year:String(ctx.year),updated_at:new Date().toISOString(),updated_by:ctx.user.id};
+      const {error}=await ctx.client.from('vappie_surveys').insert(payload);if(error)throw error;
+      await reload();ctx.refresh();alert(`“${parsed.title}” is geïmporteerd als concept met ${parsed.questions.length} vragen.`);
+    }catch(err){alert(`Markdown importeren mislukt: ${err.message}`)}finally{e.target.value=''}
   }
   function questionRow(q={id:uid(),type:'long_text',title:'',section:'Algemeen',required:false,options:[]}){
     return `<div class="survey-question-row" data-qid="${esc(q.id)}"><label class="field"><span>Vraag</span><textarea data-q-title placeholder="Typ hier de vraag…">${esc(q.title)}</textarea><span>Sectie</span><input data-q-section value="${esc(q.section||'Algemeen')}" placeholder="Bijv. Planning"></label><label class="field"><span>Vraagtype</span><select data-q-type><option value="short_text" ${q.type==='short_text'?'selected':''}>Korte tekst</option><option value="long_text" ${q.type==='long_text'?'selected':''}>Lange tekst</option><option value="single_choice" ${q.type==='single_choice'?'selected':''}>Eén keuze</option><option value="multi_choice" ${q.type==='multi_choice'?'selected':''}>Meerdere keuzes</option><option value="scale5" ${q.type==='scale5'?'selected':''}>Schaal 1–5</option><option value="scale10" ${q.type==='scale10'?'selected':''}>Cijfer 1–10</option></select><textarea data-q-options placeholder="Keuzes, één per regel" style="display:${q.type.includes('choice')?'block':'none'}">${esc((q.options||[]).join('\n'))}</textarea><label class="survey-check"><input data-q-required type="checkbox" ${q.required?'checked':''}> Verplicht</label></label><button class="secondary" data-q-remove>Verwijder</button></div>`;
@@ -67,9 +107,16 @@
   }
   async function copySurvey(s){const p={title:`Kopie van ${s.title}`,description:s.description,status:'draft',questions:s.questions,festival_year:String(ctx.year),updated_by:ctx.user.id};const {error}=await ctx.client.from('vappie_surveys').insert(p);if(error)return alert(error.message);await reload();ctx.refresh()}
   async function deleteSurvey(s){if(!confirm(`Enquête “${s.title}” en alle antwoorden verwijderen?`))return;const {error}=await ctx.client.from('vappie_surveys').delete().eq('id',s.id);if(error)return alert(error.message);await reload();ctx.refresh()}
+  function invitationStatus(i){
+    if(!i)return '<span class="survey-state neutral">Niet geselecteerd</span>';
+    if(i.status==='completed')return '<span class="survey-state completed">✓ Voltooid</span>';
+    if(i.opened_at||i.status==='opened')return '<span class="survey-state opened">◉ Geopend</span>';
+    if(i.sent_at||i.status==='sent')return '<span class="survey-state sent">✉ Verzonden</span>';
+    return '<span class="survey-state neutral">Niet verzonden</span>';
+  }
   function recipientModal(s){
     const current=invitations.filter(i=>i.survey_id===s.id), map=Object.fromEntries(current.map(i=>[i.association_id,i]));
-    const rows=ctx.associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(a=>{const i=map[a.id];return `<tr><td><input type="checkbox" data-recipient="${esc(a.id)}" ${i?'checked':''}></td><td><strong>${esc(a.name)}</strong><small>${esc(a.barchef||'')}</small></td><td>${esc(a.email||'—')}</td><td>${i?.status==='completed'?'Ingevuld':i?.sent_at?'Verzonden':'Niet verzonden'}</td><td>${i?`<button class="secondary" data-mail-one="${i.id}">Mail</button>`:''}</td></tr>`}).join('');
+    const rows=ctx.associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(a=>{const i=map[a.id];return `<tr><td><input type="checkbox" data-recipient="${esc(a.id)}" ${i?'checked':''}></td><td><strong>${esc(a.name)}</strong><small>${esc(a.barchef||'')}</small></td><td>${esc(a.email||'—')}</td><td>${invitationStatus(i)}${i?.opened_at?`<small>${fmt(i.opened_at)}</small>`:''}</td><td>${i?`<button class="secondary" data-mail-one="${i.id}">${i.sent_at?'Opnieuw mailen':'Mail'}</button>`:''}</td></tr>`}).join('');
     modal(`Ontvangers · ${s.title}`,`<div class="survey-recipient-tools"><label class="survey-check"><input id="selectAllRecipients" type="checkbox"> Selecteer alles</label><span>Persoonlijke links worden veilig per vereniging aangemaakt.</span></div><div class="table-card"><div class="table-scroll"><table class="survey-table"><thead><tr><th></th><th>Vereniging</th><th>E-mail</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`,`<button class="secondary" id="saveRecipients">Selectie opslaan</button><button class="primary" id="mailSelected">Geselecteerde uitnodigingen mailen</button>`);
     document.getElementById('selectAllRecipients').onchange=e=>document.querySelectorAll('[data-recipient]').forEach(x=>x.checked=e.target.checked);
     document.getElementById('saveRecipients').onclick=()=>saveRecipients(s,false);
@@ -94,16 +141,18 @@
   }
   function resultsModal(s){
     const inv=invitations.filter(i=>i.survey_id===s.id), res=responses.filter(r=>r.survey_id===s.id), map=Object.fromEntries(res.map(r=>[r.invitation_id,r]));
-    const rows=inv.map(i=>`<tr><td><strong>${esc(i.association_name)}</strong><small>${esc(i.recipient_name)}</small></td><td>${i.sent_at?fmt(i.sent_at):'Niet verzonden'}</td><td>${i.completed_at?fmt(i.completed_at):'Nog niet ingevuld'}</td><td>${map[i.id]?`<button class="secondary" data-view-response="${map[i.id].id}">Bekijk</button>`:'—'}</td></tr>`).join('');
-    modal(`Resultaten · ${s.title}`,`<div class="survey-kpis"><div class="survey-kpi"><span>Uitgenodigd</span><strong>${inv.length}</strong></div><div class="survey-kpi"><span>Ingevuld</span><strong>${res.length}</strong></div><div class="survey-kpi"><span>Respons</span><strong>${inv.length?Math.round(res.length/inv.length*100):0}%</strong></div><div class="survey-kpi"><span>Nog open</span><strong>${Math.max(0,inv.length-res.length)}</strong></div></div><div class="table-card"><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th>Verzonden</th><th>Ingevuld</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`,`<button class="secondary" id="remindSurvey">Herinneringsbestand</button><button class="primary" id="exportSurvey">Export Excel</button>`);
+    const opened=inv.filter(i=>i.opened_at).length;
+    const rows=inv.map(i=>`<tr><td><strong>${esc(i.association_name)}</strong><small>${esc(i.recipient_name)}</small></td><td>${invitationStatus(i)}</td><td>${i.sent_at?fmt(i.sent_at):'—'}</td><td>${i.opened_at?fmt(i.opened_at):'—'}</td><td>${i.completed_at?fmt(i.completed_at):'—'}</td><td>${map[i.id]?`<button class="secondary" data-view-response="${map[i.id].id}">Resultaat bekijken</button>`:'—'}</td></tr>`).join('');
+    modal(`Status & resultaten · ${s.title}`,`<div class="survey-kpis"><div class="survey-kpi"><span>Uitgenodigd</span><strong>${inv.length}</strong></div><div class="survey-kpi"><span>Geopend</span><strong>${opened}</strong></div><div class="survey-kpi"><span>Voltooid</span><strong>${res.length}</strong></div><div class="survey-kpi"><span>Respons</span><strong>${inv.length?Math.round(res.length/inv.length*100):0}%</strong></div></div><div class="survey-recipient-tools"><span>De status wordt bijgewerkt zodra je dit overzicht opent of op verversen klikt.</span><button class="secondary" id="refreshSurveyResults">↻ Verversen</button></div><div class="table-card"><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th>Status</th><th>Verzonden</th><th>Geopend</th><th>Voltooid</th><th>Resultaat</th></tr></thead><tbody>${rows}</tbody></table></div></div>`,`<button class="secondary" id="remindSurvey">Herinneringsbestand</button><button class="primary" id="exportSurvey">Export Excel</button>`);
     document.getElementById('exportSurvey').onclick=()=>exportResults(s,inv,res);
     document.getElementById('remindSurvey').onclick=()=>bulkMail(inv.filter(i=>i.status!=='completed'),s);
+    document.getElementById('refreshSurveyResults').onclick=async()=>{await reload();resultsModal(byId(s.id))};
     document.querySelectorAll('[data-view-response]').forEach(b=>b.onclick=()=>viewResponse(s,res.find(r=>r.id===b.dataset.viewResponse),inv));
   }
   function viewResponse(s,r,inv){const i=inv.find(x=>x.id===r.invitation_id), ans=r.answers||{};modal(`Antwoorden · ${i?.association_name||''}`,questions(s).map(q=>`<div class="survey-public-question"><label>${esc(q.title)}</label><div class="survey-answer">${esc(Array.isArray(ans[q.id])?ans[q.id].join(', '):(ans[q.id]??'—'))}</div></div>`).join(''))}
   function exportResults(s,inv,res){
-    const headers=['Vereniging','Contactpersoon','E-mail','Datum verzonden','Datum ingevuld',...questions(s).map(q=>q.title)];
-    const rows=inv.map(i=>{const r=res.find(x=>x.invitation_id===i.id),a=r?.answers||{};return [i.association_name,i.recipient_name,i.recipient_email,i.sent_at||'',i.completed_at||'',...questions(s).map(q=>Array.isArray(a[q.id])?a[q.id].join(', '):(a[q.id]??''))]});
+    const headers=['Vereniging','Contactpersoon','E-mail','Status','Datum verzonden','Datum geopend','Datum voltooid',...questions(s).map(q=>q.title)];
+    const rows=inv.map(i=>{const r=res.find(x=>x.invitation_id===i.id),a=r?.answers||{};return [i.association_name,i.recipient_name,i.recipient_email,i.status,i.sent_at||'',i.opened_at||'',i.completed_at||'',...questions(s).map(q=>Array.isArray(a[q.id])?a[q.id].join(', '):(a[q.id]??''))]});
     if(window.XLSX){const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);ws['!cols']=headers.map((h,i)=>({wch:Math.min(60,Math.max(14,h.length+2,...rows.map(r=>String(r[i]||'').length+2)))}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Resultaten');XLSX.writeFile(wb,`resultaten-${slug(s.title)}.xlsx`);return}
     download(`resultaten-${slug(s.title)}.csv`,'\ufeff'+[headers,...rows].map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv;charset=utf-8')
   }
@@ -122,5 +171,5 @@
     const form=document.getElementById('publicSurveyForm');form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form);const missing=questions(s).find(q=>q.required&&(q.type==='multi_choice'?!fd.getAll(q.id).length:!fd.get(q.id)));if(missing)return alert(`Vul de verplichte vraag in: ${missing.title}`);const btn=form.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Versturen…';const answers={};questions(s).forEach(q=>{answers[q.id]=q.type==='multi_choice'?fd.getAll(q.id):fd.get(q.id)||''});const {data:ok,error}=await client.rpc('submit_public_survey',{p_token:token,p_answers:answers});if(error||!ok){btn.disabled=false;btn.textContent='Evaluatie versturen →';return alert(`Versturen mislukt: ${error?.message||'Probeer het opnieuw.'}`)}app.innerHTML=`<main class="survey-public"><section class="survey-public-shell"><div class="survey-thanks"><span class="brand-mark">Z</span><h1>Bedankt!</h1><p>Jullie antwoorden zijn goed ontvangen. Samen maken we Zomerparkfeest ieder jaar nóg verrökkelijker! 🎪🍻</p></div></section></main>`}
   }
   function publicQuestion(q){const req=q.required?'required':'';let input='';if(q.type==='long_text')input=`<textarea name="${q.id}" ${req}></textarea>`;else if(q.type==='short_text')input=`<input type="text" name="${q.id}" ${req}>`;else if(q.type==='single_choice'||q.type==='multi_choice')input=`<div class="survey-options">${(q.options||[]).map((o,n)=>`<label class="survey-option"><input type="${q.type==='multi_choice'?'checkbox':'radio'}" name="${q.id}" value="${esc(o)}" ${q.type==='single_choice'&&n===0?req:''}> ${esc(o)}</label>`).join('')}</div>`;else{const max=q.type==='scale10'?10:5;input=`<div class="survey-scale">${Array.from({length:max},(_,x)=>`<label><input type="radio" name="${q.id}" value="${x+1}" ${x===0?req:''}>${x+1}</label>`).join('')}</div>`}return `<div class="survey-public-question"><label>${esc(q.title)}${q.required?' *':''}</label>${input}</div>`}
-  window.VappieEnquetes={adminHtml,bindAdmin,openPublic};
+  window.VappieEnquetes={adminHtml,bindAdmin,openPublic,parseMarkdown};
 })();
