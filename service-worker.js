@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v42-markdown-enquetes';
+const CACHE = 'vappie-cache-v43-preview-testvereniging';
 const CORE = [
   '/index.html',
   '/styles.css',

@@ -18,6 +18,14 @@
 6. Bij meerdere ontvangers downloadt Vappie een mailingbestand met unieke links voor Afdruk samenvoegen in Word/Outlook.
 7. Onder **Resultaten** zie je wie heeft gereageerd en exporteer je alles naar Excel.
 
+## Voorbeeld en testvereniging
+
+- Gebruik **Voorbeeld bekijken** om vóór verzending zowel de uitnodigingsmail als het invulformulier te controleren.
+- Bovenaan de ontvangerslijst staat altijd **Test-vereniging**.
+- De contactpersoon is **Chris Munten test** en het e-mailadres is `chrismunten@zomerparkfeest.nl`.
+- Deze testvereniging staat bewust los van de centrale verenigingsadministratie en verschijnt daardoor niet in planning of financiële overzichten.
+- Selecteer de testvereniging en verstuur de uitnodiging om de volledige persoonlijke link en statusregistratie te testen.
+
 ## Markdown importeren
 
 Gebruik `#` voor de titel, `##` voor een sectie en `###` voor een vraag. Zet onder iedere vraag het vraagtype en of de vraag verplicht is. Bij keuzevragen zet je elke antwoordoptie op een eigen regel.
