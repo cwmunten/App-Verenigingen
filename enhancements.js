@@ -485,7 +485,7 @@
   function v16OrderNavigation(){
     const nav=document.querySelector('.sidebar-nav');
     if(!nav)return;
-    const order=['home','planning','admin','financial','occupancy','meldingen'];
+    const order=['home','planning','admin','financial','occupancy','surveys','meldingen'];
     const items=[...nav.querySelectorAll(':scope > [data-page]')];
 
     // Alleen herschikken wanneer de volgorde echt afwijkt.

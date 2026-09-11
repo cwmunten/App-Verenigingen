@@ -1,5 +1,7 @@
 # Vappie
 
+> Nieuw in versie 41: een volledig eigen enquêtemodule. Zie `README_ENQUETES.md` en voer eenmalig `SUPABASE_ENQUETES_SETUP.sql` uit.
+
 Vappie is een statische webapp voor Team Verenigingen van het Zomerparkfeest.
 
 ## Belangrijk

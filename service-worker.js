@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-12-hard-refresh-fix';
+const CACHE = 'vappie-cache-v41-enquetes';
 const CORE = [
   '/index.html',
   '/styles.css',
@@ -9,6 +9,8 @@ const CORE = [
   '/enhancements.js',
   '/meldingen.css',
   '/meldingen.js',
+  '/enquetes.css',
+  '/enquetes.js',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
@@ -51,7 +53,7 @@ self.addEventListener('fetch', event => {
   // HTML en code altijd eerst van het netwerk: voorkomt blijven hangen op oude Vappie-versies.
   const live = request.mode === 'navigate' || [
     '/index.html','/app.js','/styles.css','/seedData.js','/planning2026.js',
-    '/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css',
+    '/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css','/enquetes.js','/enquetes.css',
     '/manifest.webmanifest'
   ].includes(url.pathname);
 
