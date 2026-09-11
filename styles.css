@@ -309,3 +309,55 @@ table{min-width:800px}th{background:#f8f8f7;color:#4f4f4f;border-bottom:1px soli
 .admin-full-table.admin-2027-table th:last-child{position:static!important;right:auto!important;min-width:320px!important}
 .admin-full-table.admin-2027-table td:last-child{position:static!important;right:auto!important;box-shadow:none!important}
 .admin-full-table.admin-2027-table .sticky-actions{display:none!important}
+
+
+/* v40.13 - nieuwe planningsmodule */
+.planning-kpis,.billing-kpis{margin-bottom:18px}
+.planning-toolbar{display:grid;gap:12px;margin-bottom:14px}
+.planning-search{max-width:620px}
+.planning-filterbar{margin:0}
+.planning-dashboard-table table{min-width:1250px}
+.daypart-badge{display:inline-block;margin-left:8px;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:900}
+.daypart-badge.evening{background:#f2ee33;color:#171717}
+.daypart-badge.afternoon{background:#dff2d6;color:#24411d}
+.bar-chip{display:inline-block;background:#f3e800;padding:5px 9px;border-radius:7px;font-weight:850}
+.planning-status{display:inline-block;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}
+.planning-status.ok{background:#e2f4df;color:#27601f}
+.planning-status.attention{background:#fff0d7;color:#8a4e00}
+.association-link.compact em,.association-link.compact small{display:none}
+.empty-state{padding:28px;text-align:center;display:grid;gap:5px;color:#777}
+.empty-state strong{color:#171717;font-size:17px}
+.choice-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.choice-card{border:1px solid #ddd;background:#fff;border-radius:14px;padding:22px;text-align:left;display:grid;gap:7px;cursor:pointer;min-height:130px}
+.choice-card:hover{border-color:#171717;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.choice-card strong{font-size:18px}.choice-card span{color:#666;line-height:1.4}.choice-card:disabled{opacity:.45;cursor:not-allowed}
+.total-planning-grid{display:grid;gap:16px}
+.total-day{border:1px solid #ddd;border-radius:12px;overflow:hidden}
+.total-day h3{margin:0;padding:12px 14px;background:#171717;color:#fff}
+.total-shift{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:11px 14px;border-top:1px solid #eee}
+.total-shift:first-of-type{border-top:0}.total-shift div{display:grid;gap:2px}.total-shift span{font-size:12px;color:#666}
+.bars-editor{display:grid;gap:12px}.bar-edit-row{display:grid;grid-template-columns:1fr 130px 48px;gap:8px;align-items:center}
+
+/* v40.13 - facturatie dashboard */
+.billing-toolbar{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.billing-search{min-width:340px;flex:1;max-width:620px}
+.billing-actions{display:flex;gap:8px;flex-wrap:wrap}
+.billing-table{min-width:1700px}
+.billing-summary-line{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;color:#666}
+.billing-summary-line strong{color:#171717}
+.billing-badge{display:inline-block;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}
+.billing-badge.akkoord{background:#dff2d6;color:#245b1e}
+.billing-badge.niet{background:#fde0e0;color:#8d2020}
+.billing-badge.verzonden{background:#fff2c2;color:#745600}
+.billing-badge.niet-verzonden{background:#ececec;color:#555}
+.small-btn{padding:7px 10px!important;font-size:12px!important}
+.billing-table .positive{color:#2d6a24}.billing-table .negative{color:#a11f1f}
+.billing-note{margin-top:14px;border:1px solid #e5dfad;background:#fffbea;border-radius:12px;padding:13px 15px;display:grid;gap:4px}
+.billing-note span{color:#666;font-size:13px}
+
+@media(max-width:760px){
+  .choice-cards{grid-template-columns:1fr}
+  .billing-toolbar{display:grid}
+  .billing-search{min-width:0;max-width:none}
+  .planning-dashboard-table table{min-width:1050px}
+}

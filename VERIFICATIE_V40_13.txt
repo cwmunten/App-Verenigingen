@@ -1,0 +1,28 @@
+VAPPIE v40.13 - PLANNING + FACTURATIE TEST
+===========================================
+OK - app.js
+OK - enhancements.js
+OK - meldingen.js
+OK - service-worker.js
+OK - seedData.js
+OK - planning2026.js
+OK - planning add-flow
+OK - planning total
+OK - bars beheren
+OK - existing/new choice
+OK - planning search
+OK - afternoon/evening badges
+OK - billing dashboard
+OK - billing status
+OK - billing csv
+OK - billing edit
+OK - billing selection
+OK - 2027 admin compact preserved
+OK - data backup preserved
+OK - supabase save preserved
+
+Functionele scope:
+- Nieuwe planningsmodule: dashboard, zoeken/filteren, dienst toevoegen via bestaande/nieuwe vereniging, totaalplanning, bars beheren.
+- Nieuw facturatie dashboard: KPI's, zoeken, selectie, status, uren/bedragen/begroting, bewerken en CSV-export.
+- Bestaande 2027 Administratie, Data/back-up en Supabase-sync blijven behouden.
+- De bestaande externe web-akkoord/mail/PDF-workflow is niet vervangen; Vappie beheert nu de centrale facturatiestatus en data.

@@ -25,7 +25,8 @@
   }
   function amount(shift,a,rate){ return durationHours(shift.from,shift.to)*Number(shift.people||0)*Number(a?.rateOverride ?? rate ?? 0); }
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
-  let db=load(), page='home', searchQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
+  let db=load(), page='home', searchQuery='', planningQuery='', financialQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
+  const financialSelection=new Set();
 
   function applyAuthoritativePlanning2026(){
     const source=window.VAPPIE_PLANNING_2026;
@@ -196,11 +197,6 @@
   }
 
   async function boot(){
-    const publicSurveyToken=new URLSearchParams(location.search).get('enquete');
-    if(publicSurveyToken&&window.VappieEnquetes){
-      await window.VappieEnquetes.openPublic({app,token:publicSurveyToken,config:DEFAULT_SUPABASE_CONFIG});
-      return;
-    }
     const available=await initSupabase();
     if(!available){showLoginGate('Supabase is momenteel niet bereikbaar. Je kunt eventueel offline lokaal verder werken.');return;}
     if(!supabaseUser){showLoginGate();return;}
@@ -231,7 +227,7 @@
           <div class="sidebar-brand" data-page="home"><span class="brand-mark">Z</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></div>
           <button class="nav-close" data-action="mobile-menu" aria-label="Menu sluiten">×</button>
           <nav class="sidebar-nav">
-            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}${navBtn('surveys','☑','Enquêtes')}
+            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}
           </nav>
           <div class="sidebar-foot">
             <div><strong>Vappie</strong> · ${esc(db.activeYear)}</div>
@@ -259,13 +255,9 @@
     if(page==='planning') bindPlanning();
     if(page==='financial') bindFinancial();
     if(page==='admin') bindAdmin();
-    if(page==='surveys') window.VappieEnquetes?.bindAdmin();
   }
   function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b><span>${label}</span></button>`}
-  function renderPage(){
-    if(page==='surveys')return window.VappieEnquetes?.adminHtml({year:db.activeYear,associations:yd().associations,client:supabaseClient,user:supabaseUser,escape:esc,refresh:render})||'<p>Enquêtemodule laden…</p>';
-    return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml();
-  }
+  function renderPage(){ return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
 
   function homeHtml(){
     const q=norm(searchQuery), matches=q.length>=2?yd().associations.filter(a=>norm(a.name).includes(q)||norm(a.barchef).includes(q)||norm(a.planningName).includes(q)).slice(0,12):[];
@@ -301,27 +293,128 @@
 
   function pageHeader(kicker,title,subtitle,action=''){return `<div class="page-header"><div><span class="eyebrow">${kicker}</span><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`}
   function planningHtml(){
-    const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort();
+    const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'nl'));
     const associations=yd().associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl'));
-    const list=yd().shifts.filter(s=>(!filters.day||s.day===filters.day)&&(!filters.daypart||s.daypart===filters.daypart)&&(!filters.bar||s.bar===filters.bar)&&(!filters.associationId||s.associationId===filters.associationId)).sort(shiftSort);
+    const q=norm(planningQuery);
+    const list=yd().shifts.filter(s=>{
+      const a=assoc(s.associationId);
+      return (!filters.day||s.day===filters.day)
+        &&(!filters.daypart||s.daypart===filters.daypart)
+        &&(!filters.bar||s.bar===filters.bar)
+        &&(!filters.associationId||s.associationId===filters.associationId)
+        &&(!q||[s.day,s.daypart,s.bar,a?.name,a?.planningName,a?.barchef].some(v=>norm(v||'').includes(q)));
+    }).sort(shiftSort);
+
+    const scheduled=new Set(yd().shifts.map(s=>s.associationId)).size;
+    const people=yd().shifts.reduce((n,s)=>n+Number(s.people||0),0);
+    const attention=yd().shifts.filter(s=>{
+      const cap=Number(yd().barCaps?.[s.bar]||0);
+      return cap>0 && Number(s.people||0)!==cap;
+    }).length;
+
     const assocFilter=`<label class="filter-select"><span>Vereniging</span><select data-filter="associationId"><option value="">Alles</option>${associations.map(a=>`<option value="${attr(a.id)}" ${filters.associationId===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select></label>`;
-    return `${pageHeader('PLANNING','Wie staat waar?','Filter, wijzig of voeg diensten toe.','<button class="primary" data-action="add-shift">＋ Dienst toevoegen</button>')}
-      <div class="filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}${assocFilter}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
-      <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Dag</th><th>Dagdeel</th><th>Bar</th><th>Vereniging</th><th>Tijd</th><th class="num">Personen</th><th></th></tr></thead><tbody>
-      ${list.map(s=>{const a=assoc(s.associationId);return `<tr><td><strong>${esc(s.day)}</strong></td><td><span class="pill">${esc(s.daypart)}</span></td><td>${esc(s.bar)}</td><td><button class="association-link" data-view-assoc="${attr(a?.id||'')}" title="Bekijk volledige gegevens van ${attr(a?.name||'deze vereniging')}"><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><small>${esc(a?.barchef||'')}</small><em>Bekijk gegevens →</em></button></td><td>${esc(s.from)} – ${esc(s.to)}</td><td class="num">${s.people}</td><td class="actions"><button data-edit-shift="${attr(s.id)}">✎</button><button data-delete-shift="${attr(s.id)}">⌫</button></td></tr>`}).join('')}</tbody></table></div></div>`;
+
+    return `${pageHeader('PLANNING','Planning maken','Plan verenigingen in, beheer bars en bekijk de totaalplanning.',`<div class="header-actions"><button class="secondary" data-action="bars-manage">Bars beheren</button><button class="secondary" data-action="total-planning">Totaalplanning</button><button class="primary" data-action="add-shift-flow">＋ Dienst toevoegen</button></div>`)}
+      <div class="kpis planning-kpis">
+        ${kpi('Totaal diensten',yd().shifts.length,'Deze editie')}
+        ${kpi('Verenigingen',scheduled,'In planning')}
+        ${kpi('Vrijwilligers',people.toLocaleString('nl-NL'),'Ingepland')}
+        ${kpi('Aandacht nodig',attention,attention?'Afwijkende bezetting':'Alles sluit aan')}
+      </div>
+      <div class="planning-toolbar">
+        <div class="mini-search planning-search">⌕ <input id="planningSearch" value="${attr(planningQuery)}" placeholder="Zoek vereniging, barchef of bar..."></div>
+        <div class="filterbar planning-filterbar">${selectFilter('day','Dag',DAYS)}${selectFilter('daypart','Dagdeel',PARTS)}${selectFilter('bar','Bar',bars)}${assocFilter}<button class="text-btn" data-action="clear-filters">Filters wissen</button><span class="count">${list.length} diensten</span></div>
+      </div>
+      <div class="table-card planning-dashboard-table"><div class="table-scroll"><table><thead><tr>
+        <th>Dag</th><th>Tijd</th><th>Bar</th><th>Vereniging</th><th>Barchef</th><th class="num">Vrijwilligers</th><th>Status</th><th>Acties</th>
+      </tr></thead><tbody>
+      ${list.length?list.map(s=>{const a=assoc(s.associationId),cap=Number(yd().barCaps?.[s.bar]||0),ok=!cap||Number(s.people)===cap;return `<tr>
+        <td><strong>${esc(s.day)}</strong><span class="daypart-badge ${s.daypart==='Avond'?'evening':'afternoon'}">${esc(s.daypart)}</span></td>
+        <td>${esc(s.from)} – ${esc(s.to)}</td>
+        <td><span class="bar-chip">${esc(s.bar)}</span></td>
+        <td><button class="association-link compact" data-view-assoc="${attr(a?.id||'')}"><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong></button></td>
+        <td>${esc(a?.barchef||'—')}</td>
+        <td class="num"><strong>${s.people}${cap?` / ${cap}`:''}</strong></td>
+        <td><span class="planning-status ${ok?'ok':'attention'}">${ok?'In orde':'Aandacht'}</span></td>
+        <td class="actions"><button data-edit-shift="${attr(s.id)}" title="Wijzigen">✎</button><button data-delete-shift="${attr(s.id)}" title="Verwijderen">⌫</button></td>
+      </tr>`}).join(''):`<tr><td colspan="8"><div class="empty-state"><strong>Nog geen diensten gevonden</strong><span>Voeg een dienst toe of pas de filters aan.</span></div></td></tr>`}</tbody></table></div></div>`;
   }
   function selectFilter(key,label,opts){return `<label class="filter-select"><span>${label}</span><select data-filter="${key}"><option value="">Alles</option>${opts.map(o=>`<option ${filters[key]===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`}
   function shiftSort(a,b){return DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||PARTS.indexOf(a.daypart)-PARTS.indexOf(b.daypart)||String(a.bar).localeCompare(String(b.bar),'nl')}
 
+  function billingStore(){
+    if(!yd().billing||typeof yd().billing!=='object')yd().billing={};
+    return yd().billing;
+  }
+
+  function billingRow(a){
+    const store=billingStore(), ss=yd().shifts.filter(s=>s.associationId===a.id);
+    const plannedHours=ss.reduce((n,s)=>n+durationHours(s.from,s.to)*Number(s.people||0),0);
+    const plannedAmount=ss.reduce((n,s)=>n+amount(s,a,yd().rate),0);
+    const b=store[a.id]||{};
+    return {
+      a,
+      services:ss.length,
+      hours:b.hours==null?plannedHours:Number(b.hours||0),
+      amount:b.amount==null?plannedAmount:Number(b.amount||0),
+      budgetHours:Number(b.budgetHours||0),
+      budgetCost:Number(b.budgetCost||0),
+      status:b.status||'Niet verzonden',
+      note:b.note||'',
+      accountHolder:b.accountHolder||'',
+      submittedAt:b.submittedAt||''
+    };
+  }
+
+  function billingSave(id,patch){
+    const store=billingStore();
+    store[id]={...(store[id]||{}),...patch,updatedAt:new Date().toISOString()};
+    save();
+  }
+
+  function billingBadge(status){
+    const cls=status==='Akkoord'?'akkoord':status==='Niet akkoord'?'niet':status==='Verzonden'?'verzonden':'niet-verzonden';
+    return `<span class="billing-badge ${cls}">${esc(status)}</span>`;
+  }
+
   function financialHtml(){
-    const am=Object.fromEntries(yd().associations.map(a=>[a.id,a]));
-    const rows=yd().associations.map(a=>{const ss=yd().shifts.filter(s=>s.associationId===a.id);return {a,services:ss.length,hours:ss.reduce((n,s)=>n+durationHours(s.from,s.to)*s.people,0),amount:ss.reduce((n,s)=>n+amount(s,a,yd().rate),0)}}).filter(r=>r.services).sort((a,b)=>b.amount-a.amount);
-    const total=rows.reduce((n,r)=>n+r.amount,0), hours=rows.reduce((n,r)=>n+r.hours,0), persons=yd().shifts.reduce((n,s)=>n+s.people,0);
-    const byDay=DAYS.map(day=>({day,amount:yd().shifts.filter(s=>s.day===day).reduce((n,s)=>n+amount(s,am[s.associationId],yd().rate),0)})).filter(x=>x.amount>0); const max=Math.max(1,...byDay.map(x=>x.amount));
-    return `${pageHeader('FINANCIEEL','Verdiensten in beeld',`Berekend met standaardtarief ${money(yd().rate)} per persoon per uur; uitzonderingen zijn per vereniging mogelijk.`)}
-      <div class="kpis">${kpi('Totale vergoeding',money(total))}${kpi('Persoonsuren',Math.round(hours).toLocaleString('nl-NL'))}${kpi('Ingeplande personen',persons.toLocaleString('nl-NL'))}${kpi('Verenigingen met diensten',rows.length)}</div>
-      <div class="two-col"><div class="table-card"><div class="card-title">Per vereniging</div><div class="table-scroll"><table><thead><tr><th>Vereniging</th><th class="num">Diensten</th><th class="num">Persoonsuren</th><th class="num">Bedrag</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.a.name)}</strong>${r.a.rateOverride===0?'<small>€ 0,00 tarief</small>':''}</td><td class="num">${r.services}</td><td class="num">${r.hours.toFixed(1)}</td><td class="num"><strong>${money(r.amount)}</strong></td></tr>`).join('')}</tbody></table></div></div>
-      <div class="side-card"><div class="card-title">Kosten per dag</div>${byDay.map(x=>`<div class="bar-stat"><div><strong>${x.day}</strong><span>${money(x.amount)}</span></div><div class="bar-track"><i style="width:${(x.amount/max)*100}%"></i></div></div>`).join('')}</div></div>`;
+    const q=norm(financialQuery);
+    const rows=yd().associations.map(billingRow).filter(r=>{
+      if(!q)return true;
+      return [r.a.name,r.a.barchef,r.a.email,r.a.iban,r.note,r.status].some(v=>norm(v||'').includes(q));
+    }).sort((x,y)=>x.a.name.localeCompare(y.a.name,'nl'));
+
+    const real=yd().associations.map(billingRow);
+    const akkoord=real.filter(r=>r.status==='Akkoord').length;
+    const niet=real.filter(r=>r.status==='Niet akkoord').length;
+    const verzonden=real.filter(r=>r.status==='Verzonden').length;
+    const total=real.reduce((n,r)=>n+r.amount,0);
+
+    return `${pageHeader('FINANCIEEL','Facturatie dashboard',`Uren, bedragen, begroting en akkoordstatus voor ${esc(db.activeYear)}.`)}
+      <div class="kpis billing-kpis">
+        ${kpi('Verenigingen',real.length)}
+        ${kpi('Akkoord',akkoord)}
+        ${kpi('Niet akkoord',niet)}
+        ${kpi('Verzonden / wachtend',verzonden)}
+      </div>
+      <div class="billing-toolbar">
+        <div class="mini-search billing-search">⌕ <input id="financialSearch" value="${attr(financialQuery)}" placeholder="Zoek vereniging, contact, e-mail, IBAN of status..."></div>
+        <div class="billing-actions">
+          <button class="secondary" data-action="billing-select-visible">Selecteer zichtbaar</button>
+          <button class="secondary" data-action="billing-clear-selection">Wis selectie</button>
+          <button class="secondary" data-action="billing-export-csv">↓ Export CSV</button>
+          <button class="primary" data-action="billing-mark-sent">Markeer geselecteerde als verzonden</button>
+        </div>
+      </div>
+      <div class="table-card billing-table-card"><div class="billing-summary-line"><span>${rows.length} regels zichtbaar</span><strong>Totaal ${money(total)}</strong></div><div class="table-scroll"><table class="billing-table"><thead><tr>
+        <th></th><th>Vereniging</th><th>Contact</th><th>E-mail</th><th>IBAN</th><th class="num">Uren</th><th class="num">Bedrag</th><th class="num">Begroot uren</th><th class="num">Verschil uren</th><th>Status</th><th>Bewerken</th><th>Opmerkingen</th>
+      </tr></thead><tbody>${rows.map(r=>{const locked=r.status==='Akkoord'||r.status==='Niet akkoord',diff=r.hours-r.budgetHours;return `<tr>
+        <td><input class="billing-select" type="checkbox" data-billing-select="${attr(r.a.id)}" ${financialSelection.has(r.a.id)?'checked':''} ${locked?'disabled':''}></td>
+        <td><strong>${esc(r.a.name)}</strong></td><td>${esc(r.a.barchef||'—')}</td><td>${esc(r.a.email||'—')}</td><td class="admin-iban">${esc(r.a.iban||'—')}</td>
+        <td class="num">${r.hours.toFixed(2).replace(/\.00$/,'')}</td><td class="num"><strong>${money(r.amount)}</strong></td><td class="num">${r.budgetHours.toFixed(2).replace(/\.00$/,'')}</td><td class="num ${diff<0?'negative':diff>0?'positive':''}">${diff.toFixed(2).replace(/\.00$/,'')}</td>
+        <td>${billingBadge(r.status)}</td><td><button class="secondary small-btn" data-billing-edit="${attr(r.a.id)}">Wijzigen</button></td><td class="admin-notes">${esc(r.note||'—')}</td>
+      </tr>`}).join('')}</tbody></table></div></div>
+      <div class="billing-note"><strong>Web-akkoord</strong><span>De bestaande web-akkoord/mailworkflow blijft voorlopig apart. Dit dashboard beheert de centrale facturatiegegevens en status in Vappie.</span></div>`;
   }
   function kpi(label,value,sub=''){return `<div class="kpi"><span>${label}</span><strong>${value}</strong>${sub?`<small>${sub}</small>`:''}</div>`}
 
@@ -409,13 +502,131 @@
   }
   function bindPlanning(){
     document.querySelectorAll('[data-filter]').forEach(s=>s.onchange=e=>{filters[e.target.dataset.filter]=e.target.value;render()});
-    document.querySelector('[data-action="clear-filters"]').onclick=()=>{filters={day:'',daypart:'',bar:'',associationId:''};render()};
-    document.querySelector('[data-action="add-shift"]').onclick=()=>shiftModal();
+    const ps=document.getElementById('planningSearch');
+    if(ps)ps.oninput=e=>{planningQuery=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('planningSearch');if(n){n.focus();n.setSelectionRange(pos,pos)}};
+    document.querySelector('[data-action="clear-filters"]')?.addEventListener('click',()=>{filters={day:'',daypart:'',bar:'',associationId:''};planningQuery='';render()});
+    document.querySelector('[data-action="add-shift-flow"]')?.addEventListener('click',addShiftFlow);
+    document.querySelector('[data-action="total-planning"]')?.addEventListener('click',totalPlanningModal);
+    document.querySelector('[data-action="bars-manage"]')?.addEventListener('click',barsManageModal);
     document.querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>shiftModal(yd().shifts.find(s=>s.id===b.dataset.editShift)));
     document.querySelectorAll('[data-delete-shift]').forEach(b=>b.onclick=()=>{if(confirm('Deze dienst verwijderen?')){yd().shifts=yd().shifts.filter(s=>s.id!==b.dataset.deleteShift);save();render()}});
     document.querySelectorAll('[data-view-assoc]').forEach(b=>b.onclick=()=>associationDetailModal(b.dataset.viewAssoc));
   }
-  function bindFinancial(){}
+  function bindFinancial(){
+    const fs=document.getElementById('financialSearch');
+    if(fs)fs.oninput=e=>{financialQuery=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('financialSearch');if(n){n.focus();n.setSelectionRange(pos,pos)}};
+    document.querySelectorAll('[data-billing-select]').forEach(c=>c.onchange=()=>{c.checked?financialSelection.add(c.dataset.billingSelect):financialSelection.delete(c.dataset.billingSelect)});
+    document.querySelector('[data-action="billing-select-visible"]')?.addEventListener('click',()=>{
+      document.querySelectorAll('[data-billing-select]:not(:disabled)').forEach(c=>{c.checked=true;financialSelection.add(c.dataset.billingSelect)});
+    });
+    document.querySelector('[data-action="billing-clear-selection"]')?.addEventListener('click',()=>{financialSelection.clear();render()});
+    document.querySelector('[data-action="billing-export-csv"]')?.addEventListener('click',billingExportCsv);
+    document.querySelector('[data-action="billing-mark-sent"]')?.addEventListener('click',billingMarkSelectedSent);
+    document.querySelectorAll('[data-billing-edit]').forEach(b=>b.onclick=()=>billingEditModal(b.dataset.billingEdit));
+  }
+
+
+  function addShiftFlow(){
+    const hasAssociations=yd().associations.length>0;
+    const body=`<div class="choice-cards">
+      <button class="choice-card" id="chooseExisting" ${hasAssociations?'':'disabled'}><strong>Bestaande vereniging</strong><span>Kies een vereniging uit Administratie en plan direct een dienst.</span></button>
+      <button class="choice-card" id="chooseNew"><strong>Nieuwe vereniging</strong><span>Vul eerst de stamgegevens in en ga daarna verder naar de planning.</span></button>
+    </div>`;
+    showModal('Dienst toevoegen',body,null,false);
+    document.getElementById('chooseExisting')?.addEventListener('click',()=>{document.getElementById('modalRoot').innerHTML='';shiftModal()});
+    document.getElementById('chooseNew')?.addEventListener('click',()=>{
+      document.getElementById('modalRoot').innerHTML='';
+      assocModal(null,false,newAssoc=>{
+        shiftModal(null,newAssoc?.id);
+      });
+    });
+  }
+
+  function totalPlanningModal(){
+    const rows=yd().shifts.slice().sort(shiftSort);
+    const html=rows.length?`<div class="total-planning-grid">${DAYS.map(day=>{
+      const dayRows=rows.filter(s=>s.day===day);
+      if(!dayRows.length)return '';
+      return `<section class="total-day"><h3>${esc(day)}</h3>${dayRows.map(s=>{const a=assoc(s.associationId);return `<div class="total-shift"><div><strong>${esc(s.bar)}</strong><span>${esc(s.daypart)} · ${esc(s.from)}–${esc(s.to)}</span></div><div><strong>${esc(a?.planningName||a?.name||'Onbekend')}</strong><span>${s.people} personen</span></div></div>`}).join('')}</section>`;
+    }).join('')}</div>`:'<div class="empty-state"><strong>Nog geen planning</strong><span>Voeg eerst diensten toe.</span></div>';
+    showModal('Totaalplanning',html,null,true);
+  }
+
+  function barsManageModal(){
+    const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'nl'));
+    const body=`<div class="bars-editor"><div id="barsRows">${bars.map((b,i)=>`<div class="bar-edit-row"><input class="bar-name-edit" data-bar-old="${attr(b)}" value="${attr(b)}"><input class="bar-cap-edit" data-bar-cap="${attr(b)}" type="number" min="0" value="${Number(yd().barCaps?.[b]||0)}"><button class="secondary" data-remove-bar="${attr(b)}" title="Verwijderen">⌫</button></div>`).join('')}</div><button class="secondary" id="addBarRow">＋ Bar toevoegen</button><p class="hint">Capaciteit is het gewenste aantal vrijwilligers per dienst. 0 betekent: geen controle.</p></div>`;
+    showModal('Bars beheren',body,close=>{
+      const oldCaps={...(yd().barCaps||{})},newCaps={};
+      document.querySelectorAll('.bar-edit-row').forEach(row=>{
+        const name=row.querySelector('.bar-name-edit').value.trim();
+        const cap=Number(row.querySelector('.bar-cap-edit').value||0);
+        const old=row.querySelector('.bar-name-edit').dataset.barOld||'';
+        if(!name)return;
+        newCaps[name]=Math.max(0,cap);
+        if(old&&old!==name)yd().shifts.forEach(s=>{if(s.bar===old)s.bar=name});
+      });
+      yd().barCaps=newCaps;save();close();render();
+    });
+    document.getElementById('addBarRow')?.addEventListener('click',()=>{
+      document.getElementById('barsRows').insertAdjacentHTML('beforeend','<div class="bar-edit-row"><input class="bar-name-edit" data-bar-old="" placeholder="Naam bar"><input class="bar-cap-edit" type="number" min="0" value="0"><button class="secondary" type="button">⌫</button></div>');
+    });
+    document.querySelectorAll('[data-remove-bar]').forEach(b=>b.onclick=()=>b.closest('.bar-edit-row')?.remove());
+  }
+
+  function billingEditModal(id){
+    const a=assoc(id);if(!a)return;
+    const r=billingRow(a);
+    const body=`<div class="form-grid">
+      ${field('Vereniging',`<input value="${attr(a.name)}" disabled>`)}
+      ${field('IBAN',`<input value="${attr(a.iban||'')}" disabled>`)}
+      ${field('Gewerkte uren',`<input id="billHours" type="number" step="0.25" value="${r.hours}">`)}
+      ${field('Totaal bedrag',`<input id="billAmount" type="number" step="0.01" value="${r.amount}">`)}
+      ${field('Begroot uren',`<input id="billBudgetHours" type="number" step="0.25" value="${r.budgetHours}">`)}
+      ${field('Begrote kosten',`<input id="billBudgetCost" type="number" step="0.01" value="${r.budgetCost}">`)}
+      ${field('Status',`<select id="billStatus">${opts(['Niet verzonden','Verzonden','Akkoord','Niet akkoord'],r.status)}</select>`)}
+      ${field('Rekening op naam van',`<input id="billHolder" value="${attr(r.accountHolder)}">`)}
+      ${field('Opmerkingen',`<textarea id="billNote" rows="4">${esc(r.note)}</textarea>`,true)}
+    </div>`;
+    showModal('Facturatie wijzigen',body,close=>{
+      billingSave(id,{
+        hours:Number(val('billHours')||0),
+        amount:Number(val('billAmount')||0),
+        budgetHours:Number(val('billBudgetHours')||0),
+        budgetCost:Number(val('billBudgetCost')||0),
+        status:val('billStatus'),
+        accountHolder:val('billHolder').trim(),
+        note:val('billNote').trim()
+      });
+      close();render();
+    });
+  }
+
+  function billingMarkSelectedSent(){
+    if(!financialSelection.size)return alert('Selecteer eerst minimaal één vereniging.');
+    const store=billingStore();
+    let changed=0;
+    financialSelection.forEach(id=>{
+      const current=store[id]?.status||'Niet verzonden';
+      if(current!=='Akkoord'&&current!=='Niet akkoord'){
+        store[id]={...(store[id]||{}),status:'Verzonden',updatedAt:new Date().toISOString()};
+        changed++;
+      }
+    });
+    financialSelection.clear();save();render();
+    alert(`${changed} vereniging(en) gemarkeerd als Verzonden.`);
+  }
+
+  function billingExportCsv(){
+    const rows=yd().associations.map(billingRow);
+    const header=['Naam vereniging','Contactpersoon','Email','IBAN','Aantal uren','Bedrag','Begroot uren','Begrote kosten','Verschil uren','Verschil kosten','Status','Rekening op naam van','Opmerkingen'];
+    const lines=[header.map(csvCell).join(';')];
+    rows.forEach(r=>{
+      const diffH=r.hours-r.budgetHours,diffC=r.amount-r.budgetCost;
+      lines.push([r.a.name,r.a.barchef||'',r.a.email||'',r.a.iban||'',r.hours,r.amount.toFixed(2).replace('.',','),r.budgetHours,r.budgetCost.toFixed(2).replace('.',','),diffH,diffC.toFixed(2).replace('.',','),r.status,r.accountHolder,r.note].map(csvCell).join(';'));
+    });
+    const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`Vappie_facturatie_${db.activeYear}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
 
   function reportRows(associationId='all'){
     return yd().associations
@@ -621,8 +832,8 @@
   function field(label,input,full=false){return `<label class="field ${full?'full':''}"><span>${label}</span>${input}</label>`}
   function opts(values,val){return values.map(v=>`<option ${String(v)===String(val)?'selected':''}>${esc(v)}</option>`).join('')}
 
-  function shiftModal(shift){
-    const f=shift?clone(shift):{associationId:yd().associations[0]?.id||'',day:'Vrijdag',daypart:'Middag',from:'13:00',to:'18:00',bar:Object.keys(yd().barCaps||{})[0]||'',people:1};
+  function shiftModal(shift,preselectedAssociationId=''){
+    const f=shift?clone(shift):{associationId:preselectedAssociationId||yd().associations[0]?.id||'',day:'Vrijdag',daypart:'Middag',from:'13:00',to:'18:00',bar:Object.keys(yd().barCaps||{})[0]||'',people:1};
     const bars=[...new Set([...Object.keys(yd().barCaps||{}),...yd().shifts.map(s=>s.bar)])].filter(Boolean).sort();
     const body=`<div class="form-grid">
       ${field('Vereniging',`<select id="fAssoc">${yd().associations.slice().sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(a=>`<option value="${attr(a.id)}" ${a.id===f.associationId?'selected':''}>${esc(a.name)}</option>`).join('')}</select>`)}
@@ -637,7 +848,7 @@
     });
   }
 
-  function assocModal(a,asCard=false){
+  function assocModal(a,asCard=false,onSaved=null){
     const f=a?clone(a):{name:'',planningName:'',barchef:'',phone:'',email:'',iban:'',meeting1:'Onbekend',meeting2:'Onbekend',certificates:'Nee',wristbands:'Nee',shirts:'Nee',mealVouchers:'Geen',notes:'',rateOverride:null};
     const tri=['Ja','Nee','Onbekend'];
     const is2027=Number(db.activeYear)>=2027;
@@ -686,7 +897,7 @@
       };
       if(!n.name)return alert('Vul een naam van de vereniging in.');
       yd().associations=a?yd().associations.map(x=>x.id===a.id?n:x):[...yd().associations,n];
-      save();close();render();
+      save();close();render();if(typeof onSaved==='function')setTimeout(()=>onSaved(n),0);
     });
   }
 
