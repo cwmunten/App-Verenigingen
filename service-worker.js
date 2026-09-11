@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-13-planning-facturatie';
+const CACHE = 'vappie-cache-v40-14-webakkoord';
 const CORE = [
   '/index.html',
   '/styles.css',

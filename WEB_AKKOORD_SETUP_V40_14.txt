@@ -1,0 +1,1 @@
+Voor productie in Vercel zijn nodig: DATABASE_URL, MS_CLIENT_SECRET en MS_REFRESH_TOKEN. Kopieer deze uit het oude web-akkoordproject naar het Vappie-project en redeploy.

@@ -1030,6 +1030,265 @@
     }catch(err){console.warn('Automatisch verversen overgeslagen; lokale Vappie blijft actief:',err);}
   }
 
+  /* =========================================================
+     v40.14 - geïntegreerd web-akkoord + planningbegroting
+     Deze latere functies overrulen de eerdere dashboardfuncties.
+     ========================================================= */
+
+  function effectiveRate(a,rate=yd()?.rate){
+    const key=norm(`${a?.name||''} ${a?.planningName||''}`);
+    if(key.includes('oud bestuur')||key.includes('vrijwilligersbar')||key.includes('vrijwilligers')) return 0;
+    return Number(a?.rateOverride ?? rate ?? 0);
+  }
+
+  function amount(shift,a,rate){
+    return durationHours(shift.from,shift.to)*Number(shift.people||0)*effectiveRate(a,rate);
+  }
+
+  function billingRow(a){
+    const store=billingStore();
+    const ss=yd().shifts.filter(s=>s.associationId===a.id);
+    const budgetHours=ss.reduce((n,s)=>n+durationHours(s.from,s.to)*Number(s.people||0),0);
+    const rate=effectiveRate(a,yd().rate);
+    const budgetCost=budgetHours*rate;
+    const b=store[a.id]||{};
+    const hours=b.hours==null?budgetHours:Number(b.hours||0);
+    return {
+      a,services:ss.length,hours,
+      amount:b.amount==null?hours*rate:Number(b.amount||0),
+      budgetHours,budgetCost,rate,
+      status:b.status||'Niet verzonden',
+      note:b.note||'',
+      accountHolder:b.accountHolder||'',
+      submittedAt:b.submittedAt||'',
+      workflowToken:b.workflowToken||'',
+      workflowComment:b.workflowComment||''
+    };
+  }
+
+  function financialHtml(){
+    const q=norm(financialQuery);
+    const rows=yd().associations.map(billingRow).filter(r=>!q||[
+      r.a.name,r.a.barchef,r.a.email,r.a.iban,r.note,r.status
+    ].some(v=>norm(v||'').includes(q))).sort((x,y)=>x.a.name.localeCompare(y.a.name,'nl'));
+
+    const real=yd().associations.map(billingRow);
+    const akkoord=real.filter(r=>r.status==='Akkoord').length;
+    const niet=real.filter(r=>r.status==='Niet akkoord').length;
+    const verzonden=real.filter(r=>r.status==='Verzonden').length;
+    const total=real.reduce((n,r)=>n+r.amount,0);
+    const budgetTotal=real.reduce((n,r)=>n+r.budgetCost,0);
+
+    return `${pageHeader('FINANCIEEL','Facturatie dashboard',`Uren, bedragen, begroting uit de planning en web-akkoord voor ${esc(db.activeYear)}.`)}
+      <div class="kpis billing-kpis">
+        ${kpi('Verenigingen',real.length)}
+        ${kpi('Akkoord',akkoord)}
+        ${kpi('Niet akkoord',niet)}
+        ${kpi('Verzonden / wachtend',verzonden)}
+      </div>
+      <div class="billing-toolbar">
+        <div class="mini-search billing-search">⌕ <input id="financialSearch" value="${attr(financialQuery)}" placeholder="Zoek vereniging, contact, e-mail, IBAN of status..."></div>
+        <div class="billing-actions">
+          <button class="secondary" data-action="billing-select-visible">Selecteer zichtbaar</button>
+          <button class="secondary" data-action="billing-clear-selection">Wis selectie</button>
+          <button class="secondary" data-action="workflow-refresh">↻ Status vernieuwen</button>
+          <button class="secondary" data-action="billing-export-csv">↓ Export CSV</button>
+          <button class="secondary" data-action="workflow-export-confirmations">Export Bevestigingen</button>
+          <button class="primary" data-action="workflow-send-selected">Verzend geselecteerde</button>
+        </div>
+      </div>
+      <div class="workflow-status" id="workflowStatus">
+        <span class="workflow-dot"></span><strong>Web-akkoord</strong><span>Synchroniseer om de actuele status op te halen.</span>
+      </div>
+      <div class="table-card billing-table-card">
+        <div class="billing-summary-line"><span>${rows.length} regels zichtbaar · Begroot uit planning: ${money(budgetTotal)}</span><strong>Actueel totaal ${money(total)}</strong></div>
+        <div class="table-scroll"><table class="billing-table"><thead><tr>
+          <th></th><th>Vereniging</th><th>Contact</th><th>E-mail</th><th>IBAN</th>
+          <th class="num">Uren</th><th class="num">Bedrag</th><th class="num">Begroot uren</th><th class="num">Begrote kosten</th><th class="num">Verschil uren</th>
+          <th>Status</th><th>Formulier</th><th>Bewerken</th><th>Opmerkingen</th>
+        </tr></thead><tbody>
+          ${rows.map(r=>{
+            const locked=r.status==='Akkoord'||r.status==='Niet akkoord';
+            const diff=r.hours-r.budgetHours;
+            return `<tr>
+              <td><input class="billing-select" type="checkbox" data-billing-select="${attr(r.a.id)}" ${financialSelection.has(r.a.id)?'checked':''} ${locked?'disabled':''}></td>
+              <td><strong>${esc(r.a.name)}</strong>${r.rate===0?'<small class="zero-rate">Tarief € 0,00</small>':''}</td>
+              <td>${esc(r.a.barchef||'—')}</td><td>${esc(r.a.email||'—')}</td><td class="admin-iban">${esc(r.a.iban||'—')}</td>
+              <td class="num">${r.hours.toFixed(2).replace(/\.00$/,'')}</td><td class="num"><strong>${money(r.amount)}</strong></td>
+              <td class="num">${r.budgetHours.toFixed(2).replace(/\.00$/,'')}</td><td class="num">${money(r.budgetCost)}</td>
+              <td class="num ${diff<0?'negative':diff>0?'positive':''}">${diff.toFixed(2).replace(/\.00$/,'')}</td>
+              <td>${billingBadge(r.status)}</td>
+              <td>${r.workflowToken?`<a class="secondary small-btn link-button" target="_blank" rel="noopener" href="/akkoord.html?token=${encodeURIComponent(r.workflowToken)}">Open</a>`:'—'}</td>
+              <td><button class="secondary small-btn" data-billing-edit="${attr(r.a.id)}">Wijzigen</button></td>
+              <td class="admin-notes">${esc(r.workflowComment||r.note||'—')}</td>
+            </tr>`;
+          }).join('')}
+        </tbody></table></div>
+      </div>
+      <div class="billing-note"><strong>Begroting uit Planning</strong><span>Begrote uren en kosten worden automatisch berekend uit Planning. Oud bestuur en Vrijwilligersbar hebben altijd tarief € 0,00.</span></div>`;
+  }
+
+  function billingEditModal(id){
+    const a=assoc(id); if(!a)return;
+    const r=billingRow(a);
+    const body=`<div class="form-grid">
+      ${field('Vereniging',`<input value="${attr(a.name)}" disabled>`)}
+      ${field('IBAN',`<input value="${attr(a.iban||'')}" disabled>`)}
+      ${field('Tarief',`<input value="${money(r.rate)} per uur" disabled>`)}
+      ${field('Begroot uit planning',`<input value="${r.budgetHours.toFixed(2).replace(/\.00$/,'')} uur · ${money(r.budgetCost)}" disabled>`)}
+      ${field('Gewerkte uren',`<input id="billHours" type="number" step="0.25" value="${r.hours}">`)}
+      ${field('Totaal bedrag',`<input id="billAmount" type="number" step="0.01" value="${r.amount}">`)}
+      ${field('Status',`<select id="billStatus">${opts(['Niet verzonden','Verzonden','Akkoord','Niet akkoord'],r.status)}</select>`)}
+      ${field('Rekening op naam van',`<input id="billHolder" value="${attr(r.accountHolder)}">`)}
+      ${field('Opmerkingen',`<textarea id="billNote" rows="4">${esc(r.note)}</textarea>`,true)}
+    </div>`;
+    showModal('Facturatie wijzigen',body,close=>{
+      billingSave(id,{
+        hours:Number(val('billHours')||0),
+        amount:Number(val('billAmount')||0),
+        status:val('billStatus'),
+        accountHolder:val('billHolder').trim(),
+        note:val('billNote').trim()
+      });
+      close();render();
+    });
+  }
+
+  async function workflowHeaders(){
+    if(!supabaseClient)throw new Error('Meld je eerst aan in Vappie.');
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)throw error;
+    const token=data?.session?.access_token;
+    if(!token)throw new Error('Geen actieve Supabase-sessie gevonden.');
+    return {'content-type':'application/json','authorization':`Bearer ${token}`};
+  }
+
+  function workflowPayload(){
+    return yd().associations.map(a=>{
+      const r=billingRow(a);
+      return {
+        associationId:a.id,club:a.name,contact:a.barchef||'',email:a.email||'',iban:a.iban||'',
+        hours:r.hours,amount:r.amount,budgetHours:r.budgetHours,budgetCost:r.budgetCost,note:r.note||''
+      };
+    });
+  }
+
+  function setWorkflowStatus(text,state='busy'){
+    const el=document.getElementById('workflowStatus'); if(!el)return;
+    el.className=`workflow-status ${state}`;
+    el.innerHTML=`<span class="workflow-dot"></span><strong>Web-akkoord</strong><span>${esc(text)}</span>`;
+  }
+
+  async function workflowApi(action,{method='GET',body=null,query={}}={}){
+    const headers=await workflowHeaders();
+    const qs=new URLSearchParams({action,...Object.fromEntries(Object.entries(query).map(([k,v])=>[k,String(v)]))});
+    const r=await fetch(`/api/workflow?${qs}`,{method,headers,body:body==null?undefined:JSON.stringify(body),cache:'no-store'});
+    if(!r.ok){
+      let msg=`Web-akkoord fout (${r.status})`;
+      try{const j=await r.json();msg=j.error||msg}catch{}
+      throw new Error(msg);
+    }
+    const ct=r.headers.get('content-type')||'';
+    return ct.includes('application/json')?r.json():r;
+  }
+
+  function mergeWorkflowRows(rows){
+    const store=billingStore();
+    for(const r of rows||[]){
+      const id=r.associationId;if(!id)continue;
+      store[id]={
+        ...(store[id]||{}),
+        hours:Number(r.hours||0),amount:Number(r.amount||0),status:r.status||'Niet verzonden',
+        note:r.note||store[id]?.note||'',accountHolder:r.accountHolder||'',submittedAt:r.submittedAt||'',
+        workflowToken:r.token||'',workflowComment:r.comment||''
+      };
+    }
+    save({sync:false});
+  }
+
+  async function workflowSync({quiet=false}={}){
+    try{
+      if(!quiet)setWorkflowStatus('Synchroniseren met web-akkoord…','busy');
+      const out=await workflowApi('sync',{method:'POST',body:{year:Number(db.activeYear),rows:workflowPayload()}});
+      mergeWorkflowRows(out.rows||[]);
+      if(!quiet)setWorkflowStatus(`${out.rows?.length||0} verenigingen gesynchroniseerd.`,'ok');
+      return out.rows||[];
+    }catch(err){
+      setWorkflowStatus(err.message,'bad');
+      if(!quiet)alert(err.message);
+      throw err;
+    }
+  }
+
+  async function workflowRefresh(quiet=false){
+    try{
+      if(!quiet)setWorkflowStatus('Actuele akkoordstatus ophalen…','busy');
+      await workflowSync({quiet:true});
+      const out=await workflowApi('admin-data',{query:{year:db.activeYear}});
+      mergeWorkflowRows(out.rows||[]);
+      if(!quiet){setWorkflowStatus(`Status bijgewerkt om ${new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}.`,'ok');render();}
+      return out.rows||[];
+    }catch(err){
+      setWorkflowStatus(err.message,'bad');
+      if(!quiet)alert(err.message);
+      return [];
+    }
+  }
+
+  async function workflowSendSelected(){
+    if(!financialSelection.size)return alert('Selecteer eerst minimaal één vereniging.');
+    const ids=[...financialSelection];
+    const missing=ids.map(id=>assoc(id)).filter(a=>!a?.email);
+    if(missing.length)return alert(`Geen e-mailadres bij: ${missing.map(a=>a.name).join(', ')}`);
+    if(!confirm(`Je gaat ${ids.length} web-akkoord uitnodiging(en) versturen. Doorgaan?`))return;
+    try{
+      setWorkflowStatus('Gegevens synchroniseren…','busy');
+      await workflowSync({quiet:true});
+      let ok=0;
+      for(const id of ids){
+        setWorkflowStatus(`Uitnodiging ${ok+1} van ${ids.length} versturen…`,'busy');
+        await workflowApi('invite',{method:'POST',body:{year:Number(db.activeYear),associationId:id}});
+        ok++;
+      }
+      financialSelection.clear();
+      await workflowRefresh(true);
+      setWorkflowStatus(`${ok} uitnodiging(en) verzonden.`,'ok');
+      render();
+      alert(`${ok} uitnodiging(en) verzonden.`);
+    }catch(err){
+      setWorkflowStatus(err.message,'bad');
+      alert(err.message);
+    }
+  }
+
+  async function workflowExportConfirmations(){
+    try{
+      setWorkflowStatus('ZIP met bevestigingen maken…','busy');
+      const headers=await workflowHeaders();
+      const r=await fetch(`/api/workflow?action=export-confirmations&year=${encodeURIComponent(db.activeYear)}`,{headers,cache:'no-store'});
+      if(!r.ok){let msg='Export mislukt.';try{const j=await r.json();msg=j.error||msg}catch{}throw new Error(msg)}
+      const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+      const cd=r.headers.get('content-disposition')||'',m=cd.match(/filename="?([^";]+)"?/i);
+      a.href=url;a.download=m?.[1]||`ZPF_${db.activeYear}_Bevestigingen.zip`;a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      setWorkflowStatus('Bevestigingen geëxporteerd.','ok');
+    }catch(err){setWorkflowStatus(err.message,'bad');alert(err.message)}
+  }
+
+  function bindFinancial(){
+    const fs=document.getElementById('financialSearch');
+    if(fs)fs.oninput=e=>{financialQuery=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('financialSearch');if(n){n.focus();n.setSelectionRange(pos,pos)}};
+    document.querySelectorAll('[data-billing-select]').forEach(c=>c.onchange=()=>{c.checked?financialSelection.add(c.dataset.billingSelect):financialSelection.delete(c.dataset.billingSelect)});
+    document.querySelector('[data-action="billing-select-visible"]')?.addEventListener('click',()=>document.querySelectorAll('[data-billing-select]:not(:disabled)').forEach(c=>{c.checked=true;financialSelection.add(c.dataset.billingSelect)}));
+    document.querySelector('[data-action="billing-clear-selection"]')?.addEventListener('click',()=>{financialSelection.clear();render()});
+    document.querySelector('[data-action="billing-export-csv"]')?.addEventListener('click',billingExportCsv);
+    document.querySelector('[data-action="workflow-refresh"]')?.addEventListener('click',()=>workflowRefresh(false));
+    document.querySelector('[data-action="workflow-send-selected"]')?.addEventListener('click',workflowSendSelected);
+    document.querySelector('[data-action="workflow-export-confirmations"]')?.addEventListener('click',workflowExportConfirmations);
+    document.querySelectorAll('[data-billing-edit]').forEach(b=>b.onclick=()=>billingEditModal(b.dataset.billingEdit));
+    setTimeout(()=>workflowRefresh(true),250);
+  }
+
   boot();
   setInterval(autoRefresh,120000);
 })();

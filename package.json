@@ -1,0 +1,11 @@
+{
+  "name": "vappie-team-verenigingen",
+  "version": "40.14.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.13.1"
+  }
+}

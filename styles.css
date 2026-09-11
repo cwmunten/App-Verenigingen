@@ -361,3 +361,4 @@ table{min-width:800px}th{background:#f8f8f7;color:#4f4f4f;border-bottom:1px soli
   .billing-search{min-width:0;max-width:none}
   .planning-dashboard-table table{min-width:1050px}
 }
+.workflow-status{display:flex;gap:8px;align-items:center;border:1px solid #ddd;background:#fff;border-radius:11px;padding:10px 13px;margin-bottom:12px;font-size:13px}.workflow-dot{width:9px;height:9px;border-radius:50%;background:#aaa}.workflow-status.busy .workflow-dot{background:#e2ad00}.workflow-status.ok .workflow-dot{background:#28a64c}.workflow-status.bad .workflow-dot{background:#d43a3a}.zero-rate{display:block;font-size:10px;color:#666;margin-top:4px}.link-button{display:inline-flex;text-decoration:none}.billing-table{min-width:2050px}

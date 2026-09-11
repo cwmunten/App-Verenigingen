@@ -1,0 +1,23 @@
+VAPPIE v40.14 - WEB-AKKOORD + BEGROTING TEST
+===============================================
+OK - app.js
+OK - enhancements.js
+OK - meldingen.js
+OK - service-worker.js
+OK - seedData.js
+OK - planning2026.js
+OK - akkoord.js
+OK - api/workflow.js
+OK - begroting uit planning
+OK - oud bestuur tarief nul
+OK - vrijwilligersbar tarief nul
+OK - web-akkoord verzending
+OK - status teruglezen
+OK - directe akkoordlink
+OK - publiek formulier
+OK - PDF bevestiging
+OK - Microsoft Graph mail
+OK - ZIP export
+OK - Supabase adminauth
+OK - database schema
+OK - 2026 migratie
