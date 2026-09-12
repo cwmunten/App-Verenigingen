@@ -1,8 +1,9 @@
-const CACHE = 'vappie-cache-v40-15-iban-repair';
+const CACHE = 'vappie-cache-v40-16-data-backup-fix';
 const CORE = [
   '/index.html',
   '/styles.css',
   '/app.js',
+  '/data-backup-fix.js',
   '/seedData.js',
   '/planning2026.js',
   '/enhancements.css',
@@ -48,9 +49,8 @@ self.addEventListener('fetch', event => {
   const sameOrigin = url.origin === self.location.origin;
   if (!sameOrigin) return;
 
-  // HTML en code altijd eerst van het netwerk: voorkomt blijven hangen op oude Vappie-versies.
   const live = request.mode === 'navigate' || [
-    '/index.html','/app.js','/styles.css','/seedData.js','/planning2026.js',
+    '/index.html','/app.js','/data-backup-fix.js','/styles.css','/seedData.js','/planning2026.js',
     '/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css',
     '/manifest.webmanifest'
   ].includes(url.pathname);
