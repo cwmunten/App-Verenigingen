@@ -1,0 +1,12 @@
+VAPPIE v40.15 - IBAN HERSTEL
+=============================
+OK - ontbrekende IBAN's worden automatisch aangevuld uit andere jaren
+OK - match primair op e-mailadres, daarna verenigingsnaam/planningnaam
+OK - IBAN wordt genormaliseerd zonder spaties
+OK - er wordt géén planning of financiële historie gekopieerd
+OK - herstel draait na lokaal laden én na Supabase-sync
+OK - gecorrigeerde IBAN's worden teruggeschreven naar Supabase
+OK - facturatiedashboard toont IBAN uit de verenigingsstamgegevens
+OK - web-akkoord payload bevat IBAN
+OK - publieke web-akkoordpagina toont IBAN
+OK - JavaScript syntax gecontroleerd

@@ -25,7 +25,8 @@
   }
   function amount(shift,a,rate){ return durationHours(shift.from,shift.to)*Number(shift.people||0)*Number(a?.rateOverride ?? rate ?? 0); }
   function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(window.VAPPIE_SEED)}catch{return clone(window.VAPPIE_SEED)} }
-  let db=load(), page='home', searchQuery='', planningQuery='', financialQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
+  let db=load(); repairMissingIbans();
+  let page='home', searchQuery='', planningQuery='', financialQuery='', filters={day:'',daypart:'',bar:'',associationId:''}, adminQuery='';
   const financialSelection=new Set();
 
   function applyAuthoritativePlanning2026(){
@@ -65,6 +66,44 @@
     chip.title=lastSyncAt?`Laatste synchronisatie: ${lastSyncAt.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Supabase synchronisatiestatus';
   }
 
+  function repairMissingIbans(){
+    if(!db?.years)return false;
+    const sources=[];
+    for(const [year,data] of Object.entries(db.years)){
+      for(const a of (data?.associations||[])){
+        const iban=String(a?.iban||'').replace(/\s+/g,'').toUpperCase();
+        if(!iban)continue;
+        sources.push({
+          year,
+          iban,
+          email:norm(a.email||''),
+          name:norm(a.name||''),
+          planningName:norm(a.planningName||'')
+        });
+      }
+    }
+    let changed=false;
+    for(const data of Object.values(db.years)){
+      for(const a of (data?.associations||[])){
+        if(String(a?.iban||'').trim())continue;
+        const email=norm(a.email||''),name=norm(a.name||''),planningName=norm(a.planningName||'');
+        const match=
+          (email && sources.find(s=>s.email===email)) ||
+          (name && sources.find(s=>s.name===name)) ||
+          (planningName && sources.find(s=>s.planningName===planningName));
+        if(match?.iban){
+          a.iban=match.iban;
+          changed=true;
+        }
+      }
+    }
+    if(changed){
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+      if(isSupabaseLinked())setSupabaseDirty(true);
+    }
+    return changed;
+  }
+
   function save({sync=true}={}){
     localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
     if(sync&&isSupabaseLinked()){
@@ -100,11 +139,12 @@
     const localYear=db.activeYear;
     db=clone(data.data);
     if(localYear&&db.years[localYear])db.activeYear=localYear;
+    const ibanCorrected=repairMissingIbans();
     const planningCorrected=applyAuthoritativePlanning2026();
     localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
     setSupabaseDirty(false); supabaseStatus='connected'; lastSyncAt=new Date(); updateSyncChip();
-    if(planningCorrected){
-      try{await pushRemote()}catch(err){console.warn('Definitieve planning kon nog niet naar Supabase worden teruggeschreven.',err);}
+    if(planningCorrected||ibanCorrected){
+      try{await pushRemote()}catch(err){console.warn('Gecorrigeerde gegevens konden nog niet naar Supabase worden teruggeschreven.',err);}
     }
     if(renderAfter)render();
     return true;
@@ -1006,7 +1046,7 @@
     catch(err){alert(`Synchronisatie mislukt. Lokale Vappie blijft bruikbaar: ${err?.message||err}`);}
   }
   function downloadBackup(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`vappie-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url)}
-  function importBackup(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x.years)throw 0;if(confirm('Deze back-up vervangt de huidige lokale gegevens. Doorgaan?')){db=x;save();render()}}catch{alert('Geen geldige Vappie back-up.')}};reader.readAsText(file)}
+  function importBackup(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x.years)throw 0;if(confirm('Deze back-up vervangt de huidige lokale gegevens. Doorgaan?')){db=x;repairMissingIbans();save();render()}}catch{alert('Geen geldige Vappie back-up.')}};reader.readAsText(file)}
   function newYear(){const current=Number(db.activeYear), input=prompt('Nieuw festivaljaar:',String(current+1));if(!input||db.years[input])return;const copy=confirm(`Gegevens van ${db.activeYear} kopiëren naar ${input}?\nOK = kopiëren, Annuleren = leeg jaar.`);db.years[input]=copy?clone(yd()):{rate:6.5,associations:[],shifts:[],barCaps:clone(yd().barCaps||{})};db.activeYear=input;save();page='home';render()}
 
   async function autoRefresh(){
