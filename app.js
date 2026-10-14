@@ -238,6 +238,8 @@
   }
 
   async function boot(){
+    const surveyToken=new URLSearchParams(location.search).get('enquete');
+    if(surveyToken){await window.VappieEnquetes.openPublic({app,token:surveyToken,config:getSupabaseConfig()});return;}
     const available=await initSupabase();
     if(!available){showLoginGate('Supabase is momenteel niet bereikbaar. Je kunt eventueel offline lokaal verder werken.');return;}
     if(!supabaseUser){showLoginGate();return;}
@@ -268,7 +270,7 @@
           <div class="sidebar-brand" data-page="home"><span class="brand-mark">Z</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></div>
           <button class="nav-close" data-action="mobile-menu" aria-label="Menu sluiten">×</button>
           <nav class="sidebar-nav">
-            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}
+            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}${navBtn('enquetes','▤','Enquêtes')}
           </nav>
           <div class="sidebar-foot">
             <div><strong>Vappie</strong> · ${esc(db.activeYear)}</div>
@@ -296,9 +298,12 @@
     if(page==='planning') bindPlanning();
     if(page==='financial') bindFinancial();
     if(page==='admin') bindAdmin();
+    if(page==='enquetes') window.VappieEnquetes?.bindAdmin();
   }
   function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b><span>${label}</span></button>`}
-  function renderPage(){ return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
+  function renderPage(){
+    if(page==='enquetes') return window.VappieEnquetes.adminHtml({year:db.activeYear,associations:yd().associations,client:supabaseClient,user:supabaseUser,escape:esc,refresh:render});
+    return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
 
   function homeHtml(){
     const q=norm(searchQuery), matches=q.length>=2?yd().associations.filter(a=>norm(a.name).includes(q)||norm(a.barchef).includes(q)||norm(a.planningName).includes(q)).slice(0,12):[];
