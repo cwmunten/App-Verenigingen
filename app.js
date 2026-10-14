@@ -17,6 +17,7 @@
   const norm = s => String(s||'').toLocaleLowerCase('nl-NL').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
   const esc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const attr = esc;
+  const val = id => document.getElementById(id)?.value ?? '';
 
   function durationHours(from,to){
     if(!from||!to) return 0;
