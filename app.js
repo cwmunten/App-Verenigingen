@@ -270,7 +270,7 @@
           <div class="sidebar-brand" data-page="home"><span class="brand-mark">Z</span><span><strong>Vappie</strong><small>TEAM VERENIGINGEN</small></span></div>
           <button class="nav-close" data-action="mobile-menu" aria-label="Menu sluiten">×</button>
           <nav class="sidebar-nav">
-            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}${navBtn('enquetes','▤','Enquêtes')}
+            ${navBtn('home','⌂','Home')}${navBtn('planning','▣','Planning')}${navBtn('occupancy','◉','Bezettingsoverzicht')}${navBtn('admin','☷','Administratie')}${navBtn('financial','€','Financieel')}${navBtn('enquetes','▤','Enquêtes')}${navBtn('communicatie','✉','Communicatie')}
           </nav>
           <div class="sidebar-foot">
             <div><strong>Vappie</strong> · ${esc(db.activeYear)}</div>
@@ -299,9 +299,14 @@
     if(page==='financial') bindFinancial();
     if(page==='admin') bindAdmin();
     if(page==='enquetes') window.VappieEnquetes?.bindAdmin();
+    if(page==='communicatie') window.VappieCommunicatie.bind();
   }
   function navBtn(id,icon,label){return `<button data-page="${id}" class="${page===id?'active':''}"><b>${icon}</b><span>${label}</span></button>`}
   function renderPage(){
+    if(page==='communicatie'){
+      const data=yd().communication||(yd().communication={events:[],tasks:[],drafts:[],history:[]});
+      return window.VappieCommunicatie.html({year:db.activeYear,data,associations:yd().associations,save,refresh:render,modal:showModal,openAssociation:id=>assocModal(assoc(id))});
+    }
     if(page==='enquetes') return window.VappieEnquetes.adminHtml({year:db.activeYear,associations:yd().associations,client:supabaseClient,user:supabaseUser,escape:esc,refresh:render});
     return page==='home'?homeHtml():page==='planning'?planningHtml():page==='financial'?financialHtml():page==='occupancy'?occupancyHtml():adminHtml(); }
 

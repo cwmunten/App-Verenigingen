@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-18-enquetes';
+const CACHE = 'vappie-cache-v40-19-communicatie';
 const CORE = [
   '/index.html',
   '/styles.css',
@@ -12,6 +12,8 @@ const CORE = [
   '/meldingen.js',
   '/enquetes.js',
   '/enquetes.css',
+  '/communicatie.js',
+  '/communicatie.css',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
@@ -54,7 +56,7 @@ self.addEventListener('fetch', event => {
   const live = request.mode === 'navigate' || [
     '/index.html','/app.js','/data-backup-fix.js','/styles.css','/seedData.js','/planning2026.js',
     '/enhancements.js','/enhancements.css','/meldingen.js','/meldingen.css',
-    '/enquetes.js','/enquetes.css','/manifest.webmanifest'
+    '/enquetes.js','/enquetes.css','/communicatie.js','/communicatie.css','/manifest.webmanifest'
   ].includes(url.pathname);
 
   if (live) {
