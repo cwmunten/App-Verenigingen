@@ -1,4 +1,4 @@
-const CACHE = 'vappie-cache-v40-16-data-backup-fix';
+const CACHE = 'vappie-cache-v40-17-login-fix';
 const CORE = [
   '/index.html',
   '/styles.css',
